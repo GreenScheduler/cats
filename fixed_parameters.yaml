@@ -1,0 +1,14 @@
+
+## ~~~ DO NOT EDIT ~~~
+##
+## These are fixed values, from the Green Algorithms app
+##
+
+---
+power_memory_perGB: 0.3725 # W/GB
+tree_month: 917 #gCO2e
+passengerCar_EU_perkm: 175 #gCO2e/km
+passengerCar_US_perkm: 251 #gCO2e/km
+flight_NY_SF: 570000 #gCO2e
+flight_PAR_LON: 50000 #gCO2e
+flight_NYC_MEL: 2310000 #gCO2e
