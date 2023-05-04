@@ -27,11 +27,14 @@ def csv_loader(filename):
 def get_lowest_carbon_intensity(data, method='simple'):
     """
     Get lowest carbon intensity in data depending on user method
-    return timestamp and carbon intensity
+    return dict of timestamp and carbon intensity
     """
     if method not in ['simple', 'windowed']:
         raise ValueError('Invalid Carbon Intensity Method')
 
     if method == 'simple':
+        #  Return element with smallest 2nd value
         rtn = min(data, key=lambda x: x[1])
+        rtn = {'timestamp': rtn[0], 'carbon_intensity': rtn[1]}
+
     return rtn
