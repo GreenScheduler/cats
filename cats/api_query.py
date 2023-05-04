@@ -33,4 +33,4 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
 if __name__ == "__main__":
     # test example using Manchester as a location
     data_tuples = get_tuple("M15")
-    parsedata.writecsv(data_tuples)
+    parsedata.writecsv(data_tuples, duration=60)
