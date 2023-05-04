@@ -165,7 +165,7 @@ class greenAlgorithmsCalculator():
         energies = self.calculate_energies()
         CF_best, CF_now = self.calculate_CF(energies)
 
-        return get_results(energies, CF_best, CF_now)
+        return self.get_results(energies, CF_best, CF_now)
 
 if __name__ == "__main__":
     GAcalc = greenAlgorithmsCalculator(
