@@ -1,4 +1,5 @@
 from datetime import datetime
+import timeseries_conversion
 
 outputfile = "./timedata.csv"
 
@@ -55,4 +56,6 @@ def writecsv(data: list[tuple[str, int]]) -> None:
         for d in parseddata:
             f.write(csvline(d))
             f.write("\n")
+    # send data to timeseries processing code
+    timeseries_conversion.cat_converter(outputfile)
 
