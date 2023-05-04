@@ -13,3 +13,4 @@ args = parser.parse_args()
 if not args.loc:
     r = requests.get("https://ipapi.co/json").json()
     loc = r["postal"]
+runtime = findtime()
