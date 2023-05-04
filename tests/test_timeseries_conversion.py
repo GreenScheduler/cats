@@ -16,5 +16,5 @@ def test_timeseries_conversion():
     assert result == {
         "timestamp": datetime.datetime(2023, 5, 5, 14, 0),
         "carbon_intensity": 5.0,
-        "est_total_carbon": 5.0
+        "est_total_carbon": 5.0,
     }
