@@ -23,8 +23,7 @@ def csv_loader(filename):
     data = [x.strip().split(",") for x in data]
     # Convert timestamp to datetime
     data = [
-        [datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%MZ"), float(x[3])]
-        for x in data
+        [datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%MZ"), float(x[3])] for x in data
     ]
     return data
 
@@ -55,12 +54,12 @@ def check_duration(size, data):
     return num_intervals
 
 
-def get_lowest_carbon_intensity(data, method="simple", size=None):
+def get_lowest_carbon_intensity(data, method="simple", duration=None):
     """
     Get lowest carbon intensity in data depending on user method
     return dict of timestamp and carbon intensity
 
-    size is in minutes
+    duration is in minutes
     """
     METHODS = ["simple", "windowed"]
     if method not in METHODS:
@@ -70,10 +69,14 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
         rtn = min(data, key=lambda x: x[1])
-        rtn = {"timestamp": rtn[0], "carbon_intensity": rtn[1]}
+        rtn = {
+            "timestamp": rtn[0],
+            "carbon_intensity": rtn[1],
+            "est_total_carbon": rtn[1],
+        }
 
     if method == "windowed":
-        num_intervals = check_duration(size, data)
+        num_intervals = check_duration(duration, data)
         #  calculate the windowed carbon intensity
         windowed_data = [[], []]
         for i in range(len(data) - num_intervals):
@@ -93,7 +96,7 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
     return rtn
 
 
-def cat_converter(filename, method="simple"):
+def cat_converter(filename, method="simple", duration=None):
     # Load CSV
     data = csv_loader(filename)
     # Get lowest carbon intensity
