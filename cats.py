@@ -1,5 +1,7 @@
 from argparse import ArgumentParser
 import requests
+import subprocess
+
 from cats import findtime
 
 parser = ArgumentParser(prog="cats", description="A climate ware job scheduler")
