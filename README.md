@@ -17,16 +17,19 @@ The Climate Aware Task Scheduler is a lightweight Python package designed to sch
 - Supports Python 3.9+
 ***
 ## Installation
-Clone the repository
+Install via `pip` as follows:
 
-```shell
-pip install git+https://github.com/GreenScheduler/cats
+```console
+$ pip install git+https://github.com/GreenScheduler/cats
 ```
 
 ***
 ## Quickstart
-```
-python -m cats -d <job_duration> --loc <postcode>
+
+You can run `cats` with:
+
+```console
+$ python -m cats -d <job_duration> --loc <postcode>
 ```
 The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address.
 
