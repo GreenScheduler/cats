@@ -9,7 +9,7 @@ from .api_query import get_tuple  # noqa: F401
 from .parsedata import writecsv  # noqa: F401
 
 # from cats import findtime
-
+from .carbonFootprint import greenAlgorithmsCalculator
 
 def findtime(postcode, duration):
     tuples = get_tuple(postcode)
@@ -55,6 +55,16 @@ def main(arguments=None):
 #            f"{runtime:%m%d%H%M}",
 #        ]
 #    )
+
+    footprint = greenAlgorithmsCalculator(
+        partition = args.partition,
+        runtime = datetime.timedelta(minutes = runtime["duration"]),
+        memory = args.memory,
+        nCPUcores = args.ncpus,
+        nGPUcores = args.ngpus,
+        averageBest_carbonIntensity = runtime[""],
+        averageNow_carbonIntensity = runtime[""],
+    ).get_footprint()
 
 
 if __name__ == "__main__":
