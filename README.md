@@ -9,5 +9,6 @@ The user submits a job with the command
 ```sh
 cats job_name -d/--duration job_duration --loc postcode
 ```
+The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address.
 
 The scheduler then calls a function that estimates the best time to start the job given predicted carbon intensity over the next 48 hours. The workflow is the same as for other popular schedulers. Switching to `cats` should be transparent to cluster users.
