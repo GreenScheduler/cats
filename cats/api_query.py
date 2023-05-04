@@ -3,7 +3,7 @@ from datetime import datetime
 import parsedata
 
 
-def get_tuple(postcode) -> list[tuple[str, int]]:
+def get_tuple(postcode, duration) -> list[tuple[str, int]]:
     """gets carbon intensity API data for the next 48 hours from carbonintensity.org.uk
     param postcode: the UK post code (just the first section) of the location, e.g. M15
     returns: a set of tuples with start time and carbon intensity
@@ -25,7 +25,7 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
     for d in data["data"]["data"]:
         timefrom = d["from"]
         intensity = d["intensity"]["forecast"]
-        response.append((timefrom, intensity))
+        response.append((timefrom, intensity),duration = duration)
 
     return response
 
