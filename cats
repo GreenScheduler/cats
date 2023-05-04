@@ -22,4 +22,11 @@
 #SOFTWARE.
 #
 
+jobName=$1
+for cliFlag in {2..}
+location=$2
+duration=$3
 
+# get time
+runTime=$(getTimeStamp)
+at $runTime -f $jobName
