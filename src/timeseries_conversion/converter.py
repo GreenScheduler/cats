@@ -6,4 +6,5 @@ def cat_converter(filename, method='simple'):
     data = tsutils.csv_loader(filename)
     # Get lowest carbon intensity
     lowest = tsutils.get_lowest_carbon_intensity(data, method)
-
+    # Return timestamp and carbon intensity
+    return lowest
