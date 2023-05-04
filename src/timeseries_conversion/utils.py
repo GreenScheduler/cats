@@ -1,6 +1,8 @@
 """
 Utils module timeseries conversion
 """
+import datetime
+
 
 def csv_loader(filename):
     """
