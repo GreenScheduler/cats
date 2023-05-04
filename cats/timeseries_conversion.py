@@ -62,8 +62,9 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
 
     lenght is in minutes
     """
-    if method not in ["simple", "windowed"]:
-        raise ValueError("Invalid Carbon Intensity Method")
+    METHODS = ["simple", "windowed"]
+    if method not in METHODS:
+        raise ValueError(f"Invalid Carbon Intensity Method. Must be one of {METHODS}")
 
     if method == "simple":
         #  Return element with smallest 2nd value
