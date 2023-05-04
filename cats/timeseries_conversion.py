@@ -82,7 +82,7 @@ def get_lowest_carbon_intensity(data, method="simple", duration=None):
         for i in range(len(data) - num_intervals):
             windowed_data[0].append(data[i][0])
             windowed_data[1].append(
-                sum([x[1] for x in data[i : i + num_intervals]]) / num_intervals
+                sum([x[1] for x in data[i: i + num_intervals]]) / num_intervals
             )
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
@@ -100,6 +100,6 @@ def cat_converter(filename, method="simple", duration=None):
     # Load CSV
     data = csv_loader(filename)
     # Get lowest carbon intensity
-    lowest = get_lowest_carbon_intensity(data, method)
+    lowest = get_lowest_carbon_intensity(data, method, duration=duration)
     # Return timestamp and carbon intensity
     return lowest

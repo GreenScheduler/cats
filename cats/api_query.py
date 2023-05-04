@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime
-import parsedata
+from .parsedata import writecsv
 
 
 def get_tuple(postcode) -> list[tuple[str, int]]:
@@ -11,7 +11,7 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
 
     # just get the first part of the postcode
     postcode = postcode.split()[0]
-
+    
     # get the carbon intensity api data
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")
     r = requests.get(
@@ -36,4 +36,4 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
 if __name__ == "__main__":
     # test example using Manchester as a location
     data_tuples = get_tuple("M15")
-    parsedata.writecsv(data_tuples, duration=60)
+    writecsv(data_tuples)
