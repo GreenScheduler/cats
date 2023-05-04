@@ -23,7 +23,7 @@ def csv_loader(filename):
     data = [x.strip().split(",") for x in data]
     # Convert timestamp to datetime
     data = [
-        [datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%M:%S"), float(x[1])]
+        [datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%M:%S"), float(x[3])]
         for x in data
     ]
     return data
