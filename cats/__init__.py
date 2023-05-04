@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import requests
 import subprocess
 import yaml
+import sys
 
 from .timeseries_conversion import cat_converter  # noqa: F401
 from .api_query import get_tuple  # noqa: F401
@@ -13,7 +14,7 @@ from .parsedata import writecsv  # noqa: F401
 def findtime(postcode, duration):
     tuples = get_tuple(postcode)
     result = writecsv(tuples, duration)
-    #print(result)
+    sys.stderr.write(str(result) + "\n")
     return result["timestamp"]
 
 
