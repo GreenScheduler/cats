@@ -9,7 +9,7 @@ class greenAlgorithmsCalculator():
                  ):
         '''
 
-        :param partition: [str] has to match one of the partitions in `config.yaml`
+        :param partition: [str] has to match one of the partitions in `config.yml`
         :param runtime: [datetime.timedelta]
         :param memory: [int] in GB
         :param nCPUcores: [int]
@@ -18,7 +18,7 @@ class greenAlgorithmsCalculator():
         :param averageNow_carbonIntensity: [float] in gCO2e/kWh
         '''
         ### Load cluster specific info
-        with open("config.yaml", "r") as stream:
+        with open("config.yml", "r") as stream:
             try:
                 self.cluster_info = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
