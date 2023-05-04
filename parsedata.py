@@ -4,16 +4,28 @@ outputfile = "./timedata.csv"
 
 
 def parsetime(datestr: str) -> datetime:
+    ''' parse the date string
+    param datestr: a date string from the api
+    returns: a datetime value
+    '''
     return datetime.strptime(datestr, "%Y-%m-%dT%H:%MZ")
 
 def timefromnow(time: datetime) -> tuple[int, float]:
+    ''' calculate the time delta between now and a timestamp
+    param time: a datetime timestamp
+    returns: tuple containing time delta in seconds and a unix timestamp
+    '''
     currenttime = datetime.now()
     timediff = abs(currenttime - time)
     deltaseconds = timediff.seconds
     unixtime = time.timestamp()
     return (deltaseconds, unixtime)
 
-def makedata(data: list) -> list[tuple[str, int, float, int]]:
+def makedata(data: list[tuple[str, int]]) -> list[tuple[str, int, float, int]]:
+    ''' create csv rows from api data
+    param data: a set of tupics with start time and carbon intensity
+    returns: a list of data table rows
+    '''
     output = []
     for d in data:
         timestr = d[0]
@@ -24,11 +36,19 @@ def makedata(data: list) -> list[tuple[str, int, float, int]]:
     return output
  
 def csvline(parseelement: tuple[str, int, float, int]) -> str:
+    ''' write tuple of data row to string
+    param parseelement: a parsed data row
+    returns: a string of a data row
+    '''
     line = [str(x) for x in parseelement]
     return ",".join(line)
     
 
-def writecsv(data: list) -> None:
+def writecsv(data: list[tuple[str, int]]) -> None:
+    ''' write api data to csv
+    param data: tuple of api output
+    returns: None
+    '''
     parseddata = makedata(data)
     with open(outputfile, "w") as f:
         f.write("time,deltaseconds,unix,intensity\n")
