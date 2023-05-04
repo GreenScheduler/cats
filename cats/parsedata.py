@@ -48,7 +48,7 @@ def csvline(parseelement: tuple[str, int, float, int]) -> str:
     return ",".join(line)
 
 
-def writecsv(data: list[tuple[str, int]], duration=None) -> dict(str, int):
+def writecsv(data: list[tuple[str, int]], duration=None) -> dict[str, int]:
     """write api data to csv
     param data: tuple of api output
     returns: None

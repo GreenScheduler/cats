@@ -13,14 +13,14 @@ from .parsedata import writecsv  # noqa: F401
 def findtime(postcode, duration):
     tuples = get_tuple(postcode)
     result = writecsv(tuples, duration)
-    print(result)
+    #print(result)
     return result["timestamp"]
 
 
 def parse_arguments():
     parser = ArgumentParser(prog="cats", description="A climate aware job scheduler")
 
-    parser.add_argument("program")
+    #parser.add_argument("program")
     parser.add_argument("--loc")
     parser.add_argument("-d", "--duration", required=True)
 
@@ -41,19 +41,19 @@ def main(arguments=None):
             loc = config["postcode"]
     else:
         loc = args.loc
-    print("Location:", loc)
+    #print("Location:", loc)
 
     runtime = findtime(loc, args.duration)
-
-    subprocess.run(
-        [
-            args.program,
-            "|",
-            "at",
-            "-m",
-            f"{runtime:%m%d%H%M}",
-        ]
-    )
+    print(f"{runtime:%m%d%H%M}")
+#    subprocess.run(
+#        [
+#            args.program,
+#            "|",
+#            "at",
+#            "-m",
+#            f"{runtime:%m%d%H%M}",
+#        ]
+#    )
 
 
 if __name__ == "__main__":
