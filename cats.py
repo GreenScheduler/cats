@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import requests
 import subprocess
+import yaml
 
 # from cats import findtime
 
@@ -16,24 +17,27 @@ def parse_arguments():
 
 
 def main(arguments=None):
+    with open("config.yml", "r") as f:
+        config = yaml.load(f)
     parser = parse_arguments()
     args = parser.parse_args(arguments)
 
     if not args.loc:
-        r = requests.get("https://ipapi.co/json").json()
-        loc = r["postal"]
+        if postcode not in config.keys():
+            r = requests.get("https://ipapi.co/json").json()
+            loc = r["postal"]
 
-        runtime = findtime()
+    runtime = findtime()
 
-        subprocess.run(
-            [
-                args.program,
-                "|",
-                "at",
-                "-m",
-                f"{runtime:%m%d%H%M}",
-            ]
-        )
+    subprocess.run(
+        [
+            args.program,
+            "|",
+            "at",
+            "-m",
+            f"{runtime:%m%d%H%M}",
+        ]
+    )
 
 
 if __name__ == "__main__":
