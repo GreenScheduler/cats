@@ -60,7 +60,7 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
     Get lowest carbon intensity in data depending on user method
     return dict of timestamp and carbon intensity
 
-    lenght is in minutes
+    size is in minutes
     """
     METHODS = ["simple", "windowed"]
     if method not in METHODS:
@@ -84,7 +84,11 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
         rtn = min(windowed_data, key=lambda x: x[1])
-        rtn = {"timestamp": rtn[0], "carbon_intensity": rtn[1]}
+        rtn = {
+            "timestamp": rtn[0],
+            "carbon_intensity": rtn[1],
+            "est_total_carbon": rtn[1] * num_intervals,
+        }
 
     return rtn
 
