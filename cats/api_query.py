@@ -9,7 +9,9 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
     returns: a set of tuples with start time and carbon intensity
     """
 
-    print("get_tuple called with", postcode)
+    # just get the first part of the postcode
+    postcode = postcode.split()[0]
+    
     # get the carbon intensity api data
     timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")
     r = requests.get(
