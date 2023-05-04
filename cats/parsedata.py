@@ -56,6 +56,6 @@ def writecsv(data: list[tuple[str, int]]) -> None:
         for d in parseddata:
             f.write(csvline(d))
             f.write("\n")
-    # send data to timeseries processing code
-    timeseries_conversion.cat_converter(outputfile)
+    # send data to timeseries processing code and print result
+    print(timeseries_conversion.cat_converter(outputfile))
 
