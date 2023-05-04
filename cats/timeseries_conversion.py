@@ -23,7 +23,7 @@ def csv_loader(filename):
     data = [x.strip().split(",") for x in data]
     # Convert timestamp to datetime
     data = [
-        [datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%M:%SZ"), float(x[1])]
+        [datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%M:%S"), float(x[1])]
         for x in data
     ]
     return data
@@ -82,8 +82,8 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
 
 def cat_converter(filename, method='simple'):
     # Load CSV
-    data = tsutils.csv_loader(filename)
+    data = csv_loader(filename)
     # Get lowest carbon intensity
-    lowest = tsutils.get_lowest_carbon_intensity(data, method)
+    lowest = get_lowest_carbon_intensity(data, method)
     # Return timestamp and carbon intensity
     return lowest
