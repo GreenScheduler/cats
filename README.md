@@ -25,13 +25,20 @@ pip install git+https://github.com/GreenScheduler/cats
 
 ***
 ## Quickstart
-```sh
-cats  -d/--duration job_duration --loc postcode
+```
+python -m cats -d <job_duration> --loc <postcode>
 ```
 The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address.
 
 The scheduler then calls a function that estimates the best time to start the job given predicted carbon intensity over the next 48 hours. The workflow is the same as for other popular schedulers. Switching to `cats` should be transparent to cluster users.
+
+It will display the time to start the job on standard out and some information about the carbon intensity on standard error.
 ***
+### Using with the at scheduler
+You can use cats with the At job scheduler by running:
+```
+command | at `python -m cats -d <job_duration> --loc <postcode>
+```
 ## Contributing
 We welcome contributions from the community! If you find a bug or have an idea for a new feature, please open an issue on our GitHub repository or submit a pull request.
 ***
