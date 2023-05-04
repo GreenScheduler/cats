@@ -1,1 +1,1 @@
-from .timeseries_conversion import cat_converter
+from .timeseries_conversion import cat_converter  # noqa: F401
