@@ -1,6 +1,6 @@
-'''
+"""
 Timeseries conversion
-'''
+"""
 
 import datetime
 
@@ -46,7 +46,13 @@ def check_duration(size, data):
         raise ValueError(
             "Windowed method timespan cannot be greater than the cached timespan"
         )
-    return size
+
+    # get length of interval between timestamps
+    interval = (data[1][0] - data[0][0]).total_seconds() / 60
+    # count number of intervals in size
+    num_intervals = int((size / interval) + 0.5)  # round to nearest integer (UP)
+
+    return num_intervals
 
 
 def get_lowest_carbon_intensity(data, method="simple", size=None):
@@ -66,12 +72,14 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
         rtn = {"timestamp": rtn[0], "carbon_intensity": rtn[1]}
 
     if method == "windowed":
-        size = check_duration(size, data)
+        num_intervals = check_duration(size, data)
         #  calculate the windowed carbon intensity
         windowed_data = [[], []]
-        for i in range(len(data) - size):
+        for i in range(len(data) - num_intervals):
             windowed_data[0].append(data[i][0])
-            windowed_data[1].append(sum([x[1] for x in data[i : i + size]]) / size)
+            windowed_data[1].append(
+                sum([x[1] for x in data[i : i + num_intervals]]) / num_intervals
+            )
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
         rtn = min(windowed_data, key=lambda x: x[1])
@@ -80,7 +88,7 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
     return rtn
 
 
-def cat_converter(filename, method='simple'):
+def cat_converter(filename, method="simple"):
     # Load CSV
     data = csv_loader(filename)
     # Get lowest carbon intensity
