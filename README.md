@@ -26,7 +26,7 @@ pip install git+https://github.com/GreenScheduler/cats
 ***
 ## Quickstart
 ```sh
-cats job_name -d/--duration job_duration --loc postcode
+cats  -d/--duration job_duration --loc postcode
 ```
 The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address.
 
