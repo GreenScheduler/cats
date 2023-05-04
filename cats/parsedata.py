@@ -1,5 +1,5 @@
 from datetime import datetime
-import timeseries_conversion
+from .timeseries_conversion import cat_converter
 
 outputfile = "./timedata.csv"
 
@@ -48,7 +48,7 @@ def csvline(parseelement: tuple[str, int, float, int]) -> str:
     return ",".join(line)
 
 
-def writecsv(data: list[tuple[str, int]]) -> None:
+def writecsv(data: list[tuple[str, int]], duration=None) -> None:
     """write api data to csv
     param data: tuple of api output
     returns: None
@@ -60,4 +60,4 @@ def writecsv(data: list[tuple[str, int]]) -> None:
             f.write(csvline(d))
             f.write("\n")
     # send data to timeseries processing code and print result
-    print(timeseries_conversion.cat_converter(outputfile))
+    return cat_converter(outputfile, duration)

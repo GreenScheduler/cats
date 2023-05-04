@@ -100,6 +100,6 @@ def cat_converter(filename, method="simple", duration=None):
     # Load CSV
     data = csv_loader(filename)
     # Get lowest carbon intensity
-    lowest = get_lowest_carbon_intensity(data, method)
+    lowest = get_lowest_carbon_intensity(data, method, duration=duration)
     # Return timestamp and carbon intensity
     return lowest
