@@ -142,7 +142,7 @@ class greenAlgorithmsCalculator():
 
         return CF_best, CF_now
 
-    def print_results(self, energies, CF_best, CF_now):
+    def get_results(self, energies, CF_best, CF_now):
 
         clusterName = self.cluster_info['cluster_name']
 
@@ -159,13 +159,13 @@ class greenAlgorithmsCalculator():
                 
         '''
 
-        print(report)
+        return report
 
-    def main(self):
+    def get_footprint(self):
         energies = self.calculate_energies()
         CF_best, CF_now = self.calculate_CF(energies)
 
-        self.print_results(energies, CF_best, CF_now)
+        return get_results(energies, CF_best, CF_now)
 
 if __name__ == "__main__":
     GAcalc = greenAlgorithmsCalculator(
@@ -177,4 +177,4 @@ if __name__ == "__main__":
         averageBest_carbonIntensity = 80,
         averageNow_carbonIntensity = 290
     )
-    GAcalc.main()
+    rslt = GAcalc.get_footprint()
