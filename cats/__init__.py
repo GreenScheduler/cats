@@ -45,7 +45,7 @@ def main(arguments=None):
     #print("Location:", loc)
 
     runtime = findtime(loc, args.duration)
-    print(f"{runtime:%m%d%H%M}")
+    print(f"{runtime:%H:%M %b %d %Y}")
 #    subprocess.run(
 #        [
 #            args.program,
