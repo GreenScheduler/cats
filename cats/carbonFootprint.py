@@ -154,7 +154,7 @@ class greenAlgorithmsCalculator():
         report = f'''
                   #####  Your carbon footprint on the {clusterName} platform  #####
 
-                  Your job will be running at {starttime}
+                  Your job will be running at {self.starttime}
 
                   By running at the suggested time: {text_total_CFbest}
 
