@@ -2,8 +2,6 @@ from argparse import ArgumentParser
 import requests
 import subprocess
 import yaml
-from tempfile import NamedTemporaryFile
-from pathlib import Path
 
 from .timeseries_conversion import cat_converter  # noqa: F401
 from .api_query import get_tuple  # noqa: F401
@@ -14,7 +12,7 @@ from .parsedata import writecsv  # noqa: F401
 
 def findtime(postcode, duration):
     tuples = get_tuple(postcode)
-    result = parsedata.writecsv(data_tuples, duration)
+    result = writecsv(tuples, duration)
     print(result)
     return result["timestamp"]
 
