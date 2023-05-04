@@ -4,10 +4,16 @@ CATS is a Climate Aware Task Scheduler. It schedules cluster jobs to minimize pr
 
 # The procedure
 
+Clone the repository
+
+```shell
+git clone https://github.com/GreenScheduler/cats
+```
+
 The user submits a job with the command
 
 ```sh
-cats job_name -d/--duration job_duration --loc postcode
+python3 -m cats job_name -d/--duration job_duration --loc postcode
 ```
 The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address.
 
