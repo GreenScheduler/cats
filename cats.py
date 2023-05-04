@@ -14,3 +14,13 @@ if not args.loc:
     r = requests.get("https://ipapi.co/json").json()
     loc = r["postal"]
 runtime = findtime()
+
+subprocess.run(
+    [
+        args.program,
+        "|",
+        "at",
+        "-m",
+        f"{runtime:%m%d%H%M}",
+    ]
+)
