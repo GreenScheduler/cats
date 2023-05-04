@@ -60,12 +60,13 @@ def main(arguments=None):
 
     footprint = greenAlgorithmsCalculator(
         partition = args.partition,
-        runtime = datetime.timedelta(minutes = runtime["duration"]),
+        runtime = timedelta(minutes = 120),
         memory = args.memory,
         nCPUcores = args.ncpus,
         nGPUcores = args.ngpus,
-        averageBest_carbonIntensity = runtime[""],
-        averageNow_carbonIntensity = runtime[""],
+        averageBest_carbonIntensity = 80.,
+        averageNow_carbonIntensity = 162.,
+        starttime=runtime
     ).get_footprint()
 
 

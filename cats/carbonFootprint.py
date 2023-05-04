@@ -5,7 +5,7 @@ class greenAlgorithmsCalculator():
 
     def __init__(self,
                  partition, runtime, memory, nCPUcores, nGPUcores,
-                 averageBest_carbonIntensity, averageNow_carbonIntensity
+                 averageBest_carbonIntensity, averageNow_carbonIntensity, starttime
                  ):
         '''
 
@@ -38,6 +38,7 @@ class greenAlgorithmsCalculator():
         self.nGPUcores = nGPUcores
         self.averageBest_carbonIntensity = averageBest_carbonIntensity
         self.averageNow_carbonIntensity = averageNow_carbonIntensity
+        self.starttime = starttime
 
     def formatText_footprint(self, footprint_g):
         '''
@@ -153,10 +154,14 @@ class greenAlgorithmsCalculator():
         report = f'''
                   #####  Your carbon footprint on the {clusterName} platform  #####
 
+                  Your job will be running at {starttime}
+
                   By running at the suggested time: {text_total_CFbest}
-                  
+
+
+
                   ...vs running now: {text_total_CFnow} (- {text_diffCF})
-                
+
         '''
 
         return report
