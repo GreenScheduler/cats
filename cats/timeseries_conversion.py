@@ -1,6 +1,7 @@
-"""
-Utils module timeseries conversion
-"""
+'''
+Timeseries conversion
+'''
+
 import datetime
 
 
@@ -77,3 +78,12 @@ def get_lowest_carbon_intensity(data, method="simple", size=None):
         rtn = {"timestamp": rtn[0], "carbon_intensity": rtn[1]}
 
     return rtn
+
+
+def cat_converter(filename, method='simple'):
+    # Load CSV
+    data = tsutils.csv_loader(filename)
+    # Get lowest carbon intensity
+    lowest = tsutils.get_lowest_carbon_intensity(data, method)
+    # Return timestamp and carbon intensity
+    return lowest
