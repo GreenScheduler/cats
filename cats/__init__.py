@@ -61,7 +61,7 @@ def validate_jobinfo(jobinfo: str):
     if missing_keys:
         print(f"ERROR: Missing job info keys: {missing_keys}")
         return {}
-    expected_partition_values = ("CPU_partition", "GPU_partition"):
+    expected_partition_values = ("CPU_partition", "GPU_partition")
     if info["partition"] not in :
         msg = (
             "ERROR: job info key 'partition' should be "
