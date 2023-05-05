@@ -35,7 +35,49 @@ The postcode is optional, and can be pulled from the `config.yml` file or, if th
 
 The scheduler then calls a function that estimates the best time to start the job given predicted carbon intensity over the next 48 hours. The workflow is the same as for other popular schedulers. Switching to `cats` should be transparent to cluster users.
 
-It will display the time to start the job on standard out and some information about the carbon intensity on standard error.
+It will display the time to start the job on standard out and optionally some information about the carbon intensity on standard error.
+
+***
+### Display carbon footprint estimates
+
+Optionally, `cats` is able to provide an estimate for the carbon footprint reduction resulting from delaying your job.  To enable the footprint estimation, you must provide information about the machine in the form of a YAML configuration file.  An example is given below:
+
+```yaml
+## ~~~ TO BE EDITED TO BE TAILORED TO THE CLUSTER ~~~
+##
+## Settings for fictive CW23
+##
+## Updated: 04/05/2023
+
+---
+cluster_name: "CW23"
+postcode: "EH8 9BT"
+PUE: 1.20 # > 1
+partitions:
+  CPU_partition:
+    type: CPU # CPU or GPU
+    model: "Xeon Gold 6142"
+    TDP: 9.4 # in W, per core
+  GPU_partition:
+    type: GPU
+    model: "NVIDIA A100-SXM-80GB GPUs" # from https://docs.hpc.cam.ac.uk/hpc/user-guide/a100.html
+    TDP: 300 # from https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/PB-10577-001_v02.pdf
+    CPU_model: "AMD EPYC 7763" # from HPC team
+    TDP_CPU: 4.4 # from https://www.amd.com/fr/products/cpu/amd-epyc-7763
+```
+
+Use the `--config` option to specify a path to the config file, relative to the current directory. If no path is specified, `cats` looks for a file named `config.yml` in the current directory.
+
+
+Additionaly, job-specific information must be provided to `cats` through the `--jobinfo` option.  The example below demonstrates running `cats` with footprint estimation for a job using 8GB of memory, 2 CPU cores and no GPU:
+
+```bash
+cats -d 120 --config .config/config.yml \
+  --jobinfo cpus=2,gpus=0,memory=8,partition=CPU_partition
+```
+
+
+>>>>>>> 80eb9f0 (docs: Update readme for carbon footprint estimation)
 ***
 ### Using with the at scheduler
 You can use cats with the At job scheduler by running:
