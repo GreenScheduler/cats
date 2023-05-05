@@ -26,7 +26,7 @@ def parse_arguments():
 
     #parser.add_argument("program")
     parser.add_argument("--loc")
-    parser.add_argument("-d", "--duration", required=True)
+    parser.add_argument("-d", "--duration", type=int, required=True)
     parser.add_argument("--jobinfo")
 
     return parser
@@ -74,6 +74,8 @@ def validate_jobinfo(jobinfo: str):
             print(f"ERROR: job info key {key} should be numeric")
             return {}
     return info
+
+
 def main(arguments=None):
     with open("config.yml", "r") as f:
         config = yaml.safe_load(f)
