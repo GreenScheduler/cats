@@ -28,6 +28,7 @@ def parse_arguments():
     parser.add_argument("--loc")
     parser.add_argument("-d", "--duration", type=int, required=True)
     parser.add_argument("--jobinfo")
+    parser.add_argument("--config")
 
     return parser
 
@@ -77,10 +78,11 @@ def validate_jobinfo(jobinfo: str):
 
 
 def main(arguments=None):
-    with open("config.yml", "r") as f:
-        config = yaml.safe_load(f)
     parser = parse_arguments()
     args = parser.parse_args(arguments)
+
+    with open(args.config, "r") as f:
+        config = yaml.safe_load(f)
 
     if not args.loc:
         if "postcode" not in config.keys():
@@ -110,6 +112,7 @@ def main(arguments=None):
             print("ERROR: job info parsing failed, exiting now")
             exit(1)
         estim = greenAlgorithmsCalculator(
+            config=args.config,
             runtime=timedelta(minutes=args.duration),
             averageBest_carbonIntensity=80,
             averageNow_carbonIntensity=290,

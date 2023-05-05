@@ -9,6 +9,7 @@ Estimates = namedtuple("Estimates", ["now", "best", "savings"])
 class greenAlgorithmsCalculator:
     def __init__(
         self,
+        config,
         partition,
         runtime,
         memory,
@@ -28,7 +29,7 @@ class greenAlgorithmsCalculator:
         :param averageNow_carbonIntensity: [float] in gCO2e/kWh
         """
         ### Load cluster specific info
-        with open("config.yml", "r") as stream:
+        with open(config, "r") as stream:
             try:
                 self.cluster_info = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
