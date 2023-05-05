@@ -92,7 +92,7 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    runtime = findtime(loc, args.duration)
+    starttime = findtime(loc, args.duration)
 #    subprocess.run(
 #        [
 #            args.program,
@@ -111,12 +111,11 @@ def main(arguments=None):
             exit(1)
         estim = greenAlgorithmsCalculator(
             runtime=timedelta(minutes=args.duration),
-            starttime=runtime,
             averageBest_carbonIntensity=80,
             averageNow_carbonIntensity=290,
             **jobinfo,
         ).get_footprint()
-        print(f"Best job start time: {runtime}")
+        print(f"Best job start time: {starttime}")
         print(f"Estimated emmissions for running job now: {estim.now}")
         msg = (
             f"Estimated emmissions for running delayed job: {estim.best})"

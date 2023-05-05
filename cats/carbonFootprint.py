@@ -16,7 +16,6 @@ class greenAlgorithmsCalculator:
         gpus,
         averageBest_carbonIntensity,
         averageNow_carbonIntensity,
-        starttime,
     ):
         """
 
@@ -49,7 +48,6 @@ class greenAlgorithmsCalculator:
         self.gpus = gpus
         self.averageBest_carbonIntensity = averageBest_carbonIntensity
         self.averageNow_carbonIntensity = averageNow_carbonIntensity
-        self.starttime = starttime
 
     def formatText_footprint(self, footprint_g):
         """
