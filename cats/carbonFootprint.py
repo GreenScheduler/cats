@@ -1,3 +1,4 @@
+from collections import namedtuple
 import datetime
 import yaml
 
@@ -8,6 +9,7 @@ class greenAlgorithmsCalculator():
                  averageBest_carbonIntensity, averageNow_carbonIntensity, starttime
                  ):
         '''
+Estimates = namedtuple("Estimates", ["now", "best", "savings"])
 
         :param partition: [str] has to match one of the partitions in `config.yml`
         :param runtime: [datetime.timedelta]
@@ -143,43 +145,12 @@ class greenAlgorithmsCalculator():
 
         return CF_best, CF_now
 
-    def get_results(self, energies, CF_best, CF_now):
-
-        clusterName = self.cluster_info['cluster_name']
-
-        text_total_CFbest = self.formatText_footprint(CF_best['total_CF'])
-        text_total_CFnow = self.formatText_footprint(CF_now['total_CF'])
-        text_diffCF = self.formatText_footprint(CF_now['total_CF'] - CF_best['total_CF'])
-
-        report = f'''
-                  #####  Your carbon footprint on the {clusterName} platform  #####
-
-                  Your job will be running at {self.starttime}
-
-                  By running at the suggested time: {text_total_CFbest}
-
-
-
-                  ...vs running now: {text_total_CFnow} (- {text_diffCF})
-
-        '''
-
-        return report
-
     def get_footprint(self):
         energies = self.calculate_energies()
         CF_best, CF_now = self.calculate_CF(energies)
+        best = CF_best["total_CF"]
+        now = CF_now["total_CF"]
 
-        return self.get_results(energies, CF_best, CF_now)
-
-if __name__ == "__main__":
-    GAcalc = greenAlgorithmsCalculator(
-        partition = 'GPU_partition',
-        runtime = datetime.timedelta(hours = 5),
-        memory = 32,
-        nCPUcores = 3,
-        nGPUcores = 16,
-        averageBest_carbonIntensity = 80,
-        averageNow_carbonIntensity = 290
-    )
-    rslt = GAcalc.get_footprint()
+        return Estimates(
+            *[self.formatText_footprint(e) for e in [now, best, now - best]]
+        )

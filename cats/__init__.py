@@ -91,7 +91,6 @@ def main(arguments=None):
     #print("Location:", loc)
 
     runtime = findtime(loc, args.duration)
-    print(f"{runtime:%H:%M %b %d %Y}")
 #    subprocess.run(
 #        [
 #            args.program,
@@ -115,6 +114,13 @@ def main(arguments=None):
             averageNow_carbonIntensity=290,
             **jobinfo,
         ).get_footprint()
+        print(f"Best job start time: {runtime}")
+        print(f"Estimated emmissions for running job now: {estim.now}")
+        msg = (
+            f"Estimated emmissions for running delayed job: {estim.best})"
+            f" (- {estim.savings})"
+        )
+        print(msg)
 
 
 if __name__ == "__main__":
