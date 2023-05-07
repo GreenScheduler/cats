@@ -82,8 +82,16 @@ def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
 
-    with open(args.config, "r") as f:
-        config = yaml.safe_load(f)
+    if args.config:
+        with open(args.config, "r") as f:
+            config = yaml.safe_load(f)
+    else:
+        # if no path provided, look for `config.yml` in current directory
+        try:
+            with open("configgg.yml", "r") as f:
+                config = yaml.safe_load(f)
+        except FileNotFoundError:
+            config = dict()
 
     if not args.loc:
         if "postcode" not in config.keys():
@@ -113,8 +121,11 @@ def main(arguments=None):
         if not jobinfo:
             print("ERROR: job info parsing failed, exiting now")
             exit(1)
+        if not config:
+            print("ERROR: config file not found, exiting now")
+            exit(1)
         estim = greenAlgorithmsCalculator(
-            config=args.config,
+            config=config,
             runtime=timedelta(minutes=args.duration),
             averageBest_carbonIntensity=80, # TODO replace with real carbon intensity
             averageNow_carbonIntensity=290, # TODO replace with real carbon intensity
