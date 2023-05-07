@@ -106,6 +106,7 @@ def main(arguments=None):
 #        ]
 #    )
 
+    print(f"Best job start time: {starttime}")
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
@@ -119,7 +120,6 @@ def main(arguments=None):
             averageNow_carbonIntensity=290, # TODO replace with real carbon intensity
             **jobinfo,
         ).get_footprint()
-        print(f"Best job start time: {starttime}")
 
         print(" -!-!- Carbon footprint estimation is a work in progress, coming soon!")
         # Commenting these out while waiting for real carbon intensities
