@@ -40,7 +40,7 @@ It will display the time to start the job on standard out and optionally some in
 ***
 ### Display carbon footprint estimates
 
-Optionally, `cats` is able to provide an estimate for the carbon footprint reduction resulting from delaying your job.  To enable the footprint estimation, you must provide information about the machine in the form of a YAML configuration file.  An example is given below:
+Optionally, `cats` will soon be able to provide an estimate for the carbon footprint reduction resulting from delaying your job.  To enable the footprint estimation, you must provide information about the machine in the form of a YAML configuration file.  An example is given below:
 
 ```yaml
 ## ~~~ TO BE EDITED TO BE TAILORED TO THE CLUSTER ~~~
@@ -60,9 +60,9 @@ partitions:
     TDP: 9.4 # in W, per core
   GPU_partition:
     type: GPU
-    model: "NVIDIA A100-SXM-80GB GPUs" # from https://docs.hpc.cam.ac.uk/hpc/user-guide/a100.html
+    model: "NVIDIA A100-SXM-80GB GPUs" 
     TDP: 300 # from https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/PB-10577-001_v02.pdf
-    CPU_model: "AMD EPYC 7763" # from HPC team
+    CPU_model: "AMD EPYC 7763" 
     TDP_CPU: 4.4 # from https://www.amd.com/fr/products/cpu/amd-epyc-7763
 ```
 
