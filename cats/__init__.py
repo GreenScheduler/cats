@@ -115,17 +115,20 @@ def main(arguments=None):
         estim = greenAlgorithmsCalculator(
             config=args.config,
             runtime=timedelta(minutes=args.duration),
-            averageBest_carbonIntensity=80,
-            averageNow_carbonIntensity=290,
+            averageBest_carbonIntensity=80, # TODO replace with real carbon intensity
+            averageNow_carbonIntensity=290, # TODO replace with real carbon intensity
             **jobinfo,
         ).get_footprint()
         print(f"Best job start time: {starttime}")
-        print(f"Estimated emmissions for running job now: {estim.now}")
-        msg = (
-            f"Estimated emmissions for running delayed job: {estim.best})"
-            f" (- {estim.savings})"
-        )
-        print(msg)
+
+        print(" -!-!- Carbon footprint estimation is a work in progress, coming soon!")
+        # Commenting these out while waiting for real carbon intensities
+        # print(f"Estimated emmissions for running job now: {estim.now}")
+        # msg = (
+        #     f"Estimated emmissions for running delayed job: {estim.best})"
+        #     f" (- {estim.savings})"
+        # )
+        # print(msg)
 
 
 if __name__ == "__main__":
