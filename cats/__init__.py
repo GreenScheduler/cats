@@ -82,13 +82,16 @@ def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
 
-    config_path = args.config if args.config else "config.yml"
-    try:
-        with open(config_path, "r") as f:
+    if args.config:
+        with open(args.config, "r") as f:
             config = yaml.safe_load(f)
-    except FileNotFoundError:
-        print("ERROR: Could not find config file {config_path}")
-        exit(1)
+    else:
+        # if no path provided, look for `config.yml` in current directory
+        try:
+            with open("configgg.yml", "r") as f:
+                config = yaml.safe_load(f)
+        except FileNotFoundError:
+            config = dict()
 
     if not args.loc:
         if "postcode" not in config.keys():
