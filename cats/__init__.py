@@ -88,7 +88,7 @@ def main(arguments=None):
     else:
         # if no path provided, look for `config.yml` in current directory
         try:
-            with open("configgg.yml", "r") as f:
+            with open("config.yml", "r") as f:
                 config = yaml.safe_load(f)
         except FileNotFoundError:
             config = dict()
