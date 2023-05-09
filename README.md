@@ -2,10 +2,11 @@
 
 **C**limate **A**ware **T**ask **S**cheduler
 
-CATS is a Climate Aware Task Scheduler. It schedules cluster jobs to minimize predicted carbon intensity of running the process. It was created as part of the [2023 Collaborations Workshop](https://software.ac.uk/cw23).
+CATS is a Climate Aware Task Scheduler. It schedules cluster jobs to minimize predicted carbon intensity of running the process. It was created as part of the [2023 Collaborations Workshop](https://software.ac.uk/cw23). 
+
+Currently CATS only works in the UK, if you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know.
 
 ![CATS](https://i.imgur.com/QvbPDm7.png)
-
 
 The Climate Aware Task Scheduler is a lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment. This tool uses real-time carbon intensity data from the National Grid ESO via their API to estimate the carbon intensity of the electricity grid, and schedules tasks at times when the estimated carbon intensity is lowest. This helps to reduce the carbon emissions associated with running computationally intensive tasks, making it an ideal solution for environmentally conscious developers.
 ***
