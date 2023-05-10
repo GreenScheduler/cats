@@ -14,7 +14,7 @@
   requires-python = ">=3.9"
   readme = "README.md"
   classifiers = ["License :: OSI Approved :: MIT License"]
-  dependencies = ["requests>=2.0.0", "PyYAML>=6.0"]
+  dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
 
   [project.optional-dependencies]
     test = ["pytest"]
