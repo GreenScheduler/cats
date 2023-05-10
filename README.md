@@ -1,14 +1,14 @@
 # CATS
 
-**C**limate **A**ware **T**ask **S**cheduler
+**C**limate-**A**ware **T**ask **S**cheduler
 
-CATS is a Climate Aware Task Scheduler. It schedules cluster jobs to minimize predicted carbon intensity of running the process. It was created as part of the [2023 Collaborations Workshop](https://software.ac.uk/cw23). 
+CATS is a Climate-Aware Task Scheduler. It schedules cluster jobs to minimize predicted carbon intensity of running the process. It was created as part of the [2023 Collaborations Workshop](https://software.ac.uk/cw23). 
 
 Currently CATS only works in the UK, if you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know.
 
 ![CATS](https://i.imgur.com/QvbPDm7.png)
 
-The Climate Aware Task Scheduler is a lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment. This tool uses real-time carbon intensity data from the National Grid ESO via their API to estimate the carbon intensity of the electricity grid, and schedules tasks at times when the estimated carbon intensity is lowest. This helps to reduce the carbon emissions associated with running computationally intensive tasks, making it an ideal solution for environmentally conscious developers.
+The Climate-Aware Task Scheduler is a lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment. This tool uses real-time carbon intensity data from the National Grid ESO via their API to estimate the carbon intensity of the electricity grid, and schedules tasks at times when the estimated carbon intensity is lowest. This helps to reduce the carbon emissions associated with running computationally intensive tasks, making it an ideal solution for environmentally conscious developers.
 ***
 ## Features
 - Estimates the carbon intensity of the electricity grid in real-time
@@ -20,8 +20,8 @@ The Climate Aware Task Scheduler is a lightweight Python package designed to sch
 ## Installation
 Install via `pip` as follows:
 
-```console
-$ pip install git+https://github.com/GreenScheduler/cats
+```bash
+pip install git+https://github.com/GreenScheduler/cats
 ```
 
 ***
@@ -29,9 +29,10 @@ $ pip install git+https://github.com/GreenScheduler/cats
 
 You can run `cats` with:
 
-```console
-$ python -m cats -d <job_duration> --loc <postcode>
+```bash
+python -m cats -d <job_duration> --loc <postcode>
 ```
+
 The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address.
 
 The scheduler then calls a function that estimates the best time to start the job given predicted carbon intensity over the next 48 hours. The workflow is the same as for other popular schedulers. Switching to `cats` should be transparent to cluster users.
@@ -79,11 +80,14 @@ cats -d 120 --config .config/config.yml \
 
 
 ***
-### Using with the at scheduler
-You can use cats with the At job scheduler by running:
-```
+### Using with the `at` scheduler
+
+You can use cats with the `at` job scheduler by running:
+
+```bash
 command | at `python -m cats -d <job_duration> --loc <postcode>
 ```
+
 ## Contributing
 We welcome contributions from the community! If you find a bug or have an idea for a new feature, please open an issue on our GitHub repository or submit a pull request.
 ***
