@@ -22,7 +22,7 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
     timestamp = dt.strftime("%Y-%m-%dT%H:%MZ")
 
     # Setup a session for the HTTP cache
-    session = requests_cache.CachedSession('cats_cache')
+    session = requests_cache.CachedSession('cats_cache', use_temp=True)
     # get the carbon intensity api data
     r = session.get(
         "https://api.carbonintensity.org.uk/regional/intensity/"
