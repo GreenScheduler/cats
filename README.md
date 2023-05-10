@@ -69,7 +69,7 @@ partitions:
 Use the `--config` option to specify a path to the config file, relative to the current directory. If no path is specified, `cats` looks for a file named `config.yml` in the current directory.
 
 
-Additionaly, job-specific information must be provided to `cats` through the `--jobinfo` option.  The example below demonstrates running `cats` with footprint estimation for a job using 8GB of memory, 2 CPU cores and no GPU:
+Additionally, job-specific information must be provided to `cats` through the `--jobinfo` option.  The example below demonstrates running `cats` with footprint estimation for a job using 8GB of memory, 2 CPU cores and no GPU:
 
 ```bash
 cats -d 120 --config .config/config.yml \
