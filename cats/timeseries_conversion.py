@@ -68,12 +68,7 @@ def get_lowest_carbon_intensity(data, method="simple", duration=None):
     if method == "simple":
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
-        rtn = min(data, key=lambda x: x[1])
-        rtn = {
-            "timestamp": rtn[0],
-            "carbon_intensity": rtn[1],
-            "est_total_carbon": rtn[1],
-        }
+        return min(data, key=lambda x: x[1])
 
     if method == "windowed":
         num_intervals = check_duration(duration, data)
@@ -86,14 +81,7 @@ def get_lowest_carbon_intensity(data, method="simple", duration=None):
             )
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
-        rtn = min(windowed_data, key=lambda x: x[1])
-        rtn = {
-            "timestamp": rtn[0],
-            "carbon_intensity": rtn[1],
-            "est_total_carbon": rtn[1] * num_intervals,
-        }
-
-    return rtn
+        return min(windowed_data, key=lambda x: x[1])
 
 
 def cat_converter(filename, method="simple", duration=None):

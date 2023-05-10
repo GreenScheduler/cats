@@ -16,9 +16,11 @@ from .carbonFootprint import greenAlgorithmsCalculator
 
 def findtime(postcode, duration):
     tuples = get_tuple(postcode)
-    result = writecsv(tuples, duration)
-    sys.stderr.write(str(result) + "\n")
-    return result["timestamp"]
+    timestamp, avg_best_ci = writecsv(tuples, duration)
+    sys.stderr.write(
+        str({"timestamp": timestamp, "carbon_intensity": avg_best_ci}) + "\n"
+    )
+    return timestamp, avg_best_ci
 
 
 def parse_arguments():
@@ -103,7 +105,9 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    starttime = findtime(loc, args.duration)
+    starttime, avg_best_ci = findtime(loc, args.duration)
+    print(f"{starttime:%H:%M %b %d %Y}")
+
 #    subprocess.run(
 #        [
 #            args.program,
