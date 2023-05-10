@@ -16,9 +16,9 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
     # the current hour or half hour in UTZ
     dt = datetime.now(timezone.utc)
     if dt.minute > 30:
-        dt.replace(minute=30, second=0, microsecond=0)
+        dt = dt.replace(minute=31, second=0, microsecond=0)
     else:
-        dt.replace(minute=0, second=0, microsecond=0)
+        dt = dt.replace(minute=1, second=0, microsecond=0)
     timestamp = dt.strftime("%Y-%m-%dT%H:%MZ")
 
     # Setup a session for the HTTP cache
