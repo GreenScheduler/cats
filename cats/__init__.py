@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from datetime import timedelta
+from datetime import datetime, timedelta
 import requests
 import subprocess
 import re
@@ -8,7 +8,7 @@ import sys
 
 from .timeseries_conversion import cat_converter  # noqa: F401
 from .api_query import get_tuple  # noqa: F401
-from .parsedata import writecsv  # noqa: F401
+from .parsedata import writecsv, avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
 # from cats import findtime
@@ -106,6 +106,9 @@ def main(arguments=None):
     #print("Location:", loc)
 
     starttime, avg_best_ci = findtime(loc, args.duration)
+    now_avg_ci = avg_carbon_intensity(
+        start=datetime.now(), runtime=timedelta(args.duration)
+    )
     print(f"{starttime:%H:%M %b %d %Y}")
 
 #    subprocess.run(

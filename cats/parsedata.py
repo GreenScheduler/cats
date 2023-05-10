@@ -1,5 +1,6 @@
-from datetime import datetime
-from .timeseries_conversion import cat_converter
+import bisect
+from datetime import datetime, timedelta
+from .timeseries_conversion import cat_converter, csv_loader
 
 CACHE_PATH = "./timedata.csv"
 
@@ -62,3 +63,20 @@ def writecsv(data: list[tuple[str, int]], duration=None) -> dict[str, int]:
     # send data to timeseries processing code and print result
     return cat_converter(CACHE_PATH, "simple", duration)
 
+
+def avg_carbon_intensity(start: datetime, runtime: timedelta):
+    """Returns the averaged carbon intensity for a job given its start
+    time and runtime.
+    """
+    data = csv_loader(CACHE_PATH)
+    datetimes = [row[0] for row in data]
+    intensities = [row[1] for row in data]
+
+    # lo is the index of the data point coming just before (or equal
+    # to) the start time
+    lo = bisect.bisect(datetimes, start) - 1
+    # hi is the index of the data point coming just after (or equal
+    # to) the expected finish time
+    hi = bisect.bisect(datetimes, start + runtime)
+
+    return sum(intensities[lo : hi + 1]) / (hi - lo + 1)
