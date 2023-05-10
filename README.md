@@ -77,7 +77,6 @@ cats -d 120 --config .config/config.yml \
 ```
 
 
->>>>>>> 80eb9f0 (docs: Update readme for carbon footprint estimation)
 ***
 ### Using with the at scheduler
 You can use cats with the At job scheduler by running:
