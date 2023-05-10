@@ -1,7 +1,7 @@
 from datetime import datetime
 from .timeseries_conversion import cat_converter
 
-outputfile = "./timedata.csv"
+CACHE_PATH = "./timedata.csv"
 
 
 def parsetime(datestr: str) -> datetime:
@@ -54,11 +54,11 @@ def writecsv(data: list[tuple[str, int]], duration=None) -> dict[str, int]:
     returns: None
     """
     parseddata = makedata(data)
-    with open(outputfile, "w") as f:
+    with open(CACHE_PATH, "w") as f:
         f.write("time,deltaseconds,unix,intensity\n")
         for d in parseddata:
             f.write(csvline(d))
             f.write("\n")
     # send data to timeseries processing code and print result
-    return cat_converter(outputfile, "simple", duration)
+    return cat_converter(CACHE_PATH, "simple", duration)
 
