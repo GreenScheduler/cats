@@ -1,5 +1,5 @@
-import requests
-from datetime import datetime
+import requests_cache
+from datetime import datetime, timezone
 from .parsedata import writecsv
 
 
@@ -12,9 +12,19 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
     # just get the first part of the postcode
     postcode = postcode.split()[0]
     
+    # get the time (as a datetime object) for the top of
+    # the current hour or half hour in UTZ
+    dt = datetime.now(timezone.utc)
+    if dt.minute > 30:
+        dt.replace(minute=30, second=0, microsecond=0)
+    else:
+        dt.replace(minute=0, second=0, microsecond=0)
+    timestamp = dt.strftime("%Y-%m-%dT%H:%MZ")
+
+    # Setup a session for the HTTP cache
+    session = requests_cache.CachedSession('cats_cache')
     # get the carbon intensity api data
-    timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ")
-    r = requests.get(
+    r = session.get(
         "https://api.carbonintensity.org.uk/regional/intensity/"
         + timestamp
         + "/fw48h/postcode/"
