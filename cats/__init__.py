@@ -115,7 +115,7 @@ def main(arguments=None):
 #    )
 
     sys.stderr.write(f"Best job start time: {starttime}\n")
-    print(f"{starttime:%m%d%H%M}")  # for POSIX compatibility with at -t
+    print(f"{starttime:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
