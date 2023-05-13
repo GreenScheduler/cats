@@ -103,7 +103,7 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    starttime = findtime(loc, args.duration)
+    best_estimate = findtime(loc, args.duration)
 #    subprocess.run(
 #        [
 #            args.program,
@@ -114,8 +114,8 @@ def main(arguments=None):
 #        ]
 #    )
 
-    sys.stderr.write(f"Best job start time: {starttime}\n")
-    print(f"{starttime:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
+    sys.stderr.write(f"Best job start time: {best_estimate.datetime}\n")
+    print(f"{best_estimate.datetime:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
@@ -128,7 +128,7 @@ def main(arguments=None):
         estim = greenAlgorithmsCalculator(
             config=config,
             runtime=timedelta(minutes=args.duration),
-            averageBest_carbonIntensity=80, # TODO replace with real carbon intensity
+            averageBest_carbonIntensity=best_estimate.value, # TODO replace with real carbon intensity
             averageNow_carbonIntensity=290, # TODO replace with real carbon intensity
             **jobinfo,
         ).get_footprint()
