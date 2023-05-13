@@ -22,7 +22,12 @@ class WindowedForecast:
         self.intensities = [row[1] for row in data]
         self.window_size = window_size
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> CarbonIntensityPointEstimate:
+        """Return the average of timeseries data from index over the
+        window size.  Data points are integrated using the trapeziodal
+        rule, that is assuming that forecast data points are joined
+        with a straight line.
+        """
         v = [
             0.5 * (a + b)
             for a, b in zip(
