@@ -1,4 +1,18 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta
+
+@dataclass(order=True)
+class CarbonIntensityPointEstimate:
+    """Represents a single data point within a carbon intensity
+    timeseries. Use order=True in order to enable comparison of class
+    instance based on the sort_index attribute.  See
+    https://peps.python.org/pep-0557
+    """
+    datetime: datetime
+    value: float
+
+    def __post_init__(self):
+        self.sort_index = self.value
 
 
 class WindowedForecast:
@@ -17,7 +31,9 @@ class WindowedForecast:
             )]
 
         avg = sum(v) / self.window_size
-        return (self.times[index], avg)
+        return CarbonIntensityPointEstimate(
+            self.times[index], avg
+        )
 
     def __iter__(self):
         for index in range(self.__len__()):
