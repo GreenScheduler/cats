@@ -7,7 +7,6 @@ class WindowedForecast:
         self.times = [row[0] for row in data]
         self.intensities = [row[1] for row in data]
         self.window_size = window_size
-        self.size = len(self.times) - window_size
 
     def __getitem__(self, index):
         avg = sum(
@@ -16,7 +15,7 @@ class WindowedForecast:
         return (self.times[index], avg)
 
     def __iter__(self):
-        for index in range(self.size + 1):
+        for index in range(self.__len__()):
             yield self.__getitem__(index)
 
 import math
@@ -27,3 +26,5 @@ data = [
         
         
     
+    def __len__(self):
+        return len(self.times) - self.window_size
