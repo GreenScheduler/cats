@@ -18,13 +18,5 @@ class WindowedForecast:
         for index in range(self.__len__()):
             yield self.__getitem__(index)
 
-import math
-data = [
-    (datetime.today() + timedelta(minutes=i), math.sin(i * (math.pi / 10)))
-    for i in range(10)
-]
-        
-        
-    
     def __len__(self):
         return len(self.times) - self.window_size
