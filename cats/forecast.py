@@ -9,9 +9,14 @@ class WindowedForecast:
         self.window_size = window_size
 
     def __getitem__(self, index):
-        avg = sum(
-            self.intensities[index:index + self.window_size]
-        ) / self.window_size
+        v = [
+            0.5 * (a + b)
+            for a, b in zip(
+                    self.intensities[index: index + self.window_size - 1],
+                    self.intensities[index + 1 : index + self.window_size]
+            )]
+
+        avg = sum(v) / self.window_size
         return (self.times[index], avg)
 
     def __iter__(self):
