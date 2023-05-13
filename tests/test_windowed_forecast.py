@@ -11,18 +11,29 @@ DATA = [
     for i in range(NDATA)
 ]
 
-def test_windowed_forecast():
-    runtime = 160
-    wf = WindowedForecast(DATA, runtime)
 
-    assert len(wf) == NDATA - runtime
+def test_has_right_length:
+    window = 160
+    wf = WindowedForecast(DATA, window)
 
+    assert len(wf) == NDATA - window
+
+def test_values():
+    # Check that we're able to estimate a integral with reasonable
+    # accuracy.  In the following we compute
+    # \int_{t}^{t+T} - sin(t) dt which is equal to
+    # cos(t + T) - cos(t).  Note that we are careful to have
+    # a step size `step` small compared the the integration window
+
+    window = 160
+    wf = WindowedForecast(DATA, window)
     expected = [
-        math.cos((i + runtime) * step) - math.cos(i * step)
-        for i in range(len(DATA) - runtime)
+
+        math.cos((i + window) * step) - math.cos(i * step)
+        for i in range(len(DATA) - window)
     ]
     # average
-    expected = [e / (runtime * step) for e in expected]
+    expected = [e / (window * step) for e in expected]
 
     assert_allclose(
         actual=[p[1] for p in wf],
