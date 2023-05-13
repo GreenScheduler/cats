@@ -12,7 +12,7 @@ DATA = [
 ]
 
 
-def test_has_right_length:
+def test_has_right_length():
     window = 160
     wf = WindowedForecast(DATA, window)
 
@@ -36,7 +36,7 @@ def test_values():
     expected = [e / (window * step) for e in expected]
 
     assert_allclose(
-        actual=[p[1] for p in wf],
+        actual=[p.value for p in wf],
         desired=expected,
         rtol=0.01
     )
