@@ -1,9 +1,14 @@
 import requests_cache
+from typing import Callable
 from datetime import datetime, timezone
 from .parsedata import writecsv
 
 
-def get_tuple(postcode) -> list[tuple[str, int]]:
+def get_tuple(
+    postcode: str,
+    request_url: Callable[[datetime, str], str],
+    parse_data_from_json: Callable[[dict], list[tuple[datetime, int]]],
+) -> list[list[tuple[datetime, int]]]:
     """
     get carbon intensity from carbonintensity.org.uk
 
@@ -31,29 +36,16 @@ def get_tuple(postcode) -> list[tuple[str, int]]:
         dt = dt.replace(minute=31, second=0, microsecond=0)
     else:
         dt = dt.replace(minute=1, second=0, microsecond=0)
-    timestamp = dt.strftime("%Y-%m-%dT%H:%MZ")
 
     # Setup a session for the API call. This uses a global HTTP cache
     # with the URL as the key. Failed attempts are not cahched.
     session = requests_cache.CachedSession('cats_cache', use_temp=True)
     # get the carbon intensity api data
-    r = session.get(
-        "https://api.carbonintensity.org.uk/regional/intensity/"
-        + timestamp
-        + "/fw48h/postcode/"
-        + postcode
-    )
 
+    r = session.get(request_url(dt, postcode))
     data = r.json()
 
-    # convert into a tuple
-    response = []
-    for d in data["data"]["data"]:
-        timefrom = d["from"]
-        intensity = d["intensity"]["forecast"]
-        response.append((timefrom, intensity))
-
-    return response
+    return parse_data_from_json(data)
 
 
 if __name__ == "__main__":
