@@ -7,7 +7,7 @@ import yaml
 import sys
 
 from .timeseries_conversion import cat_converter  # noqa: F401
-from .api_query import get_tuple  # noqa: F401
+from .api_query import get_tuple, ciuk_parse_data_from_json, ciuk_request_url  # noqa: F401
 from .parsedata import writecsv  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
@@ -15,7 +15,11 @@ from .carbonFootprint import greenAlgorithmsCalculator
 
 
 def findtime(postcode, duration):
-    tuples = get_tuple(postcode)
+    tuples = get_tuple(
+        postcode,
+        request_url=ciuk_request_url,
+        parse_data_from_json=ciuk_parse_data_from_json,
+    )
     result = writecsv(tuples, duration)
     sys.stderr.write(str(result) + "\n")
     return result["timestamp"]
