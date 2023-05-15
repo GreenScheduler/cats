@@ -7,18 +7,19 @@ import yaml
 import sys
 
 from .timeseries_conversion import cat_converter  # noqa: F401
-from .api_query import get_tuple, ciuk_parse_data_from_json, ciuk_request_url  # noqa: F401
+from .api_query import get_tuple
+from .api_interface import API_interfaces
 from .parsedata import writecsv  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
 # from cats import findtime
 
 
-def findtime(postcode, duration):
+def findtime(postcode, duration, api_interface):
     tuples = get_tuple(
         postcode,
-        request_url=ciuk_request_url,
-        parse_data_from_json=ciuk_parse_data_from_json,
+        api_interface.get_request_url,
+        api_interface.parse_reponse_data,
     )
     result = writecsv(tuples, duration)
     sys.stderr.write(str(result) + "\n")
@@ -107,7 +108,13 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    starttime = findtime(loc, args.duration)
+
+    starttime = findtime(
+        loc, args.duration,
+        # TODO Choose API provider based on postcode or
+        # user option
+        API_interfaces["carbonintensitity.org.uk"],
+    )
 #    subprocess.run(
 #        [
 #            args.program,
