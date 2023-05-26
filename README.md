@@ -101,6 +101,8 @@ that would look like
 ls | at -t `python -m cats -d 5 --loc OX1`
 ```
 
+![CATS animated usage example](cats.gif)
+
 ## Contributing
 
 We welcome contributions from the community! If you find a bug or have an idea for a new feature, please open an issue on our GitHub repository or submit a pull request.
