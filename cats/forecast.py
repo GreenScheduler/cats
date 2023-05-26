@@ -2,13 +2,14 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 @dataclass(order=True)
-class CarbonIntensityPointEstimate:
-    """Represents a single data point within a carbon intensity
-    timeseries. Use order=True in order to enable comparison of class
-    instance based on the sort_index attribute.  See
+class CarbonIntensityAverageEstimate:
+    """Represents a single data point within an *integrated* carbon
+    intensity timeseries. Use order=True in order to enable comparison
+    of class instance based on the sort_index attribute.  See
     https://peps.python.org/pep-0557
     """
-    datetime: datetime
+    start: datetime  # Start of the time-integration window
+    end: datetime  # End of the time-integration window
     value: float
 
     def __post_init__(self):
@@ -22,7 +23,7 @@ class WindowedForecast:
         self.intensities = [row[1] for row in data]
         self.window_size = window_size
 
-    def __getitem__(self, index: int) -> CarbonIntensityPointEstimate:
+    def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
         """Return the average of timeseries data from index over the
         window size.  Data points are integrated using the trapeziodal
         rule, that is assuming that forecast data points are joined
@@ -35,9 +36,12 @@ class WindowedForecast:
                     self.intensities[index + 1 : index + self.window_size]
             )]
 
-        avg = sum(v) / self.window_size
-        return CarbonIntensityPointEstimate(
-            self.times[index], avg
+        return CarbonIntensityAverageEstimate(
+            start=self.times[index],
+            # Note that `end` points to the _start_ of the last
+            # interval in the window.
+            end=self.times[index + self.window_size],
+            value=sum(v) / self.window_size,
         )
 
     def __iter__(self):
