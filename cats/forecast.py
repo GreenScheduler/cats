@@ -21,6 +21,8 @@ class WindowedForecast:
     def __init__(self, data: list[tuple[datetime, int]], window_size: int):
         self.times = [row[0] for row in data]
         self.intensities = [row[1] for row in data]
+        # Integration window size in number of time intervals covered
+        # by the window.
         self.window_size = window_size
 
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
@@ -29,11 +31,11 @@ class WindowedForecast:
         rule, that is assuming that forecast data points are joined
         with a straight line.
         """
-        v = [
+        v = [  # If you think of a better name, pls help!
             0.5 * (a + b)
             for a, b in zip(
-                    self.intensities[index: index + self.window_size - 1],
-                    self.intensities[index + 1 : index + self.window_size]
+                    self.intensities[index: index + self.window_size],
+                    self.intensities[index + 1 : index + self.window_size + 1]
             )]
 
         return CarbonIntensityAverageEstimate(
@@ -49,4 +51,4 @@ class WindowedForecast:
             yield self.__getitem__(index)
 
     def __len__(self):
-        return len(self.times) - self.window_size
+        return len(self.times) - self.window_size - 1
