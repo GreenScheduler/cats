@@ -114,9 +114,6 @@ def main(arguments=None):
         # user option
         API_interfaces["carbonintensitity.org.uk"],
     )
-    now_avg_ci = avg_carbon_intensity(
-        start=datetime.now(), runtime=timedelta(args.duration)
-    )
 #    subprocess.run(
 #        [
 #            args.program,
@@ -138,11 +135,14 @@ def main(arguments=None):
         if not config:
             print("ERROR: config file not found, exiting now")
             exit(1)
+        now_avg_ci = avg_carbon_intensity(
+            start=datetime.now(), runtime=timedelta(args.duration)
+        )
         estim = greenAlgorithmsCalculator(
             config=config,
             runtime=timedelta(minutes=args.duration),
             averageBest_carbonIntensity=best_estimate.value, # TODO replace with real carbon intensity
-            averageNow_carbonIntensity=290, # TODO replace with real carbon intensity
+            averageNow_carbonIntensity=now_avg_ci,
             **jobinfo,
         ).get_footprint()
 
