@@ -9,13 +9,16 @@ class CI_API_interface():
         assert choice_CI_API in ['carbonintensity.org.uk']
         self.choice_CI_API = choice_CI_API
 
-    def get_request_url(self, timestamp: datetime, postcode: str):
+    def get_request_url(self, timestamp: datetime, location: str):
         if self.choice_CI_API == 'carbonintensity.org.uk':
+            # Clean postcode in case a full one is provided (with space in the middle)
+            postcode_cleaned = location.split()[0]
+
             return (
                     "https://api.carbonintensity.org.uk/regional/intensity/"
                     + timestamp.strftime("%Y-%m-%dT%H:%MZ")
                     + "/fw48h/postcode/"
-                    + postcode
+                    + postcode_cleaned
             )
 
         # Other countries/APIs can be added here
@@ -39,7 +42,7 @@ if __name__ == "__main__":
     import requests
 
     CI_API = CI_API_interface('carbonintensity.org.uk')
-    request_url = CI_API.get_request_url(timestamp=datetime.now(), postcode='M15')
+    request_url = CI_API.get_request_url(timestamp=datetime.now(), location='M15')
     response = requests.get(request_url).json()
     parsed_response = CI_API.parse_response_data(response)
     print()
