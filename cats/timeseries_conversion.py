@@ -3,6 +3,7 @@ Timeseries conversion
 """
 
 import datetime
+from .forecast import WindowedForecast
 
 
 def csv_loader(filename):
@@ -73,19 +74,7 @@ def get_lowest_carbon_intensity(data, method="simple", duration=None):
 
     if method == "windowed":
         num_intervals = check_duration(duration, data)
-        #  calculate the windowed carbon intensity
-        windowed_data = []
-        for i in range(len(data) - num_intervals):
-            windowed_data.append(
-                (
-                    data[i][0],
-                    sum([x[1] for x in data[i : i + num_intervals]])
-                    / num_intervals,
-                )
-            )
-        #  Return element with smallest 2nd value
-        #  if multiple elements have the same value, return the first
-        return min(windowed_data, key=lambda x: x[1])
+        return min(WindowedForecast(data, num_intervals))
 
 
 def cat_converter(filename, method="simple", duration=None):

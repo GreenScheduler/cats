@@ -9,18 +9,21 @@ import sys
 from .timeseries_conversion import cat_converter  # noqa: F401
 from .api_query import get_tuple  # noqa: F401
 from .parsedata import writecsv, avg_carbon_intensity  # noqa: F401
+from .api_interface import API_interfaces
 from .carbonFootprint import greenAlgorithmsCalculator
 
 # from cats import findtime
 
 
-def findtime(postcode, duration):
-    tuples = get_tuple(postcode)
-    timestamp, avg_best_ci = writecsv(tuples, duration)
-    sys.stderr.write(
-        str({"timestamp": timestamp, "carbon_intensity": avg_best_ci}) + "\n"
+def findtime(postcode, duration, api_interface):
+    tuples = get_tuple(
+        postcode,
+        api_interface.get_request_url,
+        api_interface.parse_reponse_data,
     )
-    return timestamp, avg_best_ci
+    result = writecsv(tuples, duration)
+    sys.stderr.write(str(result) + "\n")
+    return result
 
 
 def parse_arguments():
@@ -105,12 +108,15 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    starttime, avg_best_ci = findtime(loc, args.duration)
+    best_estimate = findtime(
+        loc, args.duration,
+        # TODO Choose API provider based on postcode or
+        # user option
+        API_interfaces["carbonintensitity.org.uk"],
+    )
     now_avg_ci = avg_carbon_intensity(
         start=datetime.now(), runtime=timedelta(args.duration)
     )
-    print(f"{starttime:%H:%M %b %d %Y}")
-
 #    subprocess.run(
 #        [
 #            args.program,
@@ -121,7 +127,8 @@ def main(arguments=None):
 #        ]
 #    )
 
-    print(f"Best job start time: {starttime}")
+    sys.stderr.write(f"Best job start time: {best_estimate.start}\n")
+    print(f"{best_estimate.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
@@ -134,7 +141,7 @@ def main(arguments=None):
         estim = greenAlgorithmsCalculator(
             config=config,
             runtime=timedelta(minutes=args.duration),
-            averageBest_carbonIntensity=80, # TODO replace with real carbon intensity
+            averageBest_carbonIntensity=best_estimate.value, # TODO replace with real carbon intensity
             averageNow_carbonIntensity=290, # TODO replace with real carbon intensity
             **jobinfo,
         ).get_footprint()
