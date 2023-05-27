@@ -6,7 +6,7 @@ import re
 import yaml
 import sys
 
-from .timeseries_conversion import cat_converter  # noqa: F401
+from .timeseries_conversion import get_lowest_carbon_intensity  # noqa: F401
 from .api_query import get_tuple  # noqa: F401
 from .parsedata import writecsv, avg_carbon_intensity  # noqa: F401
 from .api_interface import API_interfaces
@@ -21,7 +21,7 @@ def findtime(postcode, duration, api_interface):
         api_interface.get_request_url,
         api_interface.parse_reponse_data,
     )
-    result = writecsv(tuples, duration)
+    result = get_lowest_carbon_intensity(data, method="windowed", duration=duration)
     sys.stderr.write(str(result) + "\n")
     return result
 
