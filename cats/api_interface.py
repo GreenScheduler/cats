@@ -28,8 +28,10 @@ class CI_API_interface():
 
     def parse_response_data(self, response: dict):
         if self.choice_CI_API == 'carbonintensity.org.uk':
+            # Create a list of tuples and convert timestamp to datetime
+            # (datetime, CI): list[tuple[datetime, int]]
             return [
-                (d["from"], d["intensity"]["forecast"])
+                (self.parsetime(d["from"]), d["intensity"]["forecast"])
                 for d in response["data"]["data"]
             ]
 
@@ -37,6 +39,16 @@ class CI_API_interface():
 
         else:
             return []
+
+    ### Below are helper functions ###
+    def parsetime(self, datestr: str) -> datetime:
+        """parse the date string (for now, based on UK API format)
+        param datestr: a date string from the api
+        returns: a datetime value
+        """
+        if self.choice_CI_API == 'carbonintensity.org.uk':
+            return datetime.strptime(datestr, "%Y-%m-%dT%H:%MZ")
+
 
 if __name__ == "__main__":
     import requests
