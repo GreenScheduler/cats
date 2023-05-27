@@ -8,19 +8,21 @@ class CI_API():
 
     def get_forecast(
             self,
-            postcode: str,
+            location: str,
     ) -> list[list[tuple[datetime, int]]]:
         """
-        get carbon intensity from carbonintensity.org.uk
+        Gets carbon intensity from the chosen API.
 
+        carbonintensity.org.uk:
         Given the postcode and current time, return a set of predictions of the
         future carbon intensity. This wraps the API from carbonintensity.org.uk
         and is set up to cache data from call to call even accross different
         processes within the same half hour window. The returned prediction data
         is in half hour blocks starting from the half hour containing the current
         time and extending for 48 hours into the future.
+        Parameter `location` should be a UK post code (just the first section), e.g. M15
 
-        param postcode: UK post code (just the first section), e.g. M15
+        param location: [str]
         returns: a set of tuples with start time and carbon intensity
         """
 
@@ -41,7 +43,7 @@ class CI_API():
         session = requests_cache.CachedSession('cats_cache', use_temp=True)
 
         # get the carbon intensity api data
-        r = session.get(self.API.get_request_url(timestamp=dt, postcode=postcode))
+        r = session.get(self.API.get_request_url(timestamp=dt, location=location))
         data = r.json()
         return self.API.parse_response_data(data)
 
