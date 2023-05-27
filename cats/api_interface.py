@@ -1,27 +1,45 @@
-from collections import namedtuple
 from datetime import datetime
 
+class CI_API_interface():
+    def __init__(self, choice_CI_API):
+        '''
+        This class contains API-specific functions to get URLs and then parse the response data
+        :param choice_API: [str] one of ['carbonintensity.org.uk']
+        '''
+        assert choice_CI_API in ['carbonintensity.org.uk']
+        self.choice_CI_API = choice_CI_API
 
-APIInterface = namedtuple('APIInterface', ['get_request_url', 'parse_response_data'])
+    def get_request_url(self, timestamp: datetime, postcode: str):
+        if self.choice_CI_API == 'carbonintensity.org.uk':
+            return (
+                    "https://api.carbonintensity.org.uk/regional/intensity/"
+                    + timestamp.strftime("%Y-%m-%dT%H:%MZ")
+                    + "/fw48h/postcode/"
+                    + postcode
+            )
 
-def ciuk_request_url(timestamp: datetime, postcode: str):
-    return (
-        "https://api.carbonintensity.org.uk/regional/intensity/"
-        + timestamp.strftime("%Y-%m-%dT%H:%MZ")
-        + "/fw48h/postcode/"
-        + postcode
-    )
+        # Other countries/APIs can be added here
 
+        else:
+            return ''
 
-def ciuk_parse_response_data(response: dict):
-    return [
-        (d["from"], d["intensity"]["forecast"])
-        for d in response["data"]["data"]
-    ]
+    def parse_response_data(self, response: dict):
+        if self.choice_CI_API == 'carbonintensity.org.uk':
+            return [
+                (d["from"], d["intensity"]["forecast"])
+                for d in response["data"]["data"]
+            ]
 
-API_interfaces = {
-    "carbonintensity.org.uk": APIInterface(
-        get_request_url=ciuk_request_url,
-        parse_response_data=ciuk_parse_response_data,
-        ),
-    }
+        # Other countries/APIs can be added here
+
+        else:
+            return []
+
+if __name__ == "__main__":
+    import requests
+
+    CI_API = CI_API_interface('carbonintensity.org.uk')
+    request_url = CI_API.get_request_url(timestamp=datetime.now(), postcode='M15')
+    response = requests.get(request_url).json()
+    parsed_response = CI_API.parse_response_data(response)
+    print()
