@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from api_interface import CI_API_interface
 
 class CI_API():
-    def __init__(self, choice_CI_API='carbonintensity.org.uk'):
+    def __init__(self, choice_CI_API):
         self.API = CI_API_interface(choice_CI_API)
 
     def get_forecast(
