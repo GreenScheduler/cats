@@ -1,54 +1,53 @@
 import requests_cache
-from typing import Callable
 from datetime import datetime, timezone
-from .parsedata import writecsv
+from api_interface import CI_API_interface
 
+class CI_API():
+    def __init__(self, choice_CI_API='carbonintensity.org.uk'):
+        self.API = CI_API_interface(choice_CI_API)
 
-def get_tuple(
-    postcode: str,
-    request_url: Callable[[datetime, str], str],
-    parse_data_from_json: Callable[[dict], list[tuple[datetime, int]]],
-) -> list[list[tuple[datetime, int]]]:
-    """
-    get carbon intensity from carbonintensity.org.uk
+    def get_forecast(
+            self,
+            postcode: str,
+    ) -> list[list[tuple[datetime, int]]]:
+        """
+        get carbon intensity from carbonintensity.org.uk
 
-    Given the postcode and current time, return a set of predictions of the
-    future carbon intensity. This wraps the API from carbonintensity.org.uk
-    and is set up to cache data from call to call even accross different
-    processes within the same half hour window. The returned prediction data
-    is in half hour blocks starting from the half hour containing the current
-    time and extending for 48 hours into the future.
+        Given the postcode and current time, return a set of predictions of the
+        future carbon intensity. This wraps the API from carbonintensity.org.uk
+        and is set up to cache data from call to call even accross different
+        processes within the same half hour window. The returned prediction data
+        is in half hour blocks starting from the half hour containing the current
+        time and extending for 48 hours into the future.
 
-    param postcode: UK post code (just the first section), e.g. M15
-    returns: a set of tuples with start time and carbon intensity
-    """
-    # just get the first part of the postcode, assume spaces are included
-    postcode = postcode.split()[0]
-    
-    # get the time (as a datetime object) and update this to be the 'top' of
-    # the current hour or half hour in UTZ plus one minute. So a call at 
-    # 17:47 BST will yield a timestamp of 16:31 UTC. This means that within
-    # any given half hour we will always use the same timestamp. As this 
-    # becomes part of the URL, calls can be cached using standard HTTP 
-    # caching layers
-    dt = datetime.now(timezone.utc)
-    if dt.minute > 30:
-        dt = dt.replace(minute=31, second=0, microsecond=0)
-    else:
-        dt = dt.replace(minute=1, second=0, microsecond=0)
+        param postcode: UK post code (just the first section), e.g. M15
+        returns: a set of tuples with start time and carbon intensity
+        """
 
-    # Setup a session for the API call. This uses a global HTTP cache
-    # with the URL as the key. Failed attempts are not cahched.
-    session = requests_cache.CachedSession('cats_cache', use_temp=True)
-    # get the carbon intensity api data
+        # get the time (as a datetime object) and update this to be the 'top' of
+        # the current hour or half hour in UTZ plus one minute. So a call at
+        # 17:47 BST will yield a timestamp of 16:31 UTC. This means that within
+        # any given half hour we will always use the same timestamp. As this
+        # becomes part of the URL, calls can be cached using standard HTTP
+        #  caching layers
+        dt = datetime.now(timezone.utc)
+        if dt.minute > 30:
+            dt = dt.replace(minute=31, second=0, microsecond=0)
+        else:
+            dt = dt.replace(minute=1, second=0, microsecond=0)
 
-    r = session.get(request_url(dt, postcode))
-    data = r.json()
+        # Setup a session for the API call. This uses a global HTTP cache
+        # with the URL as the key. Failed attempts are not cahched.
+        session = requests_cache.CachedSession('cats_cache', use_temp=True)
 
-    return parse_data_from_json(data)
+        # get the carbon intensity api data
+        r = session.get(self.API.get_request_url(timestamp=dt, postcode=postcode))
+        data = r.json()
+        return self.API.parse_response_data(data)
 
 
 if __name__ == "__main__":
     # test example using Manchester as a location
-    data_tuples = get_tuple("M15")
-    writecsv(data_tuples)
+    APIcall = CI_API(choice_CI_API='carbonintensity.org.uk')
+    parsed_data = APIcall.get_forecast("M15")
+    print()
