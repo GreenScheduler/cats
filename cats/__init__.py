@@ -16,12 +16,12 @@ from .carbonFootprint import greenAlgorithmsCalculator
 
 
 def findtime(postcode, duration, api_interface):
-    tuples = get_tuple(
+    forecast = get_tuple(
         postcode,
         api_interface.get_request_url,
         api_interface.parse_reponse_data,
     )
-    result = get_lowest_carbon_intensity(data, method="windowed", duration=duration)
+    result = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
     sys.stderr.write(str(result) + "\n")
     return result
 

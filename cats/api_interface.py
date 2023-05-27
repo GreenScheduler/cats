@@ -1,6 +1,8 @@
 from collections import namedtuple
 from datetime import datetime
 
+from .forecast import CarbonIntensityPointEstimate
+
 
 APIInterface = namedtuple('APIInterface', ['get_request_url', 'parse_response_data'])
 
@@ -14,8 +16,12 @@ def ciuk_request_url(timestamp: datetime, postcode: str):
 
 
 def ciuk_parse_response_data(response: dict):
+    datefmt = "%Y-%m-%dT%H:%MZ"
     return [
-        (d["from"], d["intensity"]["forecast"])
+        CarbonIntensityPointEstimate(
+            datetime=datetime.strptime(d["from"], datefmt),
+            value=d["intensity"]["forecast"],
+        )
         for d in response["data"]["data"]
     ]
 

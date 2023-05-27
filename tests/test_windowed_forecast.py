@@ -1,13 +1,16 @@
 from datetime import datetime, timedelta
 import math
 from numpy.testing import assert_allclose
-from cats.forecast import WindowedForecast
+from cats.forecast import CarbonIntensityPointEstimate, WindowedForecast
 
 d = datetime(year=2023, month=1, day=1)
 NDATA = 200
 step = math.pi / NDATA
 DATA = [
-    (d + timedelta(minutes=i), - math.sin(i * step))
+    CarbonIntensityPointEstimate(
+        datetime=d + timedelta(minutes=i),
+        value=-1. *  math.sin(i * step),
+    )
     for i in range(NDATA)
 ]
 

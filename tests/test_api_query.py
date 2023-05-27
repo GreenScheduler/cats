@@ -1,5 +1,6 @@
 import cats
 from cats.api_interface import API_interfaces
+from cats.forecast import CarbonIntensityPointEstimate
 
 def test_api_call():
     """
@@ -13,6 +14,6 @@ def test_api_call():
         parse_data_from_json=api_interface.parse_response_data,
     )
 
-    assert isinstance(response, list) 
+    assert isinstance(response, list)
     for item in response:
-        assert isinstance(item, tuple) 
+        assert isinstance(item, CarbonIntensityPointEstimate)
