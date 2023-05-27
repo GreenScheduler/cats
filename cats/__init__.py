@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from datetime import timedelta
+from datetime import datetime, timedelta
 import requests
 import subprocess
 import re
@@ -7,9 +7,9 @@ import yaml
 import sys
 
 from .timeseries_conversion import cat_converter  # noqa: F401
-from .api_query import get_tuple
+from .api_query import get_tuple  # noqa: F401
+from .parsedata import writecsv, avg_carbon_intensity  # noqa: F401
 from .api_interface import API_interfaces
-from .parsedata import writecsv  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
 # from cats import findtime
@@ -23,7 +23,7 @@ def findtime(postcode, duration, api_interface):
     )
     result = writecsv(tuples, duration)
     sys.stderr.write(str(result) + "\n")
-    return result["timestamp"]
+    return result
 
 
 def parse_arguments():
@@ -124,8 +124,8 @@ def main(arguments=None):
 #        ]
 #    )
 
-    sys.stderr.write(f"Best job start time: {best_estimate.datetime}\n")
-    print(f"{best_estimate.datetime:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
+    sys.stderr.write(f"Best job start time: {best_estimate.start}\n")
+    print(f"{best_estimate.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
@@ -135,11 +135,14 @@ def main(arguments=None):
         if not config:
             print("ERROR: config file not found, exiting now")
             exit(1)
+        now_avg_ci = avg_carbon_intensity(
+            start=datetime.now(), runtime=timedelta(args.duration)
+        )
         estim = greenAlgorithmsCalculator(
             config=config,
             runtime=timedelta(minutes=args.duration),
             averageBest_carbonIntensity=best_estimate.value, # TODO replace with real carbon intensity
-            averageNow_carbonIntensity=290, # TODO replace with real carbon intensity
+            averageNow_carbonIntensity=now_avg_ci,
             **jobinfo,
         ).get_footprint()
 

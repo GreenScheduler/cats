@@ -24,7 +24,8 @@ def csv_loader(filename):
     data = [x.strip().split(",") for x in data]
     # Convert timestamp to datetime
     data = [
-        [datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%MZ"), float(x[3])] for x in data
+        (datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%MZ"), float(x[3]))
+        for x in data
     ]
     return data
 
@@ -69,13 +70,7 @@ def get_lowest_carbon_intensity(data, method="simple", duration=None):
     if method == "simple":
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
-        rtn = min(data, key=lambda x: x[1])
-        rtn = {
-            "timestamp": rtn[0],
-            "carbon_intensity": rtn[1],
-            "est_total_carbon": rtn[1],
-        }
-        return rtn
+        return min(data, key=lambda x: x[1])
 
     if method == "windowed":
         num_intervals = check_duration(duration, data)
