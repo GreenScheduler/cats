@@ -1,4 +1,19 @@
+from dataclasses import dataclass
 from datetime import datetime
+
+@dataclass(order=True)
+class CarbonIntensityPointEstimate:
+    """Represents a single data point within an intensity
+    timeseries. Use order=True in order to enable comparison of class
+    instance based on the sort_index attribute. See
+    https://peps.python.org/pep-0557
+
+    """
+    datetime: datetime
+    value: float
+
+    def __post_init__(self):
+        self.sort_index = self.value
 
 class CI_API_interface():
     def __init__(self, choice_CI_API):
@@ -28,10 +43,13 @@ class CI_API_interface():
 
     def parse_response_data(self, response: dict):
         if self.choice_CI_API == 'carbonintensity.org.uk':
-            # Create a list of tuples and convert timestamp to datetime
-            # (datetime, CI): list[tuple[datetime, int]]
+            # Create a list of CarbonIntensityPointEstimate objects
+            # (each being a pair of a datetime and a CI)
             return [
-                (self.parsetime(d["from"]), d["intensity"]["forecast"])
+                CarbonIntensityPointEstimate(
+                    datetime=self.parsetime(d["from"]),
+                    value=d["intensity"]["forecast"],
+                )
                 for d in response["data"]["data"]
             ]
 
@@ -47,7 +65,8 @@ class CI_API_interface():
         returns: a datetime value
         """
         if self.choice_CI_API == 'carbonintensity.org.uk':
-            return datetime.strptime(datestr, "%Y-%m-%dT%H:%MZ")
+            dateformat = "%Y-%m-%dT%H:%MZ"
+            return datetime.strptime(datestr, dateformat)
 
 
 if __name__ == "__main__":
