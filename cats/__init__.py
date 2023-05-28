@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import requests
 import yaml
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 import sys
 
 from .api_query import CI_API
@@ -84,14 +84,35 @@ class cats():
         r = requests.get("https://ipapi.co/json").json()
         return r["postal"]
 
+    def _str_datetime(self, dt):
+        return dt.strftime("%d/%m/%Y-%H:%M UTC")
+
+    def _writeout_progress(self, stage):
+        if stage=='forecast_obtained':
+            sys.stdout.write(
+                f"\nCarbon intensity forecast loaded for between {self._str_datetime(self.CI_forecast[0].start)} "
+                f"and {self._str_datetime(self.CI_forecast[-1].end)}."
+            ) # TODO check why it was stderr originally
+
+        if stage=='best_starttime':
+            in_delta = self.best_window.start - datetime.now(timezone.utc)
+            sys.stdout.write(f"\n\nBest start time: {self._str_datetime(self.best_window.start)} (in {in_delta.total_seconds()/3600:.1f} hours)")
+            sys.stdout.write(f"\n\t Expected end time: {self._str_datetime(self.best_window.end)}")
+            sys.stdout.write(f"\n\t Expected average carbon intensity: {self.best_window.value:.2f} gCO2e/kWh")
+            # TODO check what unit the forecast comes in (should be grams)
+
     def run(self):
         # Get CI forecast
         instance_CI_API = CI_API(self.choice_CI_API)
-        CI_forecast = instance_CI_API.get_forecast(self.location)
+        self.CI_forecast = instance_CI_API.get_forecast(self.location)
+        self._writeout_progress('forecast_obtained')
 
         # Find best starttime
-        best_window, all_window_sorted = starttime_optimiser(CI_forecast).get_starttime(self.duration)
+        self.best_window, self.all_window_sorted = starttime_optimiser(self.CI_forecast).get_starttime(self.duration)
+        self._writeout_progress('best_starttime')
+        # print(f"{self.best_window.start:%Y%m%d%H%M}")  # TODO check if still needed: for POSIX compatibility with at -t
 
+        print()
 
 if __name__ == "__main__":
     instance_cats = cats()
