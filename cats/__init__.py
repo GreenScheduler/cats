@@ -7,6 +7,7 @@ import re
 
 from .CI_api_query import CI_API
 from .optimise_starttime import starttime_optimiser
+from .carbonFootprint import greenAlgorithmsCalculator
 
 class cats():
     def __init__(self, arguments=None):
@@ -165,10 +166,17 @@ class cats():
 
         if stage=='best_starttime':
             in_delta = self.best_window.start - datetime.now(timezone.utc)
-            sys.stdout.write(f"\nBest start time: {self._str_datetime(self.best_window.start)} (in {in_delta.total_seconds()/3600:.1f} hours)")
-            sys.stdout.write(f"\n\t Expected end time: {self._str_datetime(self.best_window.end)}")
-            sys.stdout.write(f"\n\t Expected average carbon intensity: {self.best_window.value:.2f} gCO2e/kWh\n")
+            sys.stdout.write(f"\nBest start time: {self._str_datetime(self.best_window.start)} (in {in_delta.total_seconds()/3600:.1f} hours)\n")
+            sys.stdout.write(f"\t Expected end time: {self._str_datetime(self.best_window.end)}\n")
+            sys.stdout.write(f"\t Expected average carbon intensity: {self.best_window.value:.2f} gCO2e/kWh\n")
             # TODO check what unit the forecast comes in (should be grams)
+
+        if stage=='carbon_footprint':
+            sys.stdout.write(f"\nEstimated carbon footprint of running job at best time: {self.GAcalc.formatText_footprint(self.CFs['best']['total'])}\n")
+            sys.stdout.write(f"\tvs running it now: {self.GAcalc.formatText_footprint(self.CFs['now']['total'])} "
+                             f"{self.GAcalc.formatText_footprint(self.CFs['now']['total']-self.CFs['best']['total'])} saved\n")
+            sys.stdout.write(f"\t(estimated energy usage: {self.energies['total']:.2f} kWh)\n")
+            # TODO add vs worst time
 
     def run(self):
         ### Get CI forecast
@@ -185,12 +193,17 @@ class cats():
         if not (self.jobinfo and self.config):
             sys.stderr.write("Not enough information to estimate total carbon footprint, both --jobinfo and config files are needed.")
         else:
-            pass
-
-        print()
+            self.GAcalc = greenAlgorithmsCalculator(
+                config = self.config,
+                jobinfo=self.jobinfo,
+                duration=self.duration,
+                averageBest_carbonIntensity=self.best_window,
+                averageNow_carbonIntensity=self.window_now
+            )
+            self.CFs, self.energies = self.GAcalc.get_carbonFootprint()
+            self._writeout_progress('carbon_footprint')
 
 if __name__ == "__main__":
     instance_cats = cats()
     foo = instance_cats.run()
 
-    print()
