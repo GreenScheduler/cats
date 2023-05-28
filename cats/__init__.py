@@ -1,8 +1,10 @@
 from argparse import ArgumentParser
 import requests
 import yaml
+from datetime import timedelta
 
 from api_query import CI_API
+from optimise_starttime import starttime_optimiser
 
 class cats():
     def __init__(self, arguments=None):
@@ -44,8 +46,10 @@ class cats():
             self.location = self.pull_location_from_IP()
         # TODO what is location is not in the right country for the API?
 
-        # TODO check validity of arguments
+        # TODO check validity of arguments (and clean/standardise them)
 
+        ### Duration ###
+        self.duration = timedelta(minutes=args.duration)
 
     def parse_arguments(self):
         parser = ArgumentParser(
@@ -53,7 +57,10 @@ class cats():
             description="A climate aware job scheduler."
         )
         # Required
-        parser.add_argument("-d", "--duration", type=int, required=True)
+        parser.add_argument(
+            "-d", "--duration", type=int, required=True,
+            help="Expected duration of the job in minutes."
+        )
 
         # Optional
         parser.add_argument(
@@ -77,8 +84,14 @@ class cats():
         return r["postal"]
 
     def run(self):
+        # Get CI forecast
         instance_CI_API = CI_API(self.choice_CI_API)
         CI_forecast = instance_CI_API.get_forecast(self.location)
+
+        # Find best starttime
+        best_window, all_window_sorted = starttime_optimiser(CI_forecast).get_starttime(self.duration)
+
+
 
         return CI_forecast
 
