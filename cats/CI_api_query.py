@@ -1,7 +1,7 @@
 import requests_cache
 from datetime import datetime, timezone
 
-from .api_interface import CI_API_interface
+from .CI_api_interface import CI_API_interface
 
 class CI_API():
     def __init__(self, choice_CI_API):

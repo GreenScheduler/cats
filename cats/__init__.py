@@ -4,7 +4,7 @@ import yaml
 from datetime import timedelta, datetime, timezone
 import sys
 
-from .api_query import CI_API
+from .CI_api_query import CI_API
 from .optimise_starttime import starttime_optimiser
 
 class cats():

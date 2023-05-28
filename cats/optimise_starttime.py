@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 
-from .api_interface import CarbonIntensityEstimate
+from .CI_api_interface import CarbonIntensityEstimate
 
 class starttime_optimiser():
     def __init__(self, CI_forecast):
