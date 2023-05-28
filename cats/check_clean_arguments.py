@@ -50,8 +50,7 @@ class sanityChecks_arguments():
 
         return info
 
-    def check_duration(self, duration):
-
+    def validate_duration(self, duration):
         # make sure it is can be converted to integer
         try:
             duration_int = int(duration)
@@ -62,3 +61,17 @@ class sanityChecks_arguments():
             raise ValueError("--duration needs to be positive (number of minutes)")
 
         return timedelta(minutes=duration_int)
+
+    def validate_location(self, location, choice_CI_API):
+        if choice_CI_API == 'carbonintensity.org.uk':
+            # in case the long format of the postcode is provided:
+            loc_cleaned = location.split()[0]
+
+            # check that it's between 2 and 4 characters long
+            if (len(loc_cleaned) < 2) or (len(loc_cleaned) > 4):
+                raise ValueError(f"{location} is an invalid UK postcode. Only the first part of the postcode is expected (e.g. M15).")
+
+        else:
+            loc_cleaned = location
+
+        return loc_cleaned

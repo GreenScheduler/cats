@@ -35,22 +35,6 @@ class cats():
                 sys.stderr.write("WARNING: config file not found\n")
                 self.config = {}
 
-        ### Pull and clean location ###
-        # UK: we only keep the first part of a UK postcode
-
-        if args.location:
-            self.location = args.location
-            sys.stdout.write(f"Using location provied: {self.location}\n")
-        elif "location" in self.config.keys():
-            self.location = self.config["location"]
-            sys.stdout.write(f"Using location from config file: {self.location}\n")
-        else:
-            self.location = self._pull_location_from_IP()
-            sys.stderr.write(f"WARNING: location not provided. Estimating location from IP address: {self.location}.\n")
-        # TODO what is location is not in the right country for the API?
-
-        # TODO check validity of arguments (and clean/standardise them)
-
         ### API choice ###
 
         self.list_CI_APIs = ['carbonintensity.org.uk']
@@ -67,8 +51,22 @@ class cats():
 
         sys.stdout.write(f"Using {self.choice_CI_API} for carbon intensity forecasts.\n")
 
+        ### Pull and clean location ###
+        # UK: we only keep the first part of a UK postcode
+
+        if args.location:
+            self.location = self.sanityChecks_arguments.validate_location(args.location, self.choice_CI_API)
+            sys.stdout.write(f"Using location provided: {self.location}\n")
+        elif "location" in self.config.keys():
+            self.location = self.sanityChecks_arguments.validate_location(self.config["location"], self.choice_CI_API)
+            sys.stdout.write(f"Using location from config file: {self.location}\n")
+        else:
+            self.location = self.sanityChecks_arguments.validate_location(self._pull_location_from_IP(), self.choice_CI_API)
+            sys.stderr.write(f"WARNING: location not provided. Estimating location from IP address: {self.location}.\n")
+        # TODO what is location is not in the right country for the API?
+
         ### Duration [timedelta] ###
-        self.duration = self.sanityChecks_arguments.check_duration(args.duration)
+        self.duration = self.sanityChecks_arguments.validate_duration(args.duration)
 
         ### jobinfo [dict] ###
         self.jobinfo = self.sanityChecks_arguments.validate_jobinfo(args.jobinfo) if (args.jobinfo and self.config) else None
