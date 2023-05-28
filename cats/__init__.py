@@ -57,6 +57,7 @@ class cats():
             prog="cats",
             description="A climate aware job scheduler."
         )
+
         # Required
         parser.add_argument(
             "-d", "--duration", type=int, required=True,
@@ -66,17 +67,30 @@ class cats():
         # Optional
         parser.add_argument(
             "--api-carbonintensity", type=str,
-            help="[optional] which API should be used to obtain carbon intensity forecasts."
+            help="[optional] which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`."
                  "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
         )
         # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
         parser.add_argument(
             "--location", type=str,
             help="[optional] location of the computing facility. For the UK, first half of a postcode (e.g. 'M15'), "
-                 "for other APIs, see doc for exact format."
+                 "for other APIs, see doc for exact format. Overrides `config.yml`. "
+                 "If absent, location based in IP address is used."
         )
-        parser.add_argument("--jobinfo")
-        parser.add_argument("--config")
+        parser.add_argument(
+            "--config", type=str,
+            help="[optional] path to a config file, default is `config.yml` in current directory. "
+                 "Config file is required to obtain carbon footprint estimates."
+                 "template at https://github.com/GreenScheduler/cats/blob/main/config.yml"
+        )
+
+        parser.add_argument(
+            "--jobinfo", type=str,
+            help="Resources used by the job in question, used to estimate total energy usage and carbon footprint. "
+                 "E.g. 'cpus=2,gpus=0,memory=8,partition=CPU_partition'. "
+                 "`cpus`: number of CPU cores, `gpus`: number of GPUs, `memory`: memory available in GB, "
+                 "`partition`: one of the partitions keys in `config.yml`."
+        )
 
         return parser
 
