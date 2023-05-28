@@ -1,19 +1,21 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 
 @dataclass(order=True)
-class CarbonIntensityPointEstimate:
-    """Represents a single data point within an intensity
-    timeseries. Use order=True in order to enable comparison of class
+class CarbonIntensityEstimate:
+    """Represents an average carbon intensity for a timeperiod.
+    Use order=True in order to enable comparison of class
     instance based on the sort_index attribute. See
     https://peps.python.org/pep-0557
 
     """
-    datetime: datetime
-    value: float
+    value: float # value needs to be first for the sort function to work
+    start: datetime
+    end: datetime
 
     def __post_init__(self):
-        self.sort_index = self.value
+        self.sort_index = self.value # TODO check whether that's useful
+        self.timedelta = self.end - self.start
 
 class CI_API_interface():
     def __init__(self, choice_CI_API):
@@ -43,11 +45,12 @@ class CI_API_interface():
 
     def parse_response_data(self, response: dict):
         if self.choice_CI_API == 'carbonintensity.org.uk':
-            # Create a list of CarbonIntensityPointEstimate objects
-            # (each being a pair of a datetime and a CI)
+            # Create a list of CarbonIntensityEstimate objects
+            # (each being a triple of start and end datetimes and a CI)
             return [
-                CarbonIntensityPointEstimate(
-                    datetime=self.parsetime(d["from"]),
+                CarbonIntensityEstimate(
+                    start=self.parsetime(d["from"]),
+                    end=self.parsetime(d["to"]),
                     value=d["intensity"]["forecast"],
                 )
                 for d in response["data"]["data"]
@@ -66,14 +69,14 @@ class CI_API_interface():
         """
         if self.choice_CI_API == 'carbonintensity.org.uk':
             dateformat = "%Y-%m-%dT%H:%MZ"
-            return datetime.strptime(datestr, dateformat)
+            return datetime.strptime(datestr, dateformat).replace(tzinfo=timezone.utc)
 
 
 if __name__ == "__main__":
     import requests
 
     CI_API = CI_API_interface('carbonintensity.org.uk')
-    request_url = CI_API.get_request_url(timestamp=datetime.now(), location='M15')
+    request_url = CI_API.get_request_url(timestamp=datetime.now(timezone.utc), location='M15')
     response = requests.get(request_url).json()
     parsed_response = CI_API.parse_response_data(response)
     print()
