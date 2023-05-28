@@ -53,12 +53,18 @@ class cats():
 
         ### API choice ###
 
+        self.list_CI_APIs = ['carbonintensity.org.uk']
+
         if args.api_carbonintensity:
             self.choice_CI_API = args.api_carbonintensity
         elif 'api-carbonintensity' in self.config.keys():
             self.choice_CI_API = self.config["api-carbonintensity"]
         else:
             self.choice_CI_API = 'carbonintensity.org.uk'  # default value is UK
+
+        if self.choice_CI_API not in self.list_CI_APIs:
+            raise ValueError(f"{self.choice_CI_API} is not a valid API choice, it needs to be one of {self.list_CI_APIs}.")
+
         sys.stdout.write(f"Using {self.choice_CI_API} for carbon intensity forecasts.\n")
 
         ### Duration [timedelta] ###
