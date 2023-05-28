@@ -6,7 +6,7 @@ class sanityChecks_arguments():
     def __init__(self):
         pass
 
-    def validate_jobinfo(self, jobinfo: str):
+    def validate_jobinfo(self, jobinfo: str, config):
         '''
         Parses a string of job info keys in the form
 
@@ -32,7 +32,7 @@ class sanityChecks_arguments():
             return None
 
         # Validate partition value
-        expected_partition_values = self.config['partitions'].keys()
+        expected_partition_values = config['partitions'].keys()
         if info["partition"] not in expected_partition_values:
             sys.stderr.write(
                 "ERROR: job info key 'partition' should be "

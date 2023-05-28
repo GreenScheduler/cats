@@ -69,7 +69,7 @@ class cats():
         self.duration = self.sanityChecks_arguments.validate_duration(args.duration)
 
         ### jobinfo [dict] ###
-        self.jobinfo = self.sanityChecks_arguments.validate_jobinfo(args.jobinfo) if (args.jobinfo and self.config) else None
+        self.jobinfo = self.sanityChecks_arguments.validate_jobinfo(args.jobinfo, self.config) if (args.jobinfo and self.config) else None
 
     def _parse_arguments(self):
         parser = ArgumentParser(
