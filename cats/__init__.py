@@ -2,13 +2,14 @@ from argparse import ArgumentParser
 import requests
 import yaml
 from datetime import timedelta
+import sys
 
-from api_query import CI_API
-from optimise_starttime import starttime_optimiser
+from .api_query import CI_API
+from .optimise_starttime import starttime_optimiser
 
 class cats():
     def __init__(self, arguments=None):
-        parser = self.parse_arguments()
+        parser = self._parse_arguments()
         args = parser.parse_args(arguments)
 
         ### config file ###
@@ -43,7 +44,7 @@ class cats():
         elif "location" in self.config.keys():
             self.location = self.config["location"]
         else:
-            self.location = self.pull_location_from_IP()
+            self.location = self._pull_location_from_IP()
         # TODO what is location is not in the right country for the API?
 
         # TODO check validity of arguments (and clean/standardise them)
@@ -51,7 +52,7 @@ class cats():
         ### Duration ###
         self.duration = timedelta(minutes=args.duration)
 
-    def parse_arguments(self):
+    def _parse_arguments(self):
         parser = ArgumentParser(
             prog="cats",
             description="A climate aware job scheduler."
@@ -79,7 +80,7 @@ class cats():
 
         return parser
 
-    def pull_location_from_IP(self):
+    def _pull_location_from_IP(self):
         r = requests.get("https://ipapi.co/json").json()
         return r["postal"]
 
@@ -91,9 +92,6 @@ class cats():
         # Find best starttime
         best_window, all_window_sorted = starttime_optimiser(CI_forecast).get_starttime(self.duration)
 
-
-
-        return CI_forecast
 
 if __name__ == "__main__":
     instance_cats = cats()
