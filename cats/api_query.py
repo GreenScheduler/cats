@@ -1,6 +1,7 @@
 import requests_cache
 from datetime import datetime, timezone
-from api_interface import CI_API_interface
+
+from .api_interface import CI_API_interface
 
 class CI_API():
     def __init__(self, choice_CI_API):
@@ -32,6 +33,7 @@ class CI_API():
         # any given half hour we will always use the same timestamp. As this
         # becomes part of the URL, calls can be cached using standard HTTP
         #  caching layers
+        # TODO why is that below needed at all?
         dt = datetime.now(timezone.utc)
         if dt.minute > 30:
             dt = dt.replace(minute=31, second=0, microsecond=0)
