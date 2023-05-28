@@ -1,5 +1,5 @@
 import cats
-from cats.api_interface import API_interfaces
+from cats.CI_api_interface import API_interfaces
 
 def test_api_call():
     """
