@@ -1,4 +1,4 @@
-from . import main
+from . import cats
 
 if __name__ == "__main__":
-    main()
+    cats().run()
