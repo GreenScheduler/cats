@@ -36,48 +36,22 @@ pip install git+https://github.com/GreenScheduler/cats
 You can run `cats` with:
 
 ```bash
-python -m cats -d <job_duration> --loc <postcode>
+python -m cats --duration <job_duration_in_minutes> --location <UK_postcode>
 ```
 
 The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address. Job duration is in minutes, specified as an integer.
 
 The scheduler then calls a function that estimates the best time to start the job given predicted carbon intensity over the next 48 hours. The workflow is the same as for other popular schedulers. Switching to `cats` should be transparent to cluster users.
 
-It will display the time to start the job on standard out and optionally some information about the carbon intensity on standard error.
-
 ***
 
 ### Display carbon footprint estimates
 
-Optionally, `cats` will soon be able to provide an estimate for the carbon footprint reduction resulting from delaying your job.  To enable the footprint estimation, you must provide information about the machine in the form of a YAML configuration file.  An example is given below:
-
-```yaml
-## ~~~ TO BE EDITED TO BE TAILORED TO THE CLUSTER ~~~
-##
-## Settings for fictive CW23
-##
-## Updated: 04/05/2023
-
----
-cluster_name: "CW23"
-postcode: "EH8 9BT"
-PUE: 1.20 # > 1
-partitions:
-  CPU_partition:
-    type: CPU # CPU or GPU
-    model: "Xeon Gold 6142"
-    TDP: 9.4 # in W, per core
-  GPU_partition:
-    type: GPU
-    model: "NVIDIA A100-SXM-80GB GPUs" 
-    TDP: 300 # from https://www.nvidia.com/content/dam/en-zz/Solutions/Data-Center/a100/pdf/PB-10577-001_v02.pdf
-    CPU_model: "AMD EPYC 7763" 
-    TDP_CPU: 4.4 # from https://www.amd.com/fr/products/cpu/amd-epyc-7763
-```
+Optionally, `cats` can provide an estimate for the carbon footprint reduction resulting from delaying your job.  To enable the footprint estimation, you must provide information about the machine in the form of a YAML configuration file, as well as details about the job in the command line.  An example of config file is [here](https://github.com/GreenScheduler/cats/blob/main/config.yml).
 
 Use the `--config` option to specify a path to the config file, relative to the current directory. If no path is specified, `cats` looks for a file named `config.yml` in the current directory.
 
-Additionally, to obtain carbon footprints, job-specific information must be provided to `cats` through the `--jobinfo` option.  The example below demonstrates running `cats` with footprint estimation for a job using 8GB of memory, 2 CPU cores and no GPU:
+Additionally, to obtain carbon footprints, job-specific information must be provided to `cats` through the `--jobinfo` option. The example below demonstrates running `cats` with footprint estimation for a job using 8GB of memory, 2 CPU cores and no GPU:
 
 ```bash
 cats -d 120 --config .config/config.yml \
