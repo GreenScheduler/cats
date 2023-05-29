@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from .CI_api_interface import CarbonIntensityEstimate
 

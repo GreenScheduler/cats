@@ -1,9 +1,8 @@
 from argparse import ArgumentParser
 import requests
 import yaml
-from datetime import timedelta, datetime, timezone
+from datetime import datetime, timezone
 import sys
-import re
 
 from .check_clean_arguments import sanityChecks_arguments
 from .CI_api_query import CI_API
