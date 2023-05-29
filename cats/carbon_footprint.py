@@ -24,7 +24,7 @@ class greenAlgorithmsCalculator:
         self.averageWorst_carbonIntensity = averageWorst_carbonIntensity
 
         ### Load fixed parameters
-        with open("fixed_parameters.yaml", "r") as stream:
+        with open("fixed_parameters.yml", "r") as stream:
             try:
                 self.fParams = yaml.safe_load(stream)
             except yaml.YAMLError as exc:

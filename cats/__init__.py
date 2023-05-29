@@ -8,7 +8,7 @@ import re
 from .check_clean_arguments import sanityChecks_arguments
 from .CI_api_query import CI_API
 from .optimise_starttime import starttime_optimiser
-from .carbonFootprint import greenAlgorithmsCalculator
+from .carbon_footprint import greenAlgorithmsCalculator
 
 class cats():
     def __init__(self, arguments=None):
