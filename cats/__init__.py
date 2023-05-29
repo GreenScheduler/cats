@@ -128,6 +128,7 @@ class cats():
             ) # TODO check why it was stderr originally
 
         if stage=='best_starttime':
+            # TODO fix clearer message when job should start now
             in_delta = self.best_window.start - datetime.now(timezone.utc)
             sys.stdout.write(f"\nBest start time: {self._str_datetime(self.best_window.start)} (in {in_delta.total_seconds()/3600:.1f} hours)\n")
             sys.stdout.write(f"\t Expected end time: {self._str_datetime(self.best_window.end)}\n")
