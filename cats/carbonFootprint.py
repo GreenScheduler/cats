@@ -15,7 +15,7 @@ class greenAlgorithmsCalculator:
             averageBest_carbonIntensity,
             averageNow_carbonIntensity,
     ):
-        self.config = config # TODO rename cluster_info into config
+        self.config = config
         self.jobinfo = jobinfo
         self.duration = duration
         self.averageBest_carbonIntensity = averageBest_carbonIntensity

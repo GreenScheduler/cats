@@ -33,8 +33,10 @@ class CI_API():
         # any given half hour we will always use the same timestamp. As this
         # becomes part of the URL, calls can be cached using standard HTTP
         #  caching layers
-        # TODO why is that below needed at all?
+
         dt = datetime.now(timezone.utc)
+
+        # TODO is this standardisation still needed for caching?
         if dt.minute > 30:
             dt = dt.replace(minute=31, second=0, microsecond=0)
         else:
@@ -51,6 +53,7 @@ class CI_API():
 
 
 if __name__ == "__main__":
+    # TODO these debugging blocks don't work with relative import e.g. from .my_file import ...
     # test example using Manchester as a location
     APIcall = CI_API(choice_CI_API='carbonintensity.org.uk')
     parsed_data = APIcall.get_forecast("M15")
