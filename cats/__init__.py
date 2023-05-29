@@ -132,7 +132,6 @@ class cats():
             sys.stdout.write(f"\nBest start time: {self._str_datetime(self.best_window.start)} (in {in_delta.total_seconds()/3600:.1f} hours)\n")
             sys.stdout.write(f"\t Expected end time: {self._str_datetime(self.best_window.end)}\n")
             sys.stdout.write(f"\t Expected average carbon intensity: {self.best_window.value:.2f} gCO2e/kWh\n")
-            # TODO check what unit the forecast comes in (should be grams)
 
         if stage=='carbon_footprint':
             sys.stdout.write(f"\nEstimated carbon footprint of running job at best time: {self.GAcalc.formatText_footprint(self.CFs['best']['total'])}\n")

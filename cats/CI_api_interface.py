@@ -8,6 +8,8 @@ class CarbonIntensityEstimate:
     instance based on the sort_index attribute. See
     https://peps.python.org/pep-0557
 
+    value: needs to be in gCO2e
+
     """
     value: float # value needs to be first for the sort function to work
     start: datetime
@@ -51,7 +53,7 @@ class CI_API_interface():
                 CarbonIntensityEstimate(
                     start=self.parsetime(d["from"]),
                     end=self.parsetime(d["to"]),
-                    value=d["intensity"]["forecast"],
+                    value=d["intensity"]["forecast"], # convert to gCO2e if needed
                 )
                 for d in response["data"]["data"]
             ]
