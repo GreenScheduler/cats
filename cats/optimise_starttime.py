@@ -50,7 +50,9 @@ class starttime_optimiser():
 
         # What if we start the job now
         endtime = currenttime + duration
-        assert endtime <= end_of_forecast, "Job is longer than total forecasted carbon intensities"
+        # TODO add the option to start jobs planned to run past end of forecast (i.e. with unknown CI for some of it)
+        if endtime > end_of_forecast:
+            raise ValueError(f"Job is longer than total forecasted carbon intensities (duration={duration.total_seconds()/3600:.1f} hours but only {(end_of_forecast - self.CI_forecast[0].start).total_seconds()/3600:.1f} hours available)")
 
         all_averageCIs.append(CarbonIntensityEstimate(
             start=currenttime,
