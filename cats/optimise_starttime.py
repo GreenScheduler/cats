@@ -16,7 +16,6 @@ class starttime_optimiser():
         :param endtime: [datetime]
         :return: [float] average CI in CO2e
         '''
-        # TODO deal with runtime running past end of forecast
 
         # Only keep the relevant windows in the total forecast
         filtered_forecast = [
