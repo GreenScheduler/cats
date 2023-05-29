@@ -141,7 +141,6 @@ class cats():
             sys.stdout.write(f"\tvs running at worst time ({self._str_datetime(self.worst_window.start)}): {self.GAcalc.formatText_footprint(self.CFs['worst']['total'])} "
                              f"({self.GAcalc.formatText_footprint(self.CFs['worst']['total']-self.CFs['best']['total'])} saved)\n")
             sys.stdout.write(f"\t- Estimated energy usage: {self.energies['total']:.2f} kWh\n")
-            # TODO add vs worst time
 
     def run(self):
         ### Get CI forecast
