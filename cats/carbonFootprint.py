@@ -14,12 +14,14 @@ class greenAlgorithmsCalculator:
             duration,
             averageBest_carbonIntensity,
             averageNow_carbonIntensity,
+            averageWorst_carbonIntensity,
     ):
         self.config = config
         self.jobinfo = jobinfo
         self.duration = duration
         self.averageBest_carbonIntensity = averageBest_carbonIntensity
         self.averageNow_carbonIntensity = averageNow_carbonIntensity
+        self.averageWorst_carbonIntensity = averageWorst_carbonIntensity
 
         ### Load fixed parameters
         with open("fixed_parameters.yaml", "r") as stream:
@@ -132,11 +134,13 @@ class greenAlgorithmsCalculator:
     def _calculate_CF(self, energies):
         CFs = {
             'best': {},
-            'now': {}
+            'now': {},
+            'worst': {}
         }
         for key, energy in energies.items():
             CFs['best'][key] = energy * self.averageBest_carbonIntensity.value
             CFs['now'][key] = energy * self.averageNow_carbonIntensity.value
+            CFs['worst'][key] = energy * self.averageWorst_carbonIntensity.value
 
         return CFs
 

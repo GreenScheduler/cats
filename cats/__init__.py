@@ -136,8 +136,10 @@ class cats():
         if stage=='carbon_footprint':
             sys.stdout.write(f"\nEstimated carbon footprint of running job at best time: {self.GAcalc.formatText_footprint(self.CFs['best']['total'])}\n")
             sys.stdout.write(f"\tvs running it now: {self.GAcalc.formatText_footprint(self.CFs['now']['total'])} "
-                             f"{self.GAcalc.formatText_footprint(self.CFs['now']['total']-self.CFs['best']['total'])} saved\n")
-            sys.stdout.write(f"\t(estimated energy usage: {self.energies['total']:.2f} kWh)\n")
+                             f"({self.GAcalc.formatText_footprint(self.CFs['now']['total']-self.CFs['best']['total'])} saved)\n")
+            sys.stdout.write(f"\tvs running at worst time ({self._str_datetime(self.worst_window.start)}): {self.GAcalc.formatText_footprint(self.CFs['worst']['total'])} "
+                             f"({self.GAcalc.formatText_footprint(self.CFs['worst']['total']-self.CFs['best']['total'])} saved)\n")
+            sys.stdout.write(f"\t- Estimated energy usage: {self.energies['total']:.2f} kWh\n")
             # TODO add vs worst time
 
     def run(self):
@@ -148,6 +150,7 @@ class cats():
 
         ### Find best starttime
         self.best_window, self.window_now, self.all_window_sorted = starttime_optimiser(self.CI_forecast).get_starttime(self.duration)
+        self.worst_window = self.all_window_sorted[-1]
         self._writeout_progress('best_starttime')
         # print(f"{self.best_window.start:%Y%m%d%H%M}")  # TODO check if still needed: for POSIX compatibility with at -t
 
@@ -160,7 +163,8 @@ class cats():
                 jobinfo=self.jobinfo,
                 duration=self.duration,
                 averageBest_carbonIntensity=self.best_window,
-                averageNow_carbonIntensity=self.window_now
+                averageNow_carbonIntensity=self.window_now,
+                averageWorst_carbonIntensity=self.worst_window
             )
             self.CFs, self.energies = self.GAcalc.get_carbonFootprint()
             self._writeout_progress('carbon_footprint')
