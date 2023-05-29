@@ -7,7 +7,7 @@ class starttime_optimiser():
     def __init__(self, CI_forecast):
         self.CI_forecast = CI_forecast
 
-    def _calculate_averageCI_over_runtime(self, starttime, endtime):
+    def _calculate_averageCI_over_runtime(self, starttime, endtime, method='sum'):
         '''
         Calculate the total average CI between `starttime` and `endtime`
         by integrating over each time window (and taking into account the
@@ -17,23 +17,26 @@ class starttime_optimiser():
         :return: [float] average CI in CO2e
         '''
 
-        # Only keep the relevant windows in the total forecast
-        filtered_forecast = [
-            window for window in self.CI_forecast
-            if starttime < window.end and window.start < endtime
-        ]
+        if method=='sum':
+            # Only keep the relevant windows in the total forecast
+            filtered_forecast = [
+                window for window in self.CI_forecast
+                if starttime < window.end and window.start < endtime
+            ]
 
-        # Calculate average CI between starttime and endtime
-        CIsec = 0 # in gCO2e x seconds
-        totalsec = 0 # in seconds
-        for window in filtered_forecast:
-            # find the true duration of the window [timedelta]
-            # (this is needed because first and last windows won't be a full 30min, or whatever the window size is)
-            true_window = min(endtime, window.end) - max(starttime, window.start)
-            CIsec += window.value * true_window.total_seconds()
-            totalsec += true_window.total_seconds()
+            # Calculate average CI between starttime and endtime
+            CIsec = 0 # in gCO2e x seconds
+            totalsec = 0 # in seconds
+            for window in filtered_forecast:
+                # find the true duration of the window [timedelta]
+                # (this is needed because first and last windows won't be a full 30min, or whatever the window size is)
+                true_window = min(endtime, window.end) - max(starttime, window.start)
+                CIsec += window.value * true_window.total_seconds()
+                totalsec += true_window.total_seconds()
 
-        return CIsec/totalsec
+            return CIsec/totalsec
+
+        # TODO include again trapezoidal integration as an option
 
     def _get_all_averageCIs(self, duration):
         '''
