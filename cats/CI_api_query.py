@@ -1,11 +1,11 @@
 import requests_cache
 from datetime import datetime, timezone
 
-from .CI_api_interface import CI_API_interface
+from .CI_api_interface import API_interfaces
 
 class CI_API():
     def __init__(self, choice_CI_API):
-        self.API = CI_API_interface(choice_CI_API)
+        self.API = API_interfaces[choice_CI_API]
 
     def get_forecast(
             self,
@@ -43,7 +43,7 @@ class CI_API():
             dt = dt.replace(minute=1, second=0, microsecond=0)
 
         # Setup a session for the API call. This uses a global HTTP cache
-        # with the URL as the key. Failed attempts are not cahched.
+        # with the URL as the key. Failed attempts are not cached.
         session = requests_cache.CachedSession('cats_cache', use_temp=True)
 
         # get the carbon intensity api data
