@@ -84,8 +84,4 @@ class starttime_optimiser():
         '''
         all_averageCIs = self._get_all_averageCIs(duration)
 
-        averageCI_now = all_averageCIs[0]
-        # Find the minimum value
-        all_averageCIs_sorted = sorted(all_averageCIs)
-
-        return all_averageCIs_sorted[0], averageCI_now, all_averageCIs_sorted
+        return min(all_averageCIs), all_averageCIs

@@ -148,8 +148,9 @@ class cats():
         self._writeout_progress('forecast_obtained')
 
         ### Find best starttime
-        self.best_window, self.window_now, self.all_window_sorted = starttime_optimiser(self.CI_forecast).get_starttime(self.duration)
-        self.worst_window = self.all_window_sorted[-1]
+        self.best_window, self.all_windows = starttime_optimiser(self.CI_forecast).get_starttime(self.duration)
+        self.window_now = self.all_windows[0]
+        self.worst_window = max(self.all_windows)
         self._writeout_progress('best_starttime')
         # print(f"{self.best_window.start:%Y%m%d%H%M}")  # TODO check if still needed: for POSIX compatibility with at -t
 
