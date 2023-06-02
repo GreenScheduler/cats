@@ -1,7 +1,9 @@
 from pathlib import Path
-import datetime
+from datetime import datetime
+import csv
 
-from cats.timeseries_conversion import cat_converter
+from cats.timeseries_conversion import get_lowest_carbon_intensity
+from cats.forecast import CarbonIntensityPointEstimate
 
 
 TEST_DATA = Path(__file__).parent / "carbon_intensity_24h.csv"
@@ -12,8 +14,20 @@ def test_stub():
 
 
 def test_timeseries_conversion():
-    result = cat_converter(TEST_DATA)
-    assert result == (
-        datetime.datetime(2023, 5, 5, 14, 0),
-        5.0,
+    with open(TEST_DATA, "r") as f:
+        csvfile = csv.reader(f, delimiter=",")
+        next(csvfile)  # Skip header line
+        forecast_data = [
+            CarbonIntensityPointEstimate(
+                datetime=datetime.fromisoformat(datestr[:-1]),
+                value=float(intensity_value),
+            )
+            for datestr, _, _, intensity_value in csvfile
+        ]
+    result = get_lowest_carbon_intensity(
+        forecast_data, method="simple", duration=None
+    )
+    assert result == CarbonIntensityPointEstimate(
+        datetime=datetime(2023, 5, 5, 14, 0),
+        value=5.0,
     )
