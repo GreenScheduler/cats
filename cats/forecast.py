@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 
@@ -10,6 +10,7 @@ class CarbonIntensityPointEstimate:
     https://peps.python.org/pep-0557
 
     """
+    sort_index: float = field(init=False, repr=False)
     datetime: datetime
     value: float
 
@@ -24,6 +25,7 @@ class CarbonIntensityAverageEstimate:
     of class instance based on the sort_index attribute.  See
     https://peps.python.org/pep-0557
     """
+    sort_index: float = field(init=False, repr=False)
     start: datetime  # Start of the time-integration window
     end: datetime  # End of the time-integration window
     value: float
