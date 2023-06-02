@@ -8,7 +8,7 @@ import sys
 
 from .timeseries_conversion import get_lowest_carbon_intensity  # noqa: F401
 from .api_query import get_tuple  # noqa: F401
-from .parsedata import writecsv, avg_carbon_intensity  # noqa: F401
+from .parsedata import avg_carbon_intensity  # noqa: F401
 from .api_interface import API_interfaces
 from .carbonFootprint import greenAlgorithmsCalculator
 
