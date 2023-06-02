@@ -2,32 +2,7 @@
 Timeseries conversion
 """
 
-import datetime
 from .forecast import WindowedForecast
-
-
-def csv_loader(filename):
-    """
-    Load csv file without dependencies
-
-    Expected Contents:
-
-    COL1: Timestamp
-    COL2: Carbon Intensity
-    """
-    with open(filename, "r") as f:
-        data = f.readlines()
-
-    # Remove header
-    data = data[1:]
-    # Remove trailing whitespace and split by comma
-    data = [x.strip().split(",") for x in data]
-    # Convert timestamp to datetime
-    data = [
-        (datetime.datetime.strptime(x[0], "%Y-%m-%dT%H:%MZ"), float(x[3]))
-        for x in data
-    ]
-    return data
 
 
 def check_duration(size, data):
@@ -70,17 +45,8 @@ def get_lowest_carbon_intensity(data, method="simple", duration=None):
     if method == "simple":
         #  Return element with smallest 2nd value
         #  if multiple elements have the same value, return the first
-        return min(data, key=lambda x: x[1])
+        return min(data)
 
     if method == "windowed":
         num_intervals = check_duration(duration, data)
         return min(WindowedForecast(data, num_intervals))
-
-
-def cat_converter(filename, method="simple", duration=None):
-    # Load CSV
-    data = csv_loader(filename)
-    # Get lowest carbon intensity
-    lowest = get_lowest_carbon_intensity(data, method, duration=duration)
-    # Return timestamp and carbon intensity
-    return lowest

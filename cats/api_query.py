@@ -1,7 +1,6 @@
 import requests_cache
 from typing import Callable
 from datetime import datetime, timezone
-from .parsedata import writecsv
 
 
 def get_tuple(
@@ -51,4 +50,3 @@ def get_tuple(
 if __name__ == "__main__":
     # test example using Manchester as a location
     data_tuples = get_tuple("M15")
-    writecsv(data_tuples)

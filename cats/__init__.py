@@ -6,9 +6,9 @@ import re
 import yaml
 import sys
 
-from .timeseries_conversion import cat_converter  # noqa: F401
+from .timeseries_conversion import get_lowest_carbon_intensity  # noqa: F401
 from .api_query import get_tuple  # noqa: F401
-from .parsedata import writecsv, avg_carbon_intensity  # noqa: F401
+from .parsedata import avg_carbon_intensity  # noqa: F401
 from .api_interface import API_interfaces
 from .carbonFootprint import greenAlgorithmsCalculator
 
@@ -16,14 +16,14 @@ from .carbonFootprint import greenAlgorithmsCalculator
 
 
 def findtime(postcode, duration, api_interface):
-    tuples = get_tuple(
+    forecast = get_tuple(
         postcode,
         api_interface.get_request_url,
         api_interface.parse_reponse_data,
     )
-    result = writecsv(tuples, duration)
+    result = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
     sys.stderr.write(str(result) + "\n")
-    return result
+    return result, forecast
 
 
 def parse_arguments():
@@ -108,7 +108,7 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    best_estimate = findtime(
+    best_estimate, forecast_data = findtime(
         loc, args.duration,
         # TODO Choose API provider based on postcode or
         # user option
@@ -136,7 +136,7 @@ def main(arguments=None):
             print("ERROR: config file not found, exiting now")
             exit(1)
         now_avg_ci = avg_carbon_intensity(
-            start=datetime.now(), runtime=timedelta(args.duration)
+            data=forecast_data, start=datetime.now(), runtime=timedelta(args.duration)
         )
         estim = greenAlgorithmsCalculator(
             config=config,
