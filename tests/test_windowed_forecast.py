@@ -11,7 +11,7 @@
 #     for i in range(NDATA)
 # ]
 
-# TODO temporarilu commented out while issue #42 is being sorted
+# TODO temporarily commented out while issue #42 is being sorted
 #
 # def test_has_right_length():
 #     window_size = 160  # In number of time intervals
@@ -44,3 +44,27 @@
 #         desired=expected,
 #         rtol=0.01
 #     )
+
+from cats.optimise_starttime import windowed_forecast
+from cats.CI_api_interface import CarbonIntensityEstimate
+from datetime import datetime
+import math
+
+CI_forecast = [
+CarbonIntensityEstimate(start=datetime(2023,1,1,8,30), end=datetime(2023,1,1,9,0),value=26),
+    CarbonIntensityEstimate(start=datetime(2023,1,1,9,0), end=datetime(2023,1,1,9,30),value=40),
+    CarbonIntensityEstimate(start=datetime(2023,1,1,9,30), end=datetime(2023,1,1,10,0),value=50),
+    CarbonIntensityEstimate(start=datetime(2023,1,1,10,0), end=datetime(2023,1,1,10,30),value=60),
+    CarbonIntensityEstimate(start=datetime(2023,1,1,10,30), end=datetime(2023,1,1,11,0),value=25),
+]
+
+wf = windowed_forecast(CI_forecast = CI_forecast, method=None)
+foo = wf._calculate_averageCI_over_runtime(datetime(2023,1,1,9,15), datetime(2023,1,1,10,25), 'sum')
+expected_result_sum = (40*15+50*30+60*25)/70
+assert math.isclose(foo, expected_result_sum), "Sum integration returned the wrong result."
+
+bar = wf._calculate_averageCI_over_runtime(datetime(2023,1,1,9,15), datetime(2023,1,1,10,25), 'trapezoidal')
+start_new = 45
+end_new = 60 + (25-60)/30*25
+expected_result_trapezoidal = ((start_new+50)*15/2 + (50+60)*30/2 + (60+end_new)*25/2)/70
+assert math.isclose(bar, expected_result_trapezoidal), "Trapezoidal integration returned the wrong result."

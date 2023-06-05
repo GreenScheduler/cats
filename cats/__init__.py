@@ -6,10 +6,10 @@ import sys
 
 from .check_clean_arguments import sanityChecks_arguments
 from .CI_api_query import CI_API
-from .optimise_starttime import starttime_optimiser
+from .optimise_starttime import windowed_forecast
 from .carbon_footprint import greenAlgorithmsCalculator
 
-class cats():
+class cats:
     def __init__(self, arguments=None):
         parser = self._parse_arguments()
         args = parser.parse_args(arguments)
@@ -50,7 +50,15 @@ class cats():
 
         sys.stdout.write(f"Using {self.choice_CI_API} for carbon intensity forecasts.\n")
 
-        ### Pull and clean location ###
+        ### Integration method for CI forecasts ###
+        if args.integration_method:
+            self.integration_method  = args.integration_method
+        elif "integration-method" in self.config.keys():
+            self.integration_method = self.config["integration-method"]
+        else:
+            self.integration_method = 'sum'
+
+            ### Pull and clean location ###
         # UK: we only keep the first part of a UK postcode
 
         if args.location:
@@ -87,8 +95,12 @@ class cats():
             "--api-carbonintensity", type=str,
             help="[optional] which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`."
                  "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
+        ) # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
+        parser.add_argument(
+            "--integration-method", type=str,
+            help="[optional] how carbon intensity is being averaged over the entire runtime. "
+                 "Either 'sum' or 'trapezoidal' (default: 'sum')."
         )
-        # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
         parser.add_argument(
             "--location", type=str,
             help="[optional] location of the computing facility. For the UK, first half of a postcode (e.g. 'M15'), "
@@ -148,7 +160,7 @@ class cats():
         self._writeout_progress('forecast_obtained')
 
         ### Find best starttime
-        self.best_window, self.all_windows = starttime_optimiser(self.CI_forecast).get_starttime(self.duration)
+        self.best_window, self.all_windows = windowed_forecast(self.CI_forecast, self.integration_method).get_starttime(self.duration)
         self.window_now = self.all_windows[0]
         self.worst_window = max(self.all_windows)
         self._writeout_progress('best_starttime')
