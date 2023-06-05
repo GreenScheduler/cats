@@ -20,7 +20,7 @@ def findtime(postcode, duration, api_interface):
         api_interface.get_request_url,
         api_interface.parse_reponse_data,
     )
-    new, then = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
+    now, then = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
     sys.stderr.write(str(then) + "\n")
     return now, then
 
