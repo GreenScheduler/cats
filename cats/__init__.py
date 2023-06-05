@@ -21,9 +21,9 @@ def findtime(postcode, duration, api_interface):
         api_interface.get_request_url,
         api_interface.parse_reponse_data,
     )
-    result = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
-    sys.stderr.write(str(result) + "\n")
-    return result, forecast
+    new, then = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
+    sys.stderr.write(str(then) + "\n")
+    return now, then
 
 
 def parse_arguments():
@@ -108,7 +108,7 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    best_estimate, forecast_data = findtime(
+    now, then = findtime(
         loc, args.duration,
         # TODO Choose API provider based on postcode or
         # user option
@@ -124,8 +124,8 @@ def main(arguments=None):
 #        ]
 #    )
 
-    sys.stderr.write(f"Best job start time: {best_estimate.start}\n")
-    print(f"{best_estimate.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
+    sys.stderr.write(f"Best job start time: {then.start}\n")
+    print(f"{then.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
@@ -135,14 +135,11 @@ def main(arguments=None):
         if not config:
             print("ERROR: config file not found, exiting now")
             exit(1)
-        now_avg_ci = avg_carbon_intensity(
-            data=forecast_data, start=datetime.now(), runtime=timedelta(args.duration)
-        )
         estim = greenAlgorithmsCalculator(
             config=config,
             runtime=timedelta(minutes=args.duration),
-            averageBest_carbonIntensity=best_estimate.value, # TODO replace with real carbon intensity
-            averageNow_carbonIntensity=now_avg_ci,
+            averageBest_carbonIntensity=then.value,
+            averageNow_carbonIntensity=now.value,
             **jobinfo,
         ).get_footprint()
 
