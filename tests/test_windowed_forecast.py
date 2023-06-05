@@ -80,3 +80,30 @@ def test_minimise_average():
             ) / window_size
         )
         assert (result == expected)
+
+
+def test_average_intensity_now():
+    with open(TEST_DATA, "r") as f:
+        csvfile = csv.reader(f, delimiter=",")
+        next(csvfile)  # Skip header line
+        data = [
+            CarbonIntensityPointEstimate(
+                datetime=datetime.fromisoformat(datestr[:-1]),
+                value=float(intensity_value),
+            )
+            for datestr, _, _, intensity_value in csvfile
+        ]
+
+        window_size = 11
+        result = WindowedForecast(data, window_size)[0]
+
+        # Intensity point estimates over best runtime period
+        v = [p.value for p in data[:window_size + 1]]
+        expected = CarbonIntensityAverageEstimate(
+            start=data[0].datetime,
+            end=data[window_size].datetime,
+            value=sum(
+                [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
+            ) / window_size
+        )
+        assert (result == expected)
