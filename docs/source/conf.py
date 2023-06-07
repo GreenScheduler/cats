@@ -25,8 +25,8 @@ author = 'Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony 
 release = '1.0.0d1'
 
 # Add media: image for logo and a favicon for the browser tab
-html_logo = 'media/cats_dalle_img_200x200px_for_logo.png'
-html_favicon = 'media/favicon_io/favicon-32x32.png'
+html_logo = '_static/cats_dalle_img_200x200px_for_logo.png'
+html_favicon = '_static/favicon_io/favicon-32x32.png'
 
 
 # -- General configuration ---------------------------------------------------
