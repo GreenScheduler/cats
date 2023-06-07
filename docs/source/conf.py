@@ -24,6 +24,10 @@ author = 'Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony 
 # The full version, including alpha/beta/rc tags
 release = '1.0.0d1'
 
+# Add media: image for logo and a favicon for the browser tab
+html_logo = 'media/cats_dalle_img_200x200px_for_logo.png'
+html_favicon = 'media/favicon_io/favicon-32x32.png'
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -48,10 +52,10 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 
-# Choose a non-default theme, Press. For an example of the theme, see:
-# https://sphinx-themes.org/sample-sites/sphinx-press-theme/
-# Install with 'pip install sphinx-press-theme'
-html_theme = 'press'
+# Choose a non-default theme, Renku. For an example of the theme, see:
+# https://sphinx-themes.org/sample-sites/renku-sphinx-theme/
+# Install with 'pip install renku-sphinx-theme'
+html_theme = 'renku'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
