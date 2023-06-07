@@ -3,8 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to CATS's documentation!
-================================
+Documentation for CATS: the Climate-Aware Task Scheduler
+========================================================
+
+CATS is a **C**\limate-**A**\ware **T**\ask **S**\cheduler. It schedules cluster jobs to minimize predicted carbon intensity of running the process.
+
 
 .. toctree::
    :maxdepth: 2

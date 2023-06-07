@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'CATS'
-copyright = '2023, Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez adn Sadie Bartholomew'
-author = 'Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez adn Sadie Bartholomew'
+copyright = '2023, Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew'
+author = 'Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0.0d1'
