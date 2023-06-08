@@ -1,3 +1,5 @@
+.. _use-with-schedulers:
+
 Use with Schedulers
 ===================
 
