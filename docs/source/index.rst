@@ -17,6 +17,7 @@ CATS is a **C**\limate-**A**\ware **T**\ask **S**\cheduler. It schedules cluster
    installation.rst
    quickstart.rst
    use-with-schedulers.rst
+   cli-reference.rst
    api-reference.rst
    contributing.rst
 
