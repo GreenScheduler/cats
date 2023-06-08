@@ -36,5 +36,4 @@ Modules
 Classes, functions and exceptions
 ---------------------------------
 
-Add classes and functions, etc., here, when the API stabilises to an extent
-such that it is worth listing them out...
+TODODOCS
