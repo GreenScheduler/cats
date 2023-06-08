@@ -32,6 +32,14 @@ computationally intensive tasks, making it an ideal solution for
 environmentally conscious developers.
 
 
+Scope
+-----
+
+Currently CATS only works in the UK. If you are aware of APIs for
+realtime grid carbon intensity data in other countries please open
+an issue and let us know.
+
+
 Background
 ----------
 
