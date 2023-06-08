@@ -13,6 +13,12 @@ CATS is a **C**\limate-**A**\ware **T**\ask **S**\cheduler. It schedules cluster
    :maxdepth: 2
    :caption: Contents:
 
+   introduction.rst
+   installation.rst
+   quickstart.rst
+   use-with-schedulers.rst
+   api-reference.rst
+   contributing.rst
 
 
 Indices and tables
