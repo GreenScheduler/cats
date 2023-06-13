@@ -8,11 +8,11 @@ Basic usage
 
 You can run CATS with:
 
-.. code-block:: bash
+.. code-block:: console
    :caption: *A basic command to run CATS when a job duration and postcode
               are provided.*
 
-   python -m cats -d <job_duration> --loc <postcode>
+   $ python -m cats -d <job_duration> --loc <postcode>
 
 The ``postcode`` is optional, and can be pulled from the ``config.yml`` file
 or, if that is not present, inferred using the server IP address.
@@ -73,7 +73,7 @@ must be provided to cats through the ``--jobinfo`` option. The example
 below demonstrates running cats with footprint estimation for a job using
 8GB of memory, 2 CPU cores and no GPU:
 
-.. code-block:: bash
+.. code-block:: console
    :caption: *An example run command showing provision of job information.*
 
-   cats -d 120 --config .config/config.yml --jobinfo cpus=2,gpus=0,memory=8,partition=CPU_partition
+   $ cats -d 120 --config .config/config.yml --jobinfo cpus=2,gpus=0,memory=8,partition=CPU_partition

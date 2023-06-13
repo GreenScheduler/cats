@@ -37,6 +37,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
+    'sphinx_copybutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -47,6 +48,9 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# Configure copybutton:
+# Include shell prompt to skip upon copying (Python '>>>' is already skipped)
+copybutton_prompt_text = "$ "
 
 # -- Options for HTML output -------------------------------------------------
 
