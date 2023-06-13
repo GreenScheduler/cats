@@ -52,6 +52,9 @@ exclude_patterns = []
 # Include shell prompt to skip upon copying (Python '>>>' is already skipped)
 copybutton_prompt_text = "$ "
 
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = 'manni'  # better for highlighting e.g. command elements
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
