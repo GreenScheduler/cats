@@ -102,8 +102,8 @@ Variables and constants
 
 .. autosummary::
 
-   cats.API_interface
-   cats.API_interfaces
+   cats.api_interface.APIInterface
+   cats.api_interface.API_interfaces
 
 In ``cats.api_query``
 ^^^^^^^^^^^^^^^^^^^^^
