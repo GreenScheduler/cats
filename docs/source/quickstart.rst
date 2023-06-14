@@ -64,8 +64,8 @@ given below:
        TDP_CPU: 4.4 # from https://www.amd.com/fr/products/cpu/amd-epyc-7763
 
 
-Use the ``--config`` option to specify a path to the config file, relative
-to the current directory. If no path is specified, CATS looks for a
+Use the ``--config`` option to specify a path to the configuration file,
+relative to the current directory. If no path is specified, CATS looks for a
 file named ``config.yml`` in the current directory.
 
 Additionally, to obtain carbon footprints, job-specific information
