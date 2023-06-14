@@ -6,7 +6,7 @@ Use with Schedulers
 Using CATS with the ``at`` scheduler
 ------------------------------------
 
-You can use cats with the ``at`` job scheduler by running:
+You can use CATS with the ``at`` job scheduler by running:
 
 .. code-block:: console
 
@@ -25,5 +25,5 @@ Demonstration
 
 .. image:: ../../cats.gif
   :width: 400
-  :alt: A video demonstration of CATs being used standalone and with ``at``.
+  :alt: A video demonstration of CATS being used standalone and with ``at``.
   :align: center
