@@ -11,21 +11,26 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../..'))  # cats repo root directory
+
+sys.path.insert(0, os.path.abspath("../.."))  # cats repo root directory
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'CATS'
-copyright = '2023, Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew'
-author = 'Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew'
-
+project = "CATS"
+authors = (
+    "Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, "
+    "Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, "
+    "Carlos Martinez and Sadie Bartholomew"
+)
+author = authors
+copyright = f"2023, {authors}"
 # The full version, including alpha/beta/rc tags
-release = '1.0.0d1'
+release = "1.0.0d1"
 
 # Add media: image for logo and a favicon for the browser tab
-html_logo = '_static/cats_dalle_img_200x200px_for_logo.png'
-html_favicon = '_static/favicon_io/favicon-32x32.png'
+html_logo = "_static/cats_dalle_img_200x200px_for_logo.png"
+html_favicon = "_static/favicon_io/favicon-32x32.png"
 
 
 # -- General configuration ---------------------------------------------------
@@ -34,15 +39,15 @@ html_favicon = '_static/favicon_io/favicon-32x32.png'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.coverage',
-    'sphinx.ext.napoleon',
-    'sphinx_copybutton',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.napoleon",
+    "sphinx_copybutton",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -54,7 +59,7 @@ exclude_patterns = []
 copybutton_prompt_text = "$ "
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'manni'  # better for highlighting e.g. command elements
+pygments_style = "manni"  # better for highlighting e.g. command elements
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -65,9 +70,9 @@ pygments_style = 'manni'  # better for highlighting e.g. command elements
 # Choose a non-default theme, Renku. For an example of the theme, see:
 # https://sphinx-themes.org/sample-sites/renku-sphinx-theme/
 # Install with 'pip install renku-sphinx-theme'
-html_theme = 'renku'
+html_theme = "renku"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
