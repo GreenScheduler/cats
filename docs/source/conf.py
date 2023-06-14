@@ -35,6 +35,7 @@ html_favicon = '_static/favicon_io/favicon-32x32.png'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     'sphinx_copybutton',
