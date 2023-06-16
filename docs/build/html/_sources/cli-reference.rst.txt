@@ -3,4 +3,6 @@
 Command-line (CLI) reference
 ============================
 
-TODODOCS
+.. TODODOCS
+
+Coming soon...

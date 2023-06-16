@@ -31,7 +31,7 @@ some information about the carbon intensity on standard error.
 Displaying carbon footprint estimates
 -------------------------------------
 
-Optionally, cats will soon be able to provide an estimate for the
+Optionally, CATS will soon be able to provide an estimate for the
 carbon footprint reduction resulting from delaying your job. To enable
 the footprint estimation, you must provide information about the
 machine in the form of a YAML configuration file. An example is
@@ -64,13 +64,13 @@ given below:
        TDP_CPU: 4.4 # from https://www.amd.com/fr/products/cpu/amd-epyc-7763
 
 
-Use the ``--config`` option to specify a path to the config file, relative
-to the current directory. If no path is specified, cats looks for a
+Use the ``--config`` option to specify a path to the configuration file,
+relative to the current directory. If no path is specified, CATS looks for a
 file named ``config.yml`` in the current directory.
 
 Additionally, to obtain carbon footprints, job-specific information
-must be provided to cats through the ``--jobinfo`` option. The example
-below demonstrates running cats with footprint estimation for a job using
+must be provided to CATS through the ``--jobinfo`` option. The example
+below demonstrates running CATS with footprint estimation for a job using
 8GB of memory, 2 CPU cores and no GPU:
 
 .. code-block:: console

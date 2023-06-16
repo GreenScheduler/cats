@@ -6,6 +6,7 @@
 .. _CW23HackDaypage: https://www.software.ac.uk/cw23/hack-day
 .. _NationalGridESO: https://www.nationalgrideso.com/
 .. _CarbonIntensityAPI: https://carbonintensity.org.uk/
+.. _GitHubrepoissues: https://github.com/GreenScheduler/cats/issues
 
 
 Introduction
@@ -29,15 +30,15 @@ estimate the carbon intensity of the electricity grid, and schedules
 tasks at times when the estimated carbon intensity is lowest. This
 helps to reduce the carbon emissions associated with running
 computationally intensive tasks, making it an ideal solution for
-environmentally conscious developers.
+environmentally-conscious developers.
 
 
 Scope
 -----
 
 Currently CATS only works in the UK. If you are aware of APIs for
-realtime grid carbon intensity data in other countries please open
-an issue and let us know.
+realtime grid carbon intensity data in other countries, please
+`open an issue <GitHubrepoissues_>`_ to let us know.
 
 
 Background
