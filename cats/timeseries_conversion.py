@@ -49,4 +49,5 @@ def get_lowest_carbon_intensity(data, method="simple", duration=None):
 
     if method == "windowed":
         num_intervals = check_duration(duration, data)
-        return min(WindowedForecast(data, num_intervals))
+        wf = WindowedForecast(data, num_intervals)
+        return wf[0], min(wf)
