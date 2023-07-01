@@ -2,12 +2,9 @@ import requests_cache
 from typing import Callable
 from datetime import datetime, timezone
 
+from .api_interface import API_interfaces
 
-def get_tuple(
-    postcode: str,
-    request_url: Callable[[datetime, str], str],
-    parse_data_from_json: Callable[[dict], list[tuple[datetime, int]]],
-) -> list[list[tuple[datetime, int]]]:
+def get_CI_forecast(postcode: str) -> list[list[tuple[datetime, int]]]:
     """
     get carbon intensity from carbonintensity.org.uk
 
@@ -41,12 +38,14 @@ def get_tuple(
     session = requests_cache.CachedSession('cats_cache', use_temp=True)
     # get the carbon intensity api data
 
-    r = session.get(request_url(dt, postcode))
+    API = API_interfaces["carbonintensitity.org.uk"] # TODO give choice of API to user
+
+    r = session.get(API.get_request_url(dt, postcode))
     data = r.json()
 
-    return parse_data_from_json(data)
+    return API.parse_reponse_data(data)
 
 
 if __name__ == "__main__":
     # test example using Manchester as a location
-    data_tuples = get_tuple("M15")
+    data_tuples = get_CI_forecast("M15")

@@ -8,7 +8,7 @@ def test_api_call():
     """
 
     api_interface = API_interfaces["carbonintensity.org.uk"]
-    response = cats.api_query.get_tuple(
+    response = cats.api_query.get_CI_forecast(
         postcode='OX1',
         request_url=api_interface.get_request_url,
         parse_data_from_json=api_interface.parse_response_data,

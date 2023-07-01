@@ -8,16 +8,15 @@ import sys
 
 from .check_clean_arguments import validate_jobinfo
 from .timeseries_conversion import get_lowest_carbon_intensity  # noqa: F401
-from .api_query import get_tuple  # noqa: F401
+from .api_query import get_CI_forecast  # noqa: F401
 from .parsedata import avg_carbon_intensity  # noqa: F401
-from .api_interface import API_interfaces
 from .carbonFootprint import greenAlgorithmsCalculator
 
 # from cats import findtime
 
 
 def findtime(postcode, duration, api_interface):
-    forecast = get_tuple(
+    forecast = get_CI_forecast(
         postcode,
         api_interface.get_request_url,
         api_interface.parse_reponse_data,
@@ -63,6 +62,8 @@ def main(arguments=None):
     else:
         loc = args.loc
     #print("Location:", loc)
+
+    CI_forecast = get_CI_forecast(loc)
 
     best_estimate, forecast_data = findtime(
         loc, args.duration,
