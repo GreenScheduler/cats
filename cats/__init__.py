@@ -8,7 +8,7 @@ import sys
 
 from .check_clean_arguments import validate_jobinfo
 from .timeseries_conversion import get_lowest_carbon_intensity  # noqa: F401
-from .api_query import get_CI_forecast  # noqa: F401
+from .CI_api_query import get_CI_forecast  # noqa: F401
 from .parsedata import avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
