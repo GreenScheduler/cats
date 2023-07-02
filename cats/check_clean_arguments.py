@@ -43,3 +43,18 @@ def validate_jobinfo(jobinfo: str):
             print(f"ERROR: job info key {key} should be numeric")
             return {}
     return info
+
+def validate_duration(duration):
+    # make sure size is not None
+    if duration is None:
+        raise ValueError("Windowed method requires timespan to be provided")
+    # make sure size is can be converted to integer
+    try:
+        duration_int = int(duration)
+    except ValueError:
+        raise ValueError("Windowed method requires timespan to be an integer or float")
+    # make sure size is positive
+    if duration_int <= 0:
+        raise ValueError("Windowed method requires timespan to be positive")
+
+    return duration_int

@@ -6,17 +6,6 @@ from .forecast import WindowedForecast
 
 
 def check_duration(size, data):
-    # make sure size is not None
-    if size is None:
-        raise ValueError("Windowed method requires timespan to be provided")
-    # make sure size is can be converted to integer
-    try:
-        size = int(size)
-    except ValueError:
-        raise ValueError("Windowed method requires timespan to be an integer or float")
-    # make sure size is positive
-    if size <= 0:
-        raise ValueError("Windowed method requires timespan to be positive")
     # make sure size is not greater than data size
     if size > len(data):
         raise ValueError(
