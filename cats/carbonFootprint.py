@@ -28,12 +28,13 @@ class greenAlgorithmsCalculator:
         :param averageBest_carbonIntensity: [float] in gCO2e/kWh
         :param averageNow_carbonIntensity: [float] in gCO2e/kWh
         """
-        ### Load cluster specific info
-        with open(config, "r") as stream:
-            try:
-                self.cluster_info = yaml.safe_load(stream)
-            except yaml.YAMLError as exc:
-                print(exc)
+        # ### Load cluster specific info
+        # with open(config, "r") as stream:
+        #     try:
+        #         self.cluster_info = yaml.safe_load(stream)
+        #     except yaml.YAMLError as exc:
+        #         print(exc)
+        self.cluster_info = config
 
         ### Load fixed parameters
         with open("fixed_parameters.yaml", "r") as stream:

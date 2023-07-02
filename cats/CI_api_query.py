@@ -38,12 +38,12 @@ def get_CI_forecast(postcode: str) -> list[list[tuple[datetime, int]]]:
     session = requests_cache.CachedSession('cats_cache', use_temp=True)
     # get the carbon intensity api data
 
-    API = API_interfaces["carbonintensitity.org.uk"] # TODO give choice of API to user
+    API = API_interfaces["carbonintensity.org.uk"] # TODO give choice of API to user
 
     r = session.get(API.get_request_url(dt, postcode))
     data = r.json()
 
-    return API.parse_reponse_data(data)
+    return API.parse_response_data(data)
 
 
 if __name__ == "__main__":

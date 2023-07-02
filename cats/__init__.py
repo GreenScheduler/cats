@@ -96,12 +96,12 @@ def main(arguments=None):
             print("ERROR: config file not found, exiting now")
             exit(1)
         now_avg_ci = avg_carbon_intensity(
-            data=forecast_data, start=datetime.now(), runtime=timedelta(args.duration)
+            data=CI_forecast, start=datetime.now(), runtime=timedelta(args.duration)
         )
         estim = greenAlgorithmsCalculator(
             config=config,
             runtime=timedelta(minutes=args.duration),
-            averageBest_carbonIntensity=best_estimate.value, # TODO replace with real carbon intensity
+            averageBest_carbonIntensity=best_window.value, # TODO replace with real carbon intensity
             averageNow_carbonIntensity=now_avg_ci,
             **jobinfo,
         ).get_footprint()
