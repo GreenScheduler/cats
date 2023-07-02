@@ -7,7 +7,7 @@ import yaml
 import sys
 
 from .check_clean_arguments import validate_jobinfo, validate_duration
-from .timeseries_conversion import get_starttime  # noqa: F401
+from .optimise_starttime import get_starttime  # noqa: F401
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .parsedata import avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
