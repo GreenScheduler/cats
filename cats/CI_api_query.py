@@ -1,5 +1,4 @@
 import requests_cache
-from typing import Callable
 from datetime import datetime, timezone
 
 from .CI_api_interface import API_interfaces

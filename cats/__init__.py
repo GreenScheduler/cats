@@ -1,8 +1,6 @@
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 import requests
-import subprocess
-import re
 import yaml
 import sys
 
@@ -11,20 +9,6 @@ from .optimise_starttime import get_starttime  # noqa: F401
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .parsedata import avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
-
-# from cats import findtime
-
-
-def findtime(postcode, duration, api_interface):
-    forecast = get_CI_forecast(
-        postcode,
-        api_interface.get_request_url,
-        api_interface.parse_reponse_data,
-    )
-    result = get_starttime(forecast, method="windowed", duration=duration)
-    sys.stderr.write(str(result) + "\n")
-    return result, forecast
-
 
 def parse_arguments():
     parser = ArgumentParser(prog="cats", description="A climate aware job scheduler")
