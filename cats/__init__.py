@@ -7,7 +7,7 @@ import yaml
 import sys
 
 from .check_clean_arguments import validate_jobinfo, validate_duration
-from .timeseries_conversion import get_lowest_carbon_intensity  # noqa: F401
+from .timeseries_conversion import get_starttime  # noqa: F401
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .parsedata import avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
@@ -21,7 +21,7 @@ def findtime(postcode, duration, api_interface):
         api_interface.get_request_url,
         api_interface.parse_reponse_data,
     )
-    result = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
+    result = get_starttime(forecast, method="windowed", duration=duration)
     sys.stderr.write(str(result) + "\n")
     return result, forecast
 
@@ -41,6 +41,8 @@ def parse_arguments():
 def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
+
+    ## Validate and clean arguments
 
     if args.config:
         with open(args.config, "r") as f:
@@ -65,14 +67,13 @@ def main(arguments=None):
 
     duration = validate_duration(args.duration)
 
+    ## Obtain CI forecast
     CI_forecast = get_CI_forecast(loc)
 
-    best_estimate, forecast_data = findtime(
-        loc, args.duration,
-        # TODO Choose API provider based on postcode or
-        # user option
-        API_interfaces["carbonintensitity.org.uk"],
-    )
+    ## Find optimal start time
+    best_window = get_starttime(CI_forecast, method="windowed", duration=duration)
+    sys.stderr.write(str(best_window) + "\n")
+
 #    subprocess.run(
 #        [
 #            args.program,
@@ -83,8 +84,8 @@ def main(arguments=None):
 #        ]
 #    )
 
-    sys.stderr.write(f"Best job start time: {best_estimate.start}\n")
-    print(f"{best_estimate.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
+    sys.stderr.write(f"Best job start time: {best_window.start}\n")
+    print(f"{best_window.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
