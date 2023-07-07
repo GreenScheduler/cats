@@ -1,7 +1,3 @@
-"""
-Timeseries conversion
-"""
-
 from .forecast import WindowedForecast
 
 def get_starttime(data, method="simple", duration=None):
