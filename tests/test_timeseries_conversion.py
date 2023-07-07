@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime
 import csv
 
-from cats.timeseries_conversion import get_starttime
+from cats.optimise_starttime import get_starttime
 from cats.forecast import CarbonIntensityPointEstimate
 
 
