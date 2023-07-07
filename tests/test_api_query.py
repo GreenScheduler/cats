@@ -8,7 +8,7 @@ def test_api_call():
     """
 
     api_interface = API_interfaces["carbonintensity.org.uk"]
-    response = cats.CI_api_query.get_CI_forecast('OX1')
+    response = cats.CI_api_query.get_CI_forecast('OX1', api_interface)
 
     assert isinstance(response, list)
     for item in response:
