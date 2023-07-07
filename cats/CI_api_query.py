@@ -2,8 +2,9 @@ import requests_cache
 from datetime import datetime, timezone
 
 from .CI_api_interface import API_interfaces
+from .forecast import CarbonIntensityPointEstimate
 
-def get_CI_forecast(postcode: str) -> list[list[tuple[datetime, int]]]:
+def get_CI_forecast(postcode: str) -> list[CarbonIntensityPointEstimate]:
     """
     get carbon intensity from carbonintensity.org.uk
 
