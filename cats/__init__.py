@@ -6,6 +6,7 @@ import sys
 
 from .check_clean_arguments import validate_jobinfo, validate_duration
 from .optimise_starttime import get_starttime  # noqa: F401
+from .CI_api_interface import API_interfaces
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .parsedata import avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
@@ -52,7 +53,8 @@ def main(arguments=None):
     duration = validate_duration(args.duration)
 
     ## Obtain CI forecast
-    CI_forecast = get_CI_forecast(loc)
+    CI_API_interface = API_interfaces["carbonintensity.org.uk"]  # TODO give choice of API to user
+    CI_forecast = get_CI_forecast(loc, CI_API_interface)
 
     ## Find optimal start time
     best_window = get_starttime(CI_forecast, method="windowed", duration=duration)

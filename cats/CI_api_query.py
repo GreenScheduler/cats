@@ -1,10 +1,9 @@
 import requests_cache
 from datetime import datetime, timezone
 
-from .CI_api_interface import API_interfaces
 from .forecast import CarbonIntensityPointEstimate
 
-def get_CI_forecast(postcode: str) -> list[CarbonIntensityPointEstimate]:
+def get_CI_forecast(postcode: str, CI_API_interface) -> list[CarbonIntensityPointEstimate]:
     """
     get carbon intensity from carbonintensity.org.uk
 
@@ -38,12 +37,10 @@ def get_CI_forecast(postcode: str) -> list[CarbonIntensityPointEstimate]:
     session = requests_cache.CachedSession('cats_cache', use_temp=True)
     # get the carbon intensity api data
 
-    API = API_interfaces["carbonintensity.org.uk"] # TODO give choice of API to user
-
-    r = session.get(API.get_request_url(dt, postcode))
+    r = session.get(CI_API_interface.get_request_url(dt, postcode))
     data = r.json()
 
-    return API.parse_response_data(data)
+    return CI_API_interface.parse_response_data(data)
 
 
 if __name__ == "__main__":
