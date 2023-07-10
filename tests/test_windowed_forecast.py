@@ -1,7 +1,12 @@
+import csv
 from datetime import datetime, timedelta
 import math
+from pathlib import Path
 from numpy.testing import assert_allclose
-from cats.forecast import CarbonIntensityPointEstimate, WindowedForecast
+from cats.forecast import (
+    CarbonIntensityPointEstimate, WindowedForecast,
+    CarbonIntensityAverageEstimate,
+)
 
 d = datetime(year=2023, month=1, day=1)
 NDATA = 200
@@ -13,6 +18,8 @@ DATA = [
     )
     for i in range(NDATA)
 ]
+
+TEST_DATA = Path(__file__).parent / "carbon_intensity_24h.csv"
 
 
 def test_has_right_length():
@@ -46,3 +53,57 @@ def test_values():
         desired=expected,
         rtol=0.01
     )
+
+
+def test_minimise_average():
+    with open(TEST_DATA, "r") as f:
+        csvfile = csv.reader(f, delimiter=",")
+        next(csvfile)  # Skip header line
+        data = [
+            CarbonIntensityPointEstimate(
+                datetime=datetime.fromisoformat(datestr[:-1]),
+                value=float(intensity_value),
+            )
+            for datestr, _, _, intensity_value in csvfile
+        ]
+
+        window_size = 6
+        result = min(WindowedForecast(data, window_size))
+
+        # Intensity point estimates over best runtime period
+        v = [10, 8, 7, 7, 5, 8, 8]
+        expected = CarbonIntensityAverageEstimate(
+            start=datetime.fromisoformat("2023-05-05T12:00"),
+            end=datetime.fromisoformat("2023-05-05T15:00"),
+            value=sum(
+                [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
+            ) / window_size
+        )
+        assert (result == expected)
+
+
+def test_average_intensity_now():
+    with open(TEST_DATA, "r") as f:
+        csvfile = csv.reader(f, delimiter=",")
+        next(csvfile)  # Skip header line
+        data = [
+            CarbonIntensityPointEstimate(
+                datetime=datetime.fromisoformat(datestr[:-1]),
+                value=float(intensity_value),
+            )
+            for datestr, _, _, intensity_value in csvfile
+        ]
+
+        window_size = 11
+        result = WindowedForecast(data, window_size)[0]
+
+        # Intensity point estimates over best runtime period
+        v = [p.value for p in data[:window_size + 1]]
+        expected = CarbonIntensityAverageEstimate(
+            start=data[0].datetime,
+            end=data[window_size].datetime,
+            value=sum(
+                [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
+            ) / window_size
+        )
+        assert (result == expected)
