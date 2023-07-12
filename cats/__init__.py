@@ -20,6 +20,13 @@ def parse_arguments():
     parser.add_argument("--jobinfo")
     parser.add_argument("--config")
 
+    # Optional
+    parser.add_argument(
+        "--api-carbonintensity", type=str,
+        help="[optional] which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`."
+             "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
+    )  # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
+
     return parser
 
 
@@ -27,8 +34,9 @@ def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
 
-    ## Validate and clean arguments
+    ### Validate and clean arguments ###
 
+    ## config file
     if args.config:
         with open(args.config, "r") as f:
             config = yaml.safe_load(f)
@@ -38,7 +46,19 @@ def main(arguments=None):
             with open("config.yml", "r") as f:
                 config = yaml.safe_load(f)
         except FileNotFoundError:
-            config = dict()
+            config = {}
+
+    ## CI API choice
+    list_CI_APIs = ['carbonintensity.org.uk']
+    if args.api_carbonintensity:
+        choice_CI_API = args.api_carbonintensity
+    elif 'api-carbonintensity' in config.keys():
+        choice_CI_API = config["api-carbonintensity"]
+    else:
+        choice_CI_API = 'carbonintensity.org.uk'  # default value is UK
+
+    if choice_CI_API not in list_CI_APIs:
+        raise ValueError(f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}.")
 
     if not args.loc:
         if "postcode" not in config.keys():
@@ -53,7 +73,7 @@ def main(arguments=None):
     duration = validate_duration(args.duration)
 
     ## Obtain CI forecast
-    CI_API_interface = API_interfaces["carbonintensity.org.uk"]  # TODO give choice of API to user
+    CI_API_interface = API_interfaces[choice_CI_API]
     CI_forecast = get_CI_forecast(loc, CI_API_interface)
 
     ## Find optimal start time

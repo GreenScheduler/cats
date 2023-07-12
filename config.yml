@@ -8,6 +8,7 @@
 ---
 cluster_name: "CW23"
 postcode: "EH8 9BT"
+api-carbonintensity: carbonintensity.org.uk
 PUE: 1.20 # > 1
 partitions:
   CPU_partition:
