@@ -62,15 +62,19 @@ def main(arguments=None):
 
     ## config file
     if args.config:
+        # if path to config file provided, it is used
         with open(args.config, "r") as f:
             config = yaml.safe_load(f)
+        sys.stderr.write(f"Using provided config file: {args.config}\n")
     else:
         # if no path provided, look for `config.yml` in current directory
         try:
             with open("config.yml", "r") as f:
                 config = yaml.safe_load(f)
+            sys.stderr.write("Using config.yml found in current directory\n")
         except FileNotFoundError:
             config = {}
+            sys.stderr.write("WARNING: config file not found\n")
 
     ## CI API choice
     list_CI_APIs = ['carbonintensity.org.uk']
@@ -83,16 +87,20 @@ def main(arguments=None):
 
     if choice_CI_API not in list_CI_APIs:
         raise ValueError(f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}.")
+    sys.stderr.write(f"Using {choice_CI_API} for carbon intensity forecasts\n")
 
     ## Location
     if args.location:
         location = validate_location(args.location, choice_CI_API)
+        sys.stderr.write(f"Using location provided: {location}\n")
     elif "location" in config.keys():
         location = validate_location(config["location"], choice_CI_API)
+        sys.stderr.write(f"Using location from config file: {location}\n")
     else:
         r = requests.get("https://ipapi.co/json").json()
         postcode = r["postal"]
         location = validate_location(postcode, choice_CI_API)
+        sys.stderr.write(f"WARNING: location not provided. Estimating location from IP address: {location}.\n")
 
     ## Duration
     duration = validate_duration(args.duration)
@@ -109,7 +117,7 @@ def main(arguments=None):
     #############################
 
     best_window = get_starttime(CI_forecast, method="windowed", duration=duration)
-    sys.stderr.write(str(best_window) + "\n")
+    sys.stderr.write("\n" + str(best_window) + "\n")
 
     sys.stderr.write(f"Best job start time: {best_window.start}\n")
     print(f"{best_window.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
@@ -135,7 +143,7 @@ def main(arguments=None):
                 **jobinfo,
             ).get_footprint()
 
-            print(" -!-!- Carbon footprint estimation is a work in progress, coming soon!")
+            sys.stderr.write("\n -!-!- Carbon footprint estimation is a work in progress, coming soon!\n")
             # Commenting these out while waiting for real carbon intensities
             # print(f"Estimated emmissions for running job now: {estim.now}")
             # msg = (
