@@ -14,8 +14,8 @@ from .carbonFootprint import greenAlgorithmsCalculator
 def parse_arguments():
     parser = ArgumentParser(prog="cats", description="A climate aware job scheduler")
 
-    #parser.add_argument("program")
-    parser.add_argument("-d", "--duration", type=int, required=True)
+    # Required
+    parser.add_argument("-d", "--duration", type=int, required=True, help="Expected duration of the job in minutes.")
     parser.add_argument("--jobinfo")
     parser.add_argument("--config")
 
@@ -76,6 +76,7 @@ def main(arguments=None):
         postcode = r["postal"]
         location = validate_location(postcode, choice_CI_API)
 
+    ## Duration
     duration = validate_duration(args.duration)
 
     ## Obtain CI forecast
