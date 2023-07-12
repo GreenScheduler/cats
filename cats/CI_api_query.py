@@ -40,5 +40,6 @@ def get_CI_forecast(postcode: str, CI_API_interface) -> list[CarbonIntensityPoin
 
 
 if __name__ == "__main__":
+    from .CI_api_interface import API_interfaces
     # test example using Manchester as a location
-    data_tuples = get_CI_forecast("M15")
+    data_tuples = get_CI_forecast("M15", API_interfaces["carbonintensity.org.uk"])
