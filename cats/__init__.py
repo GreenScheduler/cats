@@ -4,7 +4,7 @@ import requests
 import yaml
 import sys
 
-from .check_clean_arguments import validate_jobinfo, validate_duration
+from .check_clean_arguments import validate_jobinfo, validate_duration, validate_location
 from .optimise_starttime import get_starttime  # noqa: F401
 from .CI_api_interface import API_interfaces
 from .CI_api_query import get_CI_forecast  # noqa: F401
@@ -15,7 +15,6 @@ def parse_arguments():
     parser = ArgumentParser(prog="cats", description="A climate aware job scheduler")
 
     #parser.add_argument("program")
-    parser.add_argument("--loc")
     parser.add_argument("-d", "--duration", type=int, required=True)
     parser.add_argument("--jobinfo")
     parser.add_argument("--config")
@@ -26,6 +25,13 @@ def parse_arguments():
         help="[optional] which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`."
              "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
     )  # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
+
+    parser.add_argument(
+        "-l", "--location", type=str,
+        help="[optional] location of the computing facility. For the UK, first half of a postcode (e.g. 'M15'), "
+             "for other APIs, see doc for exact format. Overrides `config.yml`. "
+             "If absent, location based in IP address is used."
+    )
 
     return parser
 
@@ -60,21 +66,21 @@ def main(arguments=None):
     if choice_CI_API not in list_CI_APIs:
         raise ValueError(f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}.")
 
-    if not args.loc:
-        if "postcode" not in config.keys():
-            r = requests.get("https://ipapi.co/json").json()
-            loc = r["postal"]
-        else:
-            loc = config["postcode"]
+    ## Location
+    if args.location:
+        location = validate_location(args.location, choice_CI_API)
+    elif "location" in config.keys():
+        location = validate_location(config["location"], choice_CI_API)
     else:
-        loc = args.loc
-    #print("Location:", loc)
+        r = requests.get("https://ipapi.co/json").json()
+        postcode = r["postal"]
+        location = validate_location(postcode, choice_CI_API)
 
     duration = validate_duration(args.duration)
 
     ## Obtain CI forecast
     CI_API_interface = API_interfaces[choice_CI_API]
-    CI_forecast = get_CI_forecast(loc, CI_API_interface)
+    CI_forecast = get_CI_forecast(location, CI_API_interface)
 
     ## Find optimal start time
     best_window = get_starttime(CI_forecast, method="windowed", duration=duration)
