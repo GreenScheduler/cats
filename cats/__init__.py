@@ -17,7 +17,6 @@ def parse_arguments():
     # Required
     parser.add_argument("-d", "--duration", type=int, required=True, help="Expected duration of the job in minutes.")
     parser.add_argument("--jobinfo")
-    parser.add_argument("--config")
 
     # Optional
     parser.add_argument(
@@ -33,6 +32,14 @@ def parse_arguments():
              "If absent, location based in IP address is used."
     )
 
+    parser.add_argument(
+        "--config", type=str,
+        help="[optional] path to a config file, default is `config.yml` in current directory. "
+             "Config file is required to obtain carbon footprint estimates."
+             "template at https://github.com/GreenScheduler/cats/blob/main/config.yml"
+    )
+
+
     return parser
 
 
@@ -40,7 +47,9 @@ def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
 
-    ### Validate and clean arguments ###
+    ##################################
+    ## Validate and clean arguments ##
+    ##################################
 
     ## config file
     if args.config:
@@ -79,26 +88,26 @@ def main(arguments=None):
     ## Duration
     duration = validate_duration(args.duration)
 
-    ## Obtain CI forecast
+    ########################
+    ## Obtain CI forecast ##
+    ########################
+
     CI_API_interface = API_interfaces[choice_CI_API]
     CI_forecast = get_CI_forecast(location, CI_API_interface)
 
-    ## Find optimal start time
+    #############################
+    ## Find optimal start time ##
+    #############################
+
     best_window = get_starttime(CI_forecast, method="windowed", duration=duration)
     sys.stderr.write(str(best_window) + "\n")
 
-#    subprocess.run(
-#        [
-#            args.program,
-#            "|",
-#            "at",
-#            "-m",
-#            f"{runtime:%m%d%H%M}",
-#        ]
-#    )
-
     sys.stderr.write(f"Best job start time: {best_window.start}\n")
     print(f"{best_window.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
+
+    ################################
+    ## Calculate carbon footprint ##
+    ################################
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
