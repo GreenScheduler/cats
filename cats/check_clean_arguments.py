@@ -1,6 +1,7 @@
 import re
+import sys
 
-def validate_jobinfo(jobinfo: str):
+def validate_jobinfo(jobinfo: str, config):
     """Parses a string of job info keys in the form
 
     partition=CPU_partition,memory=8,ncpus=8,ngpus=0
@@ -20,28 +21,27 @@ def validate_jobinfo(jobinfo: str):
         "cpus",
         "gpus",
     )
-    info = {
-        k: v
-        for k, v in [match.groups() for match in re.finditer(r"(\w+)=(\w+)", jobinfo)]
-    }
-    missing_keys = set(expected_info_keys) - set(info.keys())
-    if missing_keys:
-        print(f"ERROR: Missing job info keys: {missing_keys}")
+    info = dict([match.groups() for match in re.finditer(r"(\w+)=(\w+)", jobinfo)])
+
+    # Check if some information is missing
+    if missing_keys := set(expected_info_keys) - set(info.keys()):
+        sys.stderr.write(f"ERROR: Missing job info keys: {missing_keys}")
         return {}
-    expected_partition_values = ("CPU_partition", "GPU_partition")
+
+    # Validate partition value
+    expected_partition_values = config['partitions'].keys()
     if info["partition"] not in expected_partition_values:
-        msg = (
-            "ERROR: job info key 'partition' should be "
-            f"one of {expected_partition_values}. Typo?"
-        )
-        print(msg)
+        sys.stderr.write("ERROR: job info key 'partition' should be one of {expected_partition_values}. Typo?\n")
         return {}
-    for key in [k for k in info.keys() if k != "partition"]:
+
+    # check that `cpus`, `gpus` and `memory` are numeric and convert to int
+    for key in [k for k in info if k != "partition"]:
         try:
             info[key] = int(info[key])
         except ValueError:
-            print(f"ERROR: job info key {key} should be numeric")
+            sys.stderr.write(f"ERROR: job info key {key} should be numeric\n")
             return {}
+
     return info
 
 def validate_duration(duration):
