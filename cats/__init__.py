@@ -12,6 +12,10 @@ from .parsedata import avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
 def parse_arguments():
+    """
+    Parse command line arguments
+    :return: [dict] parsed arguments
+    """
     parser = ArgumentParser(prog="cats", description="A climate aware job scheduler")
 
     ### Required
@@ -44,7 +48,6 @@ def parse_arguments():
              "`cpus`: number of CPU cores, `gpus`: number of GPUs, `memory`: memory available in GB, "
              "`partition`: one of the partitions keys in `config.yml`."
     )
-
 
     return parser
 
