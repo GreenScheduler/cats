@@ -16,6 +16,16 @@ def ciuk_request_url(timestamp: datetime, postcode: str):
 
 
 def ciuk_parse_response_data(response: dict):
+    """
+    This wraps the API from carbonintensity.org.uk
+    and is set up to cache data from call to call even accross different
+    processes within the same half hour window. The returned prediction data
+    is in half hour blocks starting from the half hour containing the current
+    time and extending for 48 hours into the future.
+
+    :param response:
+    :return:
+    """
     datefmt = "%Y-%m-%dT%H:%MZ"
     return [
         CarbonIntensityPointEstimate(

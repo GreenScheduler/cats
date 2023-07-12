@@ -7,15 +7,11 @@ def get_CI_forecast(postcode: str, CI_API_interface) -> list[CarbonIntensityPoin
     """
     get carbon intensity from carbonintensity.org.uk
 
-    Given the postcode and current time, return a set of predictions of the
-    future carbon intensity. This wraps the API from carbonintensity.org.uk
-    and is set up to cache data from call to call even accross different
-    processes within the same half hour window. The returned prediction data
-    is in half hour blocks starting from the half hour containing the current
-    time and extending for 48 hours into the future.
+    Given the postcode and an API interface, return a list of predictions of the
+    future carbon intensity.
 
     param postcode: UK post code (just the first section), e.g. M15
-    returns: a set of tuples with start time and carbon intensity
+    returns: a list of CarbonIntensityPointEstimate
     """
     # just get the first part of the postcode, assume spaces are included
     postcode = postcode.split()[0]
