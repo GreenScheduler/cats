@@ -1,30 +1,15 @@
 from argparse import ArgumentParser
 from datetime import datetime, timedelta
 import requests
-import subprocess
-import re
 import yaml
 import sys
 
-from .timeseries_conversion import get_lowest_carbon_intensity  # noqa: F401
-from .api_query import get_tuple  # noqa: F401
+from .check_clean_arguments import validate_jobinfo, validate_duration
+from .optimise_starttime import get_starttime  # noqa: F401
+from .CI_api_interface import API_interfaces
+from .CI_api_query import get_CI_forecast  # noqa: F401
 from .parsedata import avg_carbon_intensity  # noqa: F401
-from .api_interface import API_interfaces
 from .carbonFootprint import greenAlgorithmsCalculator
-
-# from cats import findtime
-
-
-def findtime(postcode, duration, api_interface):
-    forecast = get_tuple(
-        postcode,
-        api_interface.get_request_url,
-        api_interface.parse_reponse_data,
-    )
-    result = get_lowest_carbon_intensity(forecast, method="windowed", duration=duration)
-    sys.stderr.write(str(result) + "\n")
-    return result, forecast
-
 
 def parse_arguments():
     parser = ArgumentParser(prog="cats", description="A climate aware job scheduler")
@@ -38,54 +23,11 @@ def parse_arguments():
     return parser
 
 
-def validate_jobinfo(jobinfo: str):
-    """Parses a string of job info keys in the form
-
-    partition=CPU_partition,memory=8,ncpus=8,ngpus=0
-
-    and checks all required info keys are present and of the right type.
-
-    Returns
-    -------
-
-    info: dict
-        A dictionary mapping info key to their specified values
-    """
-
-    expected_info_keys = (
-        "partition",
-        "memory",
-        "cpus",
-        "gpus",
-    )
-    info = {
-        k: v
-        for k, v in [match.groups() for match in re.finditer(r"(\w+)=(\w+)", jobinfo)]
-    }
-    missing_keys = set(expected_info_keys) - set(info.keys())
-    if missing_keys:
-        print(f"ERROR: Missing job info keys: {missing_keys}")
-        return {}
-    expected_partition_values = ("CPU_partition", "GPU_partition")
-    if info["partition"] not in expected_partition_values:
-        msg = (
-            "ERROR: job info key 'partition' should be "
-            f"one of {expected_partition_values}. Typo?"
-        )
-        print(msg)
-        return {}
-    for key in [k for k in info.keys() if k != "partition"]:
-        try:
-            info[key] = int(info[key])
-        except ValueError:
-            print(f"ERROR: job info key {key} should be numeric")
-            return {}
-    return info
-
-
 def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
+
+    ## Validate and clean arguments
 
     if args.config:
         with open(args.config, "r") as f:
@@ -108,12 +50,16 @@ def main(arguments=None):
         loc = args.loc
     #print("Location:", loc)
 
-    best_estimate, forecast_data = findtime(
-        loc, args.duration,
-        # TODO Choose API provider based on postcode or
-        # user option
-        API_interfaces["carbonintensitity.org.uk"],
-    )
+    duration = validate_duration(args.duration)
+
+    ## Obtain CI forecast
+    CI_API_interface = API_interfaces["carbonintensity.org.uk"]  # TODO give choice of API to user
+    CI_forecast = get_CI_forecast(loc, CI_API_interface)
+
+    ## Find optimal start time
+    best_window = get_starttime(CI_forecast, method="windowed", duration=duration)
+    sys.stderr.write(str(best_window) + "\n")
+
 #    subprocess.run(
 #        [
 #            args.program,
@@ -124,8 +70,8 @@ def main(arguments=None):
 #        ]
 #    )
 
-    sys.stderr.write(f"Best job start time: {best_estimate.start}\n")
-    print(f"{best_estimate.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
+    sys.stderr.write(f"Best job start time: {best_window.start}\n")
+    print(f"{best_window.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo)
@@ -136,12 +82,12 @@ def main(arguments=None):
             print("ERROR: config file not found, exiting now")
             exit(1)
         now_avg_ci = avg_carbon_intensity(
-            data=forecast_data, start=datetime.now(), runtime=timedelta(args.duration)
+            data=CI_forecast, start=datetime.now(), runtime=timedelta(args.duration)
         )
         estim = greenAlgorithmsCalculator(
             config=config,
             runtime=timedelta(minutes=args.duration),
-            averageBest_carbonIntensity=best_estimate.value, # TODO replace with real carbon intensity
+            averageBest_carbonIntensity=best_window.value, # TODO replace with real carbon intensity
             averageNow_carbonIntensity=now_avg_ci,
             **jobinfo,
         ).get_footprint()

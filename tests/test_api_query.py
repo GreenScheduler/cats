@@ -1,5 +1,5 @@
 import cats
-from cats.api_interface import API_interfaces
+from cats.CI_api_interface import API_interfaces
 from cats.forecast import CarbonIntensityPointEstimate
 
 def test_api_call():
@@ -8,11 +8,7 @@ def test_api_call():
     """
 
     api_interface = API_interfaces["carbonintensity.org.uk"]
-    response = cats.api_query.get_tuple(
-        postcode='OX1',
-        request_url=api_interface.get_request_url,
-        parse_data_from_json=api_interface.parse_response_data,
-    )
+    response = cats.CI_api_query.get_CI_forecast('OX1', api_interface)
 
     assert isinstance(response, list)
     for item in response:

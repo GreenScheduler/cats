@@ -1,25 +1,17 @@
 import requests_cache
-from typing import Callable
 from datetime import datetime, timezone
 
+from .forecast import CarbonIntensityPointEstimate
 
-def get_tuple(
-    postcode: str,
-    request_url: Callable[[datetime, str], str],
-    parse_data_from_json: Callable[[dict], list[tuple[datetime, int]]],
-) -> list[list[tuple[datetime, int]]]:
+def get_CI_forecast(postcode: str, CI_API_interface) -> list[CarbonIntensityPointEstimate]:
     """
     get carbon intensity from carbonintensity.org.uk
 
-    Given the postcode and current time, return a set of predictions of the
-    future carbon intensity. This wraps the API from carbonintensity.org.uk
-    and is set up to cache data from call to call even accross different
-    processes within the same half hour window. The returned prediction data
-    is in half hour blocks starting from the half hour containing the current
-    time and extending for 48 hours into the future.
+    Given the postcode and an API interface, return a list of predictions of the
+    future carbon intensity.
 
     param postcode: UK post code (just the first section), e.g. M15
-    returns: a set of tuples with start time and carbon intensity
+    returns: a list of CarbonIntensityPointEstimate
     """
     # just get the first part of the postcode, assume spaces are included
     postcode = postcode.split()[0]
@@ -41,12 +33,13 @@ def get_tuple(
     session = requests_cache.CachedSession('cats_cache', use_temp=True)
     # get the carbon intensity api data
 
-    r = session.get(request_url(dt, postcode))
+    r = session.get(CI_API_interface.get_request_url(dt, postcode))
     data = r.json()
 
-    return parse_data_from_json(data)
+    return CI_API_interface.parse_response_data(data)
 
 
 if __name__ == "__main__":
+    from .CI_api_interface import API_interfaces
     # test example using Manchester as a location
-    data_tuples = get_tuple("M15")
+    data_tuples = get_CI_forecast("M15", API_interfaces["carbonintensity.org.uk"])
