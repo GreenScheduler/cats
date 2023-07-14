@@ -5,7 +5,7 @@ import yaml
 import sys
 
 from .check_clean_arguments import validate_jobinfo, validate_duration, validate_location
-from .optimise_starttime import get_starttime  # noqa: F401
+from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .CI_api_interface import API_interfaces
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
@@ -115,8 +115,11 @@ def main(arguments=None):
     ## Find optimal start time ##
     #############################
 
-    ## Find optimal start time
-    now_avg, best_avg = get_starttime(CI_forecast, method="windowed", duration=duration)
+    # Find best possible average carbon intensity, along
+    # with corresponding job start time.
+    now_avg, best_avg = get_avg_estimates(
+        CI_forecast, method="windowed", duration=duration
+    )
     sys.stderr.write(str(best_avg) + "\n")
 
     sys.stderr.write(f"Best job start time: {best_avg.start}\n")

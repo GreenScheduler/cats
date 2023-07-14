@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime
 import csv
 
-from cats.optimise_starttime import get_starttime
+from cats.optimise_starttime import get_avg_estimates
 from cats.forecast import CarbonIntensityPointEstimate
 
 
@@ -24,7 +24,7 @@ def test_timeseries_conversion():
             )
             for datestr, _, _, intensity_value in csvfile
         ]
-    result = get_starttime(
+    result = get_avg_estimates(
         forecast_data, method="simple", duration=None
     )
     assert result == CarbonIntensityPointEstimate(
