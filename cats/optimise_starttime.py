@@ -1,3 +1,4 @@
+from math import ceil
 from .forecast import WindowedForecast
 
 def get_starttime(data, method="simple", duration=None):
@@ -24,7 +25,11 @@ def get_starttime(data, method="simple", duration=None):
 
     if method == "windowed":
         # get length of interval between timestamps
-        interval = (data[1].datetime - data[0].datetime).total_seconds() / 60
-        # count number of intervals in size
-        num_intervals = int((duration / interval) + 0.5)  # round to nearest integer (UP)
-        return min(WindowedForecast(data, num_intervals))
+        interval = (
+            data[1].datetime - data[0].datetime
+        ).total_seconds() / 60
+        wf = WindowedForecast(
+            data=data,
+            window_size=ceil(duration / interval)
+        )
+        return wf[0], min(wf)

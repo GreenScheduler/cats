@@ -116,11 +116,12 @@ def main(arguments=None):
     ## Find optimal start time ##
     #############################
 
-    best_window = get_starttime(CI_forecast, method="windowed", duration=duration)
-    sys.stderr.write("\n" + str(best_window) + "\n")
+    ## Find optimal start time
+    now_avg, best_avg = get_starttime(CI_forecast, method="windowed", duration=duration)
+    sys.stderr.write(str(best_avg) + "\n")
 
-    sys.stderr.write(f"Best job start time: {best_window.start}\n")
-    print(f"{best_window.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
+    sys.stderr.write(f"Best job start time: {best_avg.start}\n")
+    print(f"{best_avg.start:%Y%m%d%H%M}")  # for POSIX compatibility with at -t
 
     ################################
     ## Calculate carbon footprint ##
@@ -140,7 +141,7 @@ def main(arguments=None):
             estim = greenAlgorithmsCalculator(
                 config=config,
                 runtime=timedelta(minutes=args.duration),
-                averageBest_carbonIntensity=best_window.value, # TODO replace with real carbon intensity
+                averageBest_carbonIntensity=best_avg.value, # TODO replace with real carbon intensity
                 averageNow_carbonIntensity=now_avg_ci,
                 **jobinfo,
             ).get_footprint()
