@@ -8,7 +8,6 @@ from .check_clean_arguments import validate_jobinfo, validate_duration, validate
 from .optimise_starttime import get_starttime  # noqa: F401
 from .CI_api_interface import API_interfaces
 from .CI_api_query import get_CI_forecast  # noqa: F401
-from .parsedata import avg_carbon_intensity  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
 def parse_arguments():
@@ -135,27 +134,20 @@ def main(arguments=None):
         if not (jobinfo and config):
             sys.stderr.write(error_message)
         else:
-            now_avg_ci = avg_carbon_intensity(
-                data=CI_forecast, start=datetime.now(), runtime=timedelta(args.duration)
-            )
             estim = greenAlgorithmsCalculator(
                 config=config,
                 runtime=timedelta(minutes=args.duration),
                 averageBest_carbonIntensity=best_avg.value, # TODO replace with real carbon intensity
-                averageNow_carbonIntensity=now_avg_ci,
+                averageNow_carbonIntensity=now_avg.value,
                 **jobinfo,
             ).get_footprint()
 
-            sys.stderr.write("\n -!-!- Carbon footprint estimation is a work in progress, coming soon!\n")
-            # Commenting these out while waiting for real carbon intensities
-            # print(f"Estimated emmissions for running job now: {estim.now}")
-            # msg = (
-            #     f"Estimated emmissions for running delayed job: {estim.best})"
-            #     f" (- {estim.savings})"
-            # )
-            # print(msg)
-    else:
-        sys.stderr.write(error_message)
+            sys.stderr.write(f"Estimated emmissions for running job now: {estim.now}\n")
+            msg = (
+                f"Estimated emmissions for running delayed job: {estim.best})\n"
+                f" (- {estim.savings})"
+            )
+            sys.stderr.write(msg)
 
 
 if __name__ == "__main__":
