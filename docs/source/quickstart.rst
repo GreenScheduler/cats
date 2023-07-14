@@ -31,23 +31,15 @@ some information about the carbon intensity on standard error.
 Displaying carbon footprint estimates
 -------------------------------------
 
-Optionally, CATS will soon be able to provide an estimate for the
-carbon footprint reduction resulting from delaying your job. To enable
-the footprint estimation, you must provide information about the
-machine in the form of a YAML configuration file. An example is
-given below:
+CATS is able to provide an estimate for the carbon footprint reduction
+resulting from delaying your job. To enable the footprint estimation,
+you must provide information about the machine in the form of a YAML
+configuration file. An example is given below:
 
 .. code-block:: yaml
    :caption: *An example provision of machine information by YAML file
              to enable estimation of the carbon footprint reduction.*
 
-   ## ~~~ TO BE EDITED TO BE TAILORED TO THE CLUSTER ~~~
-   ##
-   ## Settings for fictive CW23
-   ##
-   ## Updated: 04/05/2023
-
-   ---
    cluster_name: "CW23"
    postcode: "EH8 9BT"
    PUE: 1.20 # > 1
@@ -55,7 +47,7 @@ given below:
      CPU_partition:
        type: CPU # CPU or GPU
        model: "Xeon Gold 6142"
-       TDP: 9.4 # in W, per core
+       TDP: 9.4 # Thermal Design Power, in W per core
      GPU_partition:
        type: GPU
        model: "NVIDIA A100-SXM-80GB GPUs"
