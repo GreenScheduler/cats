@@ -78,12 +78,12 @@ def main(arguments=None):
 
     ## CI API choice
     list_CI_APIs = ['carbonintensity.org.uk']
+
+    choice_CI_API = 'carbonintensity.org.uk' # default value
+    if 'api-carbonintensity' in config.keys():
+        choice_CI_API = config["api-carbonintensity"]
     if args.api_carbonintensity:
         choice_CI_API = args.api_carbonintensity
-    elif 'api-carbonintensity' in config.keys():
-        choice_CI_API = config["api-carbonintensity"]
-    else:
-        choice_CI_API = 'carbonintensity.org.uk'  # default value is UK
 
     if choice_CI_API not in list_CI_APIs:
         raise ValueError(f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}.")
