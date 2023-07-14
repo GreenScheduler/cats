@@ -127,7 +127,7 @@ def main(arguments=None):
     ################################
 
     if args.jobinfo:
-        jobinfo = validate_jobinfo(args.jobinfo, config)
+        jobinfo = validate_jobinfo(args.jobinfo, expected_partition_names=config['partitions'].keys())
 
         if not (jobinfo and config):
             sys.stderr.write("Not enough information to estimate total carbon footprint, both --jobinfo and config files are needed.\n")

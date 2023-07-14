@@ -5,6 +5,7 @@ from .forecast import CarbonIntensityPointEstimate
 
 
 APIInterface = namedtuple('APIInterface', ['get_request_url', 'parse_response_data'])
+# TODO add a validation function to check the validity of the --location argument
 
 def ciuk_request_url(timestamp: datetime, postcode: str):
     # This transformation is specific to the CI-UK API.

@@ -1,7 +1,7 @@
 import re
 import sys
 
-def validate_jobinfo(jobinfo: str, config):
+def validate_jobinfo(jobinfo: str, expected_partition_names):
     """Parses a string of job info keys in the form
 
     partition=CPU_partition,memory=8,ncpus=8,ngpus=0
@@ -29,9 +29,8 @@ def validate_jobinfo(jobinfo: str, config):
         return {}
 
     # Validate partition value
-    expected_partition_values = config['partitions'].keys()
-    if info["partition"] not in expected_partition_values:
-        sys.stderr.write("ERROR: job info key 'partition' should be one of {expected_partition_values}. Typo?\n")
+    if info["partition"] not in expected_partition_names:
+        sys.stderr.write(f"ERROR: job info key 'partition' should be one of {expected_partition_names}. Typo?\n")
         return {}
 
     # check that `cpus`, `gpus` and `memory` are numeric and convert to int
