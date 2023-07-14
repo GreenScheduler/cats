@@ -20,24 +20,24 @@ def parse_arguments():
 
     ### Required
 
-    parser.add_argument("-d", "--duration", type=int, required=True, help="Expected duration of the job in minutes.")
+    parser.add_argument("-d", "--duration", type=int, required=True, help="[required] Expected duration of the job in minutes.")
 
     ### Optional
 
     parser.add_argument(
         "--api-carbonintensity", type=str,
-        help="[optional] which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`."
+        help="Which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`."
              "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
     )  # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
     parser.add_argument(
         "-l", "--location", type=str,
-        help="[optional] location of the computing facility. For the UK, first half of a postcode (e.g. 'M15'), "
+        help="Location of the computing facility. For the UK, first half of a postcode (e.g. 'M15'), "
              "for other APIs, see doc for exact format. Overrides `config.yml`. "
              "If absent, location based in IP address is used."
     )
     parser.add_argument(
         "--config", type=str,
-        help="[optional] path to a config file, default is `config.yml` in current directory. "
+        help="Path to a config file, default is `config.yml` in current directory. "
              "Config file is required to obtain carbon footprint estimates."
              "template at https://github.com/GreenScheduler/cats/blob/main/config.yml"
     )
