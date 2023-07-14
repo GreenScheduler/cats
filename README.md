@@ -63,6 +63,44 @@ ls | at -t `python -m cats -d 5 --loc OX1`
 
 ![CATS animated usage example](cats.gif)
 
+#### Displaying carbon footprint estimates
+
+`cats` is able to provide an estimate for the carbon footprint
+reduction resulting from delaying your job.  To enable the footprint
+estimation, you must provide information about the machine in the form
+of a YAML configuration file.  An example is given below:
+
+```yaml
+cluster_name: "CW23"
+postcode: "EH8 9BT"
+PUE: 1.20 # > 1
+partitions:
+  CPU_partition:
+    type: CPU # CPU or GPU
+    model: "Xeon Gold 6142"
+    TDP: 9.4 # Thermal Design Power in W/core
+  GPU_partition:
+    type: GPU
+    model: "NVIDIA A100-SXM-80GB GPUs"
+    TDP: 300
+    CPU_model: "AMD EPYC 7763"
+    TDP_CPU: 4.4
+```
+
+Use the `--config` option to specify a path to the configuration
+file. If no path is specified, `cats` looks for a file named
+`config.yml` in the current directory.
+
+Additionally, to obtain carbon footprints, job-specific information
+must be provided to `cats` through the `--jobinfo` option.  The
+example below demonstrates running `cats` with footprint estimation
+for a job using 8GB of memory, 2 CPU cores and no GPU:
+
+```bash
+cats -d 120 --config .config/config.yml \
+  --jobinfo cpus=2,gpus=0,memory=8,partition=CPU_partition
+```
+
 ***
 
 ## Contributing
