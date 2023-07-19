@@ -5,11 +5,24 @@ from .forecast import CarbonIntensityPointEstimate
 
 
 APIInterface = namedtuple('APIInterface', ['get_request_url', 'parse_response_data'])
+# TODO add a validation function to check the validity of the --location argument
 
 def ciuk_request_url(timestamp: datetime, postcode: str):
+    # This transformation is specific to the CI-UK API.
+    # get the time (as a datetime object) and update this to be the 'top' of
+    # the current hour or half hour in UTZ plus one minute. So a call at
+    # 17:47 BST will yield a timestamp of 16:31 UTC. This means that within
+    # any given half hour we will always use the same timestamp.
+    # As this becomes part of the URL, calls can be cached using standard HTTP
+    # caching layer.
+    if timestamp.minute > 30:
+        dt = timestamp.replace(minute=31, second=0, microsecond=0)
+    else:
+        dt = timestamp.replace(minute=1, second=0, microsecond=0)
+
     return (
         "https://api.carbonintensity.org.uk/regional/intensity/"
-        + timestamp.strftime("%Y-%m-%dT%H:%MZ")
+        + dt.strftime("%Y-%m-%dT%H:%MZ")
         + "/fw48h/postcode/"
         + postcode
     )
