@@ -38,7 +38,7 @@ def parse_arguments():
     parser.add_argument(
         "--config", type=str,
         help="Path to a config file, default is `config.yml` in current directory. "
-             "Config file is required to obtain carbon footprint estimates."
+             "Config file is required to obtain carbon footprint estimates. "
              "template at https://github.com/GreenScheduler/cats/blob/main/config.yml"
     )
     parser.add_argument(
