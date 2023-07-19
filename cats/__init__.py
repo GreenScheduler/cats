@@ -26,7 +26,7 @@ def parse_arguments():
 
     parser.add_argument(
         "--api-carbonintensity", type=str,
-        help="Which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`."
+        help="Which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`. "
              "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
     )  # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
     parser.add_argument(
