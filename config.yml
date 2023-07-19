@@ -8,7 +8,7 @@
 ---
 cluster_name: "CW23"
 location: "EH8"
-api-carbonintensity: carbonintensity.org.uk
+api: carbonintensity.org.uk
 PUE: 1.20 # > 1
 partitions:
   CPU_partition:

@@ -25,10 +25,10 @@ def parse_arguments():
     ### Optional
 
     parser.add_argument(
-        "--api-carbonintensity", type=str,
+        "-a", "--api", type=str,
         help="Which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`. "
              "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
-    )  # Note: 'api-carbonintensity' will become 'api_carbonintensity' when parsed by argparse
+    )
     parser.add_argument(
         "-l", "--location", type=str,
         help="Location of the computing facility. For the UK, first half of a postcode (e.g. 'M15'), "
@@ -80,10 +80,10 @@ def main(arguments=None):
     list_CI_APIs = ['carbonintensity.org.uk']
 
     choice_CI_API = 'carbonintensity.org.uk' # default value
-    if 'api-carbonintensity' in config.keys():
-        choice_CI_API = config["api-carbonintensity"]
-    if args.api_carbonintensity:
-        choice_CI_API = args.api_carbonintensity
+    if 'api' in config.keys():
+        choice_CI_API = config["api"]
+    if args.api:
+        choice_CI_API = args.api
 
     if choice_CI_API not in list_CI_APIs:
         raise ValueError(f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}.")
