@@ -126,11 +126,13 @@ def main(arguments=None):
     ## Calculate carbon footprint ##
     ################################
 
+    error_message = "Not enough information to estimate total carbon footprint, both --jobinfo and config files are needed.\n"
+
     if args.jobinfo:
         jobinfo = validate_jobinfo(args.jobinfo, expected_partition_names=config['partitions'].keys())
 
         if not (jobinfo and config):
-            sys.stderr.write("Not enough information to estimate total carbon footprint, both --jobinfo and config files are needed.\n")
+            sys.stderr.write(error_message)
         else:
             now_avg_ci = avg_carbon_intensity(
                 data=CI_forecast, start=datetime.now(), runtime=timedelta(args.duration)
@@ -152,7 +154,7 @@ def main(arguments=None):
             # )
             # print(msg)
     else:
-        sys.stderr.write("Not enough information to estimate total carbon footprint, both --jobinfo and config files are needed.\n")
+        sys.stderr.write(error_message)
 
 
 if __name__ == "__main__":
