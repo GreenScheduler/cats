@@ -71,8 +71,8 @@ estimation, you must provide information about the machine in the form
 of a YAML configuration file.  An example is given below:
 
 ```yaml
-cluster_name: "CW23"
-postcode: "EH8 9BT"
+location: "EH8"
+api: "carbonintensity.org.uk"
 PUE: 1.20 # > 1
 partitions:
   CPU_partition:
