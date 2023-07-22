@@ -1,3 +1,4 @@
+from math import ceil
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -36,12 +37,20 @@ class CarbonIntensityAverageEstimate:
 
 class WindowedForecast:
 
-    def __init__(self, data: list[CarbonIntensityPointEstimate], window_size: int):
+    def __init__(
+            self,
+            data: list[CarbonIntensityPointEstimate],
+            duration: int,  # in minutes
+            start: datetime,
+    ):
         self.times = [point.datetime for point in data]
         self.intensities = [point.value for point in data]
         # Integration window size in number of time intervals covered
         # by the window.
-        self.window_size = window_size
+        data_stepsize = (
+            data[1].datetime - data[0].datetime
+        ).total_seconds() / 60
+        self.window_size = ceil(duration / data_stepsize)
 
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
         """Return the average of timeseries data from index over the

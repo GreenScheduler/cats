@@ -1,4 +1,4 @@
-from math import ceil
+from datetime import datetime
 from .forecast import WindowedForecast
 
 
@@ -28,11 +28,5 @@ def get_avg_estimates(data, method="simple", duration=None):
 
     if method == "windowed":
         # get length of interval between timestamps
-        interval = (
-            data[1].datetime - data[0].datetime
-        ).total_seconds() / 60
-        wf = WindowedForecast(
-            data=data,
-            window_size=ceil(duration / interval)
-        )
+        wf = WindowedForecast(data, duration, start=datetime.now())
         return wf[0], min(wf)

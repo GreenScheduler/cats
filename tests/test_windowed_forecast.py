@@ -24,7 +24,7 @@ TEST_DATA = Path(__file__).parent / "carbon_intensity_24h.csv"
 
 def test_has_right_length():
     window_size = 160  # In number of time intervals
-    wf = WindowedForecast(DATA, window_size)
+    wf = WindowedForecast(DATA, window_size, start=DATA[0].datetime)
 
     # Expecting (200 - 160 - 1) (39) data points in the time
     # integrated timeseries.
@@ -39,7 +39,7 @@ def test_values():
     # a step size `step` small compared the the integration window
 
     window_size = 160
-    wf = WindowedForecast(DATA, window_size)
+    wf = WindowedForecast(DATA, window_size, start=DATA[0].datetime)
     expected = [
 
         math.cos((i + window_size) * step) - math.cos(i * step)
@@ -68,7 +68,9 @@ def test_minimise_average():
         ]
 
         window_size = 6
-        result = min(WindowedForecast(data, window_size))
+        # Data points separated by 30 minutes intervals
+        duration = window_size * 30
+        result = min(WindowedForecast(data, duration, start=data[0].datetime))
 
         # Intensity point estimates over best runtime period
         v = [10, 8, 7, 7, 5, 8, 8]
@@ -95,7 +97,9 @@ def test_average_intensity_now():
         ]
 
         window_size = 11
-        result = WindowedForecast(data, window_size)[0]
+        # Data points separated by 30 minutes intervals
+        duration = window_size * 30
+        result = WindowedForecast(data, duration, start=data[0].datetime)[0]
 
         # Intensity point estimates over best runtime period
         v = [p.value for p in data[:window_size + 1]]
