@@ -1,6 +1,6 @@
 from math import ceil
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 @dataclass(order=True)
@@ -47,10 +47,11 @@ class WindowedForecast:
         self.intensities = [point.value for point in data]
         # Integration window size in number of time intervals covered
         # by the window.
-        data_stepsize = (
-            data[1].datetime - data[0].datetime
-        ).total_seconds() / 60
-        self.window_size = ceil(duration / data_stepsize)
+        self.data_stepsize = data[1].datetime - data[0].datetime
+        self.window_size = ceil(duration / (self.data_stepsize.total_seconds() / 60))
+        self.start = start
+        # TODO: Expect duration as a timedelta directly
+        self.duration = timedelta(minutes=duration)
 
     @staticmethod
     def interp(
@@ -77,6 +78,18 @@ class WindowedForecast:
                     self.intensities[index: index + self.window_size],
                     self.intensities[index + 1 : index + self.window_size + 1]
             )]
+
+        start = self.start + index * self.data_stepsize
+        p1 = CarbonIntensityPointEstimate(self.times[index], self.intensities[index])
+        p2 = CarbonIntensityPointEstimate(self.times[index + 1], self.intensities[index + 1])
+        v[0] = 0.5 * (self.interp(p1, p2, start) + self.intensities[index + 1])
+
+        end = self.start + index * self.data_stepsize + self.duration
+        p1 = CarbonIntensityPointEstimate(self.times[index + self.window_size - 1], self.intensities[index + self.window_size - 1])
+        p2 = CarbonIntensityPointEstimate(self.times[index + self.window_size], self.intensities[index + self.window_size])
+        v[-1] = 0.5 * (
+            self.intensities[index + self.window_size - 1] + self.interp(p1, p2, end)
+        )
 
         return CarbonIntensityAverageEstimate(
             start=self.times[index],
