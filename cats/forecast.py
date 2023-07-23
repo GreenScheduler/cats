@@ -52,23 +52,6 @@ class WindowedForecast:
         # TODO: Expect duration as a timedelta directly
         self.duration = timedelta(minutes=duration)
 
-    @staticmethod
-    def interp(
-            p1: CarbonIntensityPointEstimate,
-            p2: CarbonIntensityPointEstimate,
-            when: datetime
-    ):
-        """Return value of carbon intensity at a time between data
-        points, assuming points are joined by a straight line (linear
-        interpolation).
-        """
-        timestep = (p2.datetime - p1.datetime).total_seconds()
-
-        slope = (p2.value - p1.value) / timestep
-        offset = (when - p1.datetime).total_seconds()
-        # import pdb; pdb.set_trace()
-        return p1.value + slope * offset  # Value at t = start
-
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
         """Return the average of timeseries data from index over the
         window size.  Data points are integrated using the trapeziodal
@@ -109,6 +92,23 @@ class WindowedForecast:
             end=end,
             value=sum(midpt) / (self.ndata - 1),
         )
+
+    @staticmethod
+    def interp(
+            p1: CarbonIntensityPointEstimate,
+            p2: CarbonIntensityPointEstimate,
+            when: datetime
+    ):
+        """Return value of carbon intensity at a time between data
+        points, assuming points are joined by a straight line (linear
+        interpolation).
+        """
+        timestep = (p2.datetime - p1.datetime).total_seconds()
+
+        slope = (p2.value - p1.value) / timestep
+        offset = (when - p1.datetime).total_seconds()
+        # import pdb; pdb.set_trace()
+        return p1.value + slope * offset  # Value at t = start
 
     def __iter__(self):
         for index in range(self.__len__()):
