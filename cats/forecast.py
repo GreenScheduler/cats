@@ -1,5 +1,4 @@
 from bisect import bisect_left
-from math import ceil
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
