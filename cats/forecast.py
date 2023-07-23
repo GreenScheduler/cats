@@ -1,4 +1,3 @@
-from bisect import bisect_left
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -48,7 +47,19 @@ class WindowedForecast:
         self.start = start
         # TODO: Expect duration as a timedelta directly
         self.end = start + timedelta(minutes=duration)
-        self.ndata = bisect_left(data, self.end, key=lambda x: x.datetime) + 1
+
+        # Find number of data points in a window, by finding the index
+        # of the first data point past the job end time. Could be done
+        # with the bisect module in the stdlib for python 3.10+ ('key'
+        # parameter was introduced in 3.10).
+        #
+        # bisect_left(data, self.end, key=lambda x: x.datetime)
+        #
+        def bisect_left(data, t):
+            for i, d in enumerate(data):
+                if d.datetime >= t:
+                    return i
+        self.ndata = bisect_left(data, self.end) + 1
 
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
         """Return the average of timeseries data from index over the
