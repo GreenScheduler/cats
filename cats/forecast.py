@@ -44,8 +44,7 @@ class WindowedForecast:
             duration: int,  # in minutes
             start: datetime,
     ):
-        self.times = [point.datetime for point in data]
-        self.intensities = [point.value for point in data]
+        self.data = data
         self.end = start + timedelta(minutes=duration)
         self.ndata = bisect_left(data, self.end, key=lambda x: x.datetime) + 1
         self.start = start
@@ -73,22 +72,30 @@ class WindowedForecast:
         with a straight line.
         """
         v = [  # If you think of a better name, pls help!
-            0.5 * (a + b)
+            0.5 * (a.value + b.value)
             for a, b in zip(
-                    self.intensities[index: index + self.ndata - 1],
-                    self.intensities[index + 1 : index + self.ndata]
+                    self.data[index: index + self.ndata - 1],
+                    self.data[index + 1: index + self.ndata]
             )]
 
         start = self.start + index * self.data_stepsize
-        p1 = CarbonIntensityPointEstimate(self.times[index], self.intensities[index])
-        p2 = CarbonIntensityPointEstimate(self.times[index + 1], self.intensities[index + 1])
-        v[0] = 0.5 * (self.interp(p1, p2, start) + self.intensities[index + 1])
+        v[0] = 0.5 * (
+            self.interp(
+                p1=self.data[index],
+                p2=self.data[index + 1],
+                p=start
+            ) +
+            self.data[index + 1].value
+        )
 
         end = self.start + index * self.data_stepsize + self.duration
-        p1 = CarbonIntensityPointEstimate(self.times[index + self.ndata - 2], self.intensities[index + self.ndata - 2])
-        p2 = CarbonIntensityPointEstimate(self.times[index + self.ndata - 1], self.intensities[index + self.ndata - 1])
         v[-1] = 0.5 * (
-            self.intensities[index + self.ndata - 2] + self.interp(p1, p2, end)
+            self.data[index + self.ndata - 2].value +
+            self.interp(
+                p1=self.data[index + self.ndata - 2],
+                p2=self.data[index + self.ndata - 1],
+                p=end
+            )
         )
 
         return CarbonIntensityAverageEstimate(
@@ -102,4 +109,4 @@ class WindowedForecast:
             yield self.__getitem__(index)
 
     def __len__(self):
-        return len(self.times) - self.ndata
+        return len(self.data) - self.ndata
