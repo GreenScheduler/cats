@@ -1,3 +1,4 @@
+from bisect import bisect_left
 from math import ceil
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -45,11 +46,10 @@ class WindowedForecast:
     ):
         self.times = [point.datetime for point in data]
         self.intensities = [point.value for point in data]
-        # Integration window size in number of time intervals covered
-        # by the window.
-        self.data_stepsize = data[1].datetime - data[0].datetime
-        self.window_size = ceil(duration / (self.data_stepsize.total_seconds() / 60))
+        self.end = start + timedelta(minutes=duration)
+        self.ndata = bisect_left(data, self.end, key=lambda x: x.datetime) + 1
         self.start = start
+        self.data_stepsize = data[1].datetime - data[0].datetime
         # TODO: Expect duration as a timedelta directly
         self.duration = timedelta(minutes=duration)
 
@@ -75,8 +75,8 @@ class WindowedForecast:
         v = [  # If you think of a better name, pls help!
             0.5 * (a + b)
             for a, b in zip(
-                    self.intensities[index: index + self.window_size],
-                    self.intensities[index + 1 : index + self.window_size + 1]
+                    self.intensities[index: index + self.ndata - 1],
+                    self.intensities[index + 1 : index + self.ndata]
             )]
 
         start = self.start + index * self.data_stepsize
@@ -85,18 +85,16 @@ class WindowedForecast:
         v[0] = 0.5 * (self.interp(p1, p2, start) + self.intensities[index + 1])
 
         end = self.start + index * self.data_stepsize + self.duration
-        p1 = CarbonIntensityPointEstimate(self.times[index + self.window_size - 1], self.intensities[index + self.window_size - 1])
-        p2 = CarbonIntensityPointEstimate(self.times[index + self.window_size], self.intensities[index + self.window_size])
+        p1 = CarbonIntensityPointEstimate(self.times[index + self.ndata - 2], self.intensities[index + self.ndata - 2])
+        p2 = CarbonIntensityPointEstimate(self.times[index + self.ndata - 1], self.intensities[index + self.ndata - 1])
         v[-1] = 0.5 * (
-            self.intensities[index + self.window_size - 1] + self.interp(p1, p2, end)
+            self.intensities[index + self.ndata - 2] + self.interp(p1, p2, end)
         )
 
         return CarbonIntensityAverageEstimate(
-            start=self.times[index],
-            # Note that `end` points to the _start_ of the last
-            # interval in the window.
-            end=self.times[index + self.window_size],
-            value=sum(v) / self.window_size,
+            start=start,
+            end=end,
+            value=sum(v) / (self.ndata - 1),
         )
 
     def __iter__(self):
@@ -104,4 +102,4 @@ class WindowedForecast:
             yield self.__getitem__(index)
 
     def __len__(self):
-        return len(self.times) - self.window_size - 1
+        return len(self.times) - self.ndata
