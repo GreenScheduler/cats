@@ -56,12 +56,12 @@ class WindowedForecast:
     def interp(
             p1: CarbonIntensityPointEstimate,
             p2: CarbonIntensityPointEstimate,
-            p: datetime
+            when: datetime
     ):
         timestep = (p2.datetime - p1.datetime).total_seconds()
 
         slope = (p2.value - p1.value) / timestep
-        offset = (p - p1.datetime).total_seconds()
+        offset = (when - p1.datetime).total_seconds()
         # import pdb; pdb.set_trace()
         return p1.value + slope * offset  # Value at t = start
 
@@ -69,39 +69,41 @@ class WindowedForecast:
         """Return the average of timeseries data from index over the
         window size.  Data points are integrated using the trapeziodal
         rule, that is assuming that forecast data points are joined
-        with a straight line.
+        with a straight line. Integral value between two points is the
+        intensity value at the midpoint times the duration between the
+        two points.  This duration is assumed to be unity and the
+        average is computed by dividing the total integral value by
+        the number of intervals.
         """
-        v = [  # If you think of a better name, pls help!
+        midpt = [
             0.5 * (a.value + b.value)
             for a, b in zip(
                     self.data[index: index + self.ndata - 1],
                     self.data[index + 1: index + self.ndata]
             )]
 
+        # Account for the fact that the start and end of each window
+        # might not fall exactly on data points.  The starting
+        # intensity is interpolated between the first (index) and
+        # second data point (index + 1) in the window.  The ending
+        # intensity value is interpolated between the last and
+        # penultimate data points in he window.
         start = self.start + index * self.data_stepsize
-        v[0] = 0.5 * (
-            self.interp(
-                p1=self.data[index],
-                p2=self.data[index + 1],
-                p=start
-            ) +
-            self.data[index + 1].value
-        )
+        i = self.interp(self.data[index], self.data[index + 1], when=start)
+        midpt[0] = 0.5 * (i + self.data[index + 1].value)
 
         end = self.start + index * self.data_stepsize + self.duration
-        v[-1] = 0.5 * (
-            self.data[index + self.ndata - 2].value +
-            self.interp(
-                p1=self.data[index + self.ndata - 2],
-                p2=self.data[index + self.ndata - 1],
-                p=end
-            )
+        i = self.interp(
+            self.data[index + self.ndata - 2],
+            self.data[index + self.ndata - 1],
+            when=end,
         )
+        midpt[-1] = 0.5 * (self.data[index + self.ndata - 2].value + i)
 
         return CarbonIntensityAverageEstimate(
             start=start,
             end=end,
-            value=sum(v) / (self.ndata - 1),
+            value=sum(midpt) / (self.ndata - 1),
         )
 
     def __iter__(self):
