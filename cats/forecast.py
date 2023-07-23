@@ -44,22 +44,22 @@ class WindowedForecast:
             start: datetime,
     ):
         self.data = data
+        self.data_stepsize = data[1].datetime - data[0].datetime
+        self.start = start
+        # TODO: Expect duration as a timedelta directly
         self.end = start + timedelta(minutes=duration)
         self.ndata = bisect_left(data, self.end, key=lambda x: x.datetime) + 1
-        self.start = start
-        self.data_stepsize = data[1].datetime - data[0].datetime
-        # TODO: Expect duration as a timedelta directly
-        self.duration = timedelta(minutes=duration)
 
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
         """Return the average of timeseries data from index over the
         window size.  Data points are integrated using the trapeziodal
         rule, that is assuming that forecast data points are joined
-        with a straight line. Integral value between two points is the
-        intensity value at the midpoint times the duration between the
-        two points.  This duration is assumed to be unity and the
-        average is computed by dividing the total integral value by
-        the number of intervals.
+        with a straight line.
+
+        Integral value between two points is the intensity value at
+        the midpoint times the duration between the two points.  This
+        duration is assumed to be unity and the average is computed by
+        dividing the total integral value by the number of intervals.
         """
         midpt = [
             0.5 * (a.value + b.value)
@@ -78,7 +78,7 @@ class WindowedForecast:
         i = self.interp(self.data[index], self.data[index + 1], when=start)
         midpt[0] = 0.5 * (i + self.data[index + 1].value)
 
-        end = self.start + index * self.data_stepsize + self.duration
+        end = self.end + index * self.data_stepsize
         i = self.interp(
             self.data[index + self.ndata - 2],
             self.data[index + self.ndata - 1],
