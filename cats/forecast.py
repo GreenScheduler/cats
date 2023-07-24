@@ -72,12 +72,6 @@ class WindowedForecast:
         duration is assumed to be unity and the average is computed by
         dividing the total integral value by the number of intervals.
         """
-        midpt = [
-            0.5 * (a.value + b.value)
-            for a, b in zip(
-                    self.data[index: index + self.ndata - 1],
-                    self.data[index + 1: index + self.ndata]
-            )]
 
         # Account for the fact that the start and end of each window
         # might not fall exactly on data points.  The starting
@@ -85,21 +79,31 @@ class WindowedForecast:
         # second data point (index + 1) in the window.  The ending
         # intensity value is interpolated between the last and
         # penultimate data points in he window.
-        start = self.start + index * self.data_stepsize
-        i = self.interp(self.data[index], self.data[index + 1], when=start)
-        midpt[0] = 0.5 * (i + self.data[index + 1].value)
-
-        end = self.end + index * self.data_stepsize
-        i = self.interp(
+        window_start = self.start + index * self.data_stepsize
+        window_end = self.end + index * self.data_stepsize
+        lbound = self.interp(
+            self.data[index],
+            self.data[index + 1],
+            when=window_start,
+        )
+        rbound = self.interp(
             self.data[index + self.ndata - 2],
             self.data[index + self.ndata - 1],
-            when=end,
+            when=window_end,
         )
-        midpt[-1] = 0.5 * (self.data[index + self.ndata - 2].value + i)
-
+        # window_data <- [lbound] + [...bulk...] + [rbound] where
+        # lbound and rbound are interpolated intensity values.
+        window_data = (
+            [lbound] +
+            [d.value for d in self.data[index + 1: index + self.ndata - 1]] +
+            [rbound]
+        )
+        midpt = [
+            0.5 * (a + b) for a, b in zip(window_data[:-1], window_data[1:])
+        ]
         return CarbonIntensityAverageEstimate(
-            start=start,
-            end=end,
+            start=window_start,
+            end=window_end,
             value=sum(midpt) / (self.ndata - 1),
         )
 
