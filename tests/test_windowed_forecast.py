@@ -148,3 +148,41 @@ def test_average_intensity_with_offset():
         )
         assert (result == expected)
 
+def test_average_intensity_with_offset_short_job():
+    # Case where job is short: start and end time fall between two
+    # consecutive data points (first and second).
+    with open(TEST_DATA, "r") as f:
+        csvfile = csv.reader(f, delimiter=",")
+        next(csvfile)  # Skip header line
+        data = [
+            CarbonIntensityPointEstimate(
+                datetime=datetime.fromisoformat(datestr[:-1]),
+                value=float(intensity_value),
+            )
+            for datestr, _, _, intensity_value in csvfile
+        ]
+
+        duration = 6  # in minutes
+        # First available data point is for 12:30 but the job
+        # starts 6 minutes later.
+        job_start = datetime.fromisoformat("2023-05-04T12:48")
+        result = WindowedForecast(data, duration, start=job_start)[2]
+
+        # Job starts at 12:48 and ends at 12:54. For each candidate
+        # running window, both start and end times fall between two
+        # consecutive data points (e.g. 13:30 and 14:00 for the third
+        # window).
+        #
+        # First and second element in v are interpolated intensity
+        # values.  e.g v[0] = 15 + 18min * (18 - 15) / 30min = 16.8
+        # and v[1] = v[-1] = 15 + 24min * (18 - 15) / 30min = 17.4
+        v = [16.8, 17.4]
+        data_timestep = data[1].datetime - data[0].datetime
+        expected = CarbonIntensityAverageEstimate(
+            start=job_start + 2 * data_timestep,
+            end=job_start + 2 * data_timestep + timedelta(minutes=duration),
+            value=sum(
+                [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
+            ) / (len(v) - 1)
+        )
+        assert (result == expected)
