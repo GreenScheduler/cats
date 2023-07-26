@@ -6,7 +6,7 @@ import sys
 
 from .check_clean_arguments import validate_jobinfo, validate_duration
 from .optimise_starttime import get_avg_estimates  # noqa: F401
-from .CI_api_interface import API_interfaces
+from .CI_api_interface import API_interfaces, InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
@@ -109,7 +109,11 @@ def main(arguments=None):
     ########################
 
     CI_API_interface = API_interfaces[choice_CI_API]
-    CI_forecast = get_CI_forecast(location, CI_API_interface)
+    try:
+        CI_forecast = get_CI_forecast(location, CI_API_interface)
+    except InvalidLocationError:
+        sys.stderr.write(f"Error: unknown location {location}\n")
+        sys.exit(1)
 
     #############################
     ## Find optimal start time ##
