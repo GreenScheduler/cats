@@ -2,7 +2,7 @@ from math import ceil
 from .forecast import WindowedForecast
 
 
-def get_avg_estimates(data, method="simple", duration=None):
+def get_avg_estimates(data, duration=None):
     """
     Get lowest carbon intensity in data depending on user method
     return dict of timestamp and carbon intensity
@@ -17,22 +17,12 @@ def get_avg_estimates(data, method="simple", duration=None):
     #         "Windowed method timespan cannot be greater than the cached timespan"
     #     )
 
-    METHODS = ["simple", "windowed"]
-    if method not in METHODS:
-        raise ValueError(f"Invalid Carbon Intensity Method. Must be one of {METHODS}")
-
-    if method == "simple":
-        #  Return element with smallest 2nd value
-        #  if multiple elements have the same value, return the first
-        return min(data)
-
-    if method == "windowed":
-        # get length of interval between timestamps
-        interval = (
-            data[1].datetime - data[0].datetime
-        ).total_seconds() / 60
-        wf = WindowedForecast(
-            data=data,
-            window_size=ceil(duration / interval)
-        )
-        return wf[0], min(wf)
+    # get length of interval between timestamps
+    interval = (
+        data[1].datetime - data[0].datetime
+    ).total_seconds() / 60
+    wf = WindowedForecast(
+        data=data,
+        window_size=ceil(duration / interval)
+    )
+    return wf[0], min(wf)

@@ -118,7 +118,7 @@ def main(arguments=None):
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
     now_avg, best_avg = get_avg_estimates(
-        CI_forecast, method="windowed", duration=duration
+        CI_forecast, duration=duration
     )
     sys.stderr.write(str(best_avg) + "\n")
 
