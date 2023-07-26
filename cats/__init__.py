@@ -4,7 +4,7 @@ import requests
 import yaml
 import sys
 
-from .check_clean_arguments import validate_jobinfo, validate_duration, validate_location
+from .check_clean_arguments import validate_jobinfo, validate_duration
 from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .CI_api_interface import API_interfaces
 from .CI_api_query import get_CI_forecast  # noqa: F401
@@ -90,7 +90,7 @@ def main(arguments=None):
 
     ## Location
     if args.location:
-        location = validate_location(args.location, choice_CI_API)
+        location = args.location
         sys.stderr.write(f"Using location provided: {location}\n")
     elif "location" in config.keys():
         location = validate_location(config["location"], choice_CI_API)

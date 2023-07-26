@@ -54,16 +54,3 @@ def validate_duration(duration):
         raise ValueError("--duration needs to be positive (number of minutes)")
 
     return duration_int
-
-def validate_location(location, choice_CI_API):
-    if choice_CI_API == 'carbonintensity.org.uk':
-        # in case the long format of the postcode is provided:
-        loc_cleaned = location.split()[0]
-
-        # check that it's between 2 and 4 characters long
-        # TODO Check that it's a valid postcode for the API/country of interest
-        if (len(loc_cleaned) < 2) or (len(loc_cleaned) > 4):
-            raise ValueError(f"{location} is an invalid UK postcode. Only the first part of the postcode is expected (e.g. M15).")
-    else:
-        loc_cleaned = location
-    return loc_cleaned
