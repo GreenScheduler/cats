@@ -27,7 +27,7 @@ def ciuk_request_url(timestamp: datetime, postcode: str):
         "https://api.carbonintensity.org.uk/regional/intensity/"
         + dt.strftime("%Y-%m-%dT%H:%MZ")
         + "/fw48h/postcode/"
-        + postcode
+        + postcode.split()[0]
     )
 
 
