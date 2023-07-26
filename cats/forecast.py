@@ -121,8 +121,7 @@ class WindowedForecast:
 
         slope = (p2.value - p1.value) / timestep
         offset = (when - p1.datetime).total_seconds()
-        # import pdb; pdb.set_trace()
-        return p1.value + slope * offset  # Value at t = start
+        return p1.value + slope * offset  # Value at t = when
 
     def __iter__(self):
         for index in range(self.__len__()):
