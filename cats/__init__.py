@@ -93,12 +93,12 @@ def main(arguments=None):
         location = args.location
         sys.stderr.write(f"Using location provided: {location}\n")
     elif "location" in config.keys():
-        location = validate_location(config["location"], choice_CI_API)
+        location = config["location"]
         sys.stderr.write(f"Using location from config file: {location}\n")
     else:
         r = requests.get("https://ipapi.co/json").json()
         postcode = r["postal"]
-        location = validate_location(postcode, choice_CI_API)
+        location = postcode
         sys.stderr.write(f"WARNING: location not provided. Estimating location from IP address: {location}.\n")
 
     ## Duration
