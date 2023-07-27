@@ -138,13 +138,15 @@ def test_average_intensity_with_offset():
         # First and last element in v are interpolated intensity value.
         # e.g v[0] = 15 + 18min * (18 - 15) / 30min = 16.8
         v = [16.8, 18, 19, 17, 16, 11, 11, 11, 11]
-        data_timestep = data[1].datetime - data[0].datetime
+        data_timestep = data[1].datetime - data[0].datetime # 30 minutes
         expected = CarbonIntensityAverageEstimate(
             start=job_start + 2 * data_timestep,
             end=job_start + 2 * data_timestep + timedelta(minutes=duration),
-            value=sum(
-                [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
-            ) / (len(v) - 1)
+            value=(
+                0.5 * (v[0] + v[1]) * 12 +
+                sum([0.5 * (a + b) * 30 for a, b in zip(v[1:-2], v[2:-1])]) +
+                0.5 * (v[7] + v[8]) * 2
+            ) / duration
         )
         assert (result == expected)
 
