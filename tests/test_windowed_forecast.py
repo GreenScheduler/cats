@@ -118,6 +118,40 @@ def test_average_intensity_with_offset():
     # carbon intensity data points. In this case cats interpolate the
     # intensity value at beginning and end of each potential job
     # duration window.
+    CI_forecast = [
+        CarbonIntensityPointEstimate(datetime(2023,1,1,8,30), value=26),
+        CarbonIntensityPointEstimate(datetime(2023,1,1,9,0), value=40),
+        CarbonIntensityPointEstimate(datetime(2023,1,1,9,30), value=50),
+        CarbonIntensityPointEstimate(datetime(2023,1,1,10,0), value=60),
+        CarbonIntensityPointEstimate(datetime(2023,1,1,10,30), value=25),
+    ]
+    duration = 70  # in minutes
+    # First available data point is for 08:00 but the job
+    # starts 15 minutes later.
+    job_start = datetime.fromisoformat("2023-01-01T08:45")
+    result = WindowedForecast(CI_forecast, duration, start=job_start)[1]
+
+    expected = CarbonIntensityAverageEstimate(
+        start=datetime(2023,1,1,9,15),
+        end=datetime(2023,1,1,10,25),
+        value=(
+            0.5 * (45 + 50) * 15 +
+            0.5 * (50 + 60) * 30 +
+            0.5 * (60 + 30.83) * 25
+        ) / duration
+    )
+    assert result.start == expected.start
+    assert result.end == result.end
+    # Allow for 1% relative tolerance between result and expected
+    # value.  Difference is probably due to truncating the
+    # second interpolated value above.
+    assert math.isclose(result.value, expected.value, rel_tol=0.01)
+
+def test_average_intensity_with_offset_long_job():
+    # Case where job start and end time are not colocated with data
+    # carbon intensity data points. In this case cats interpolate the
+    # intensity value at beginning and end of each potential job
+    # duration window.
     with open(TEST_DATA, "r") as f:
         csvfile = csv.reader(f, delimiter=",")
         next(csvfile)  # Skip header line
