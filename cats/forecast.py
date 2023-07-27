@@ -95,7 +95,7 @@ class WindowedForecast:
         # lbound and rbound are interpolated intensity values.
         window_data = (
             [lbound] +
-            [d.value for d in self.data[index + 1: index + self.ndata - 1]] +
+            self.data[index + 1: index + self.ndata - 1] +
             [rbound]
         )
         midpt = [
@@ -112,8 +112,8 @@ class WindowedForecast:
             p1: CarbonIntensityPointEstimate,
             p2: CarbonIntensityPointEstimate,
             when: datetime
-    ):
-        """Return value of carbon intensity at a time between data
+    ) -> CarbonIntensityPointEstimate:
+        """Return carbon intensity pt estimate at a time between data
         points, assuming points are joined by a straight line (linear
         interpolation).
         """
@@ -121,7 +121,11 @@ class WindowedForecast:
 
         slope = (p2.value - p1.value) / timestep
         offset = (when - p1.datetime).total_seconds()
-        return p1.value + slope * offset  # Value at t = when
+
+        return CarbonIntensityPointEstimate(
+            value=p1.value + slope * offset,
+            datetime=when,
+        )
 
     def __iter__(self):
         for index in range(self.__len__()):
