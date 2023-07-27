@@ -98,13 +98,15 @@ class WindowedForecast:
             self.data[index + 1: index + self.ndata - 1] +
             [rbound]
         )
-        midpt = [
-            0.5 * (a + b) for a, b in zip(window_data[:-1], window_data[1:])
+        acc = [
+            0.5 * (a.value + b.value) * (b.datetime - a.datetime).total_seconds()
+            for a, b in zip(window_data[:-1], window_data[1:])
         ]
+        duration = window_data[-1].datetime - window_data[0].datetime
         return CarbonIntensityAverageEstimate(
             start=window_start,
             end=window_end,
-            value=sum(midpt) / (self.ndata - 1),
+            value=sum(acc) / duration.total_seconds(),
         )
 
     @staticmethod
