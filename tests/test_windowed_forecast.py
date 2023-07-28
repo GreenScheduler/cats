@@ -131,21 +131,18 @@ def test_average_intensity_with_offset():
     job_start = datetime.fromisoformat("2023-01-01T08:45")
     result = WindowedForecast(CI_forecast, duration, start=job_start)[1]
 
+    interp1 = 40 + 15 * (50 - 40) / 30
+    interp2 = 60 + 25 * (25 - 60) / 30
     expected = CarbonIntensityAverageEstimate(
         start=datetime(2023,1,1,9,15),
         end=datetime(2023,1,1,10,25),
         value=(
-            0.5 * (45 + 50) * 15 +
+            0.5 * (interp1 + 50) * 15 +
             0.5 * (50 + 60) * 30 +
-            0.5 * (60 + 30.83) * 25
+            0.5 * (60 + interp2) * 25
         ) / duration
     )
-    assert result.start == expected.start
-    assert result.end == result.end
-    # Allow for 1% relative tolerance between result and expected
-    # value.  Difference is probably due to truncating the
-    # second interpolated value above.
-    assert math.isclose(result.value, expected.value, rel_tol=0.01)
+    assert result == expected
 
 def test_average_intensity_with_offset_long_job():
     # Case where job start and end time are not colocated with data
