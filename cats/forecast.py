@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 
 
@@ -6,32 +6,23 @@ from datetime import datetime
 class CarbonIntensityPointEstimate:
     """Represents a single data point within an intensity
     timeseries. Use order=True in order to enable comparison of class
-    instance based on the sort_index attribute.  See
+    instance based on the first attribute. See
     https://peps.python.org/pep-0557
-
     """
-    sort_index: float = field(init=False, repr=False)
+    value: float # the first attribute is used automatically for sorting methods
     datetime: datetime
-    value: float
-
-    def __post_init__(self):
-        self.sort_index = self.value
 
 
 @dataclass(order=True)
 class CarbonIntensityAverageEstimate:
     """Represents a single data point within an *integrated* carbon
     intensity timeseries. Use order=True in order to enable comparison
-    of class instance based on the sort_index attribute.  See
+    of class instance based on the first attribute.  See
     https://peps.python.org/pep-0557
     """
-    sort_index: float = field(init=False, repr=False)
+    value: float
     start: datetime  # Start of the time-integration window
     end: datetime  # End of the time-integration window
-    value: float
-
-    def __post_init__(self):
-        self.sort_index = self.value
 
 
 class WindowedForecast:
