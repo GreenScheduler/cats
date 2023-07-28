@@ -144,6 +144,17 @@ def test_average_intensity_with_offset():
     )
     assert result == expected
 
+    # Test that the WindowedForecast is able to work with a job start
+    # beyond the first data interval.  Not technically required when
+    # working with carbonintensity.org.uk, but useful generalisation
+    # nontheless.
+
+    # When start at 09:15 the WindowedForecast's 'data' attribute
+    # should discard the first data point at 08:30.
+    job_start = datetime.fromisoformat("2023-01-01T09:15")
+    result = WindowedForecast(CI_forecast, duration, start=job_start)[0]
+    assert result == expected
+
 def test_average_intensity_with_offset_long_job():
     # Case where job start and end time are not colocated with data
     # carbon intensity data points. In this case cats interpolate the

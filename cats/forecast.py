@@ -42,16 +42,28 @@ class WindowedForecast:
             duration: int,  # in minutes
             start: datetime,
     ):
-        self.data = data
         self.data_stepsize = data[1].datetime - data[0].datetime
         self.start = start
         # TODO: Expect duration as a timedelta directly
         self.end = start + timedelta(minutes=duration)
 
+        # Restrict data points so that start time falls within the
+        # first data interval.  In other we don't need any data prior
+        # the closest data preceding (on the left of) the job start
+        # time.
+        def bisect_right(data, t):
+            for i, d in enumerate(data):
+                if d.datetime > t:
+                    return i - 1
+        # bisect_right(data, start) returns the index of the first
+        # data point with datetime value immediately preceding the job
+        # start time
+        self.data = data[bisect_right(data, start):]
+
         # Find number of data points in a window, by finding the index
-        # of the first data point past the job end time. Could be done
-        # with the bisect module in the stdlib for python 3.10+ ('key'
-        # parameter was introduced in 3.10).
+        # of the closest data point past the job end time. Could be
+        # done with the bisect module in the stdlib for python 3.10+
+        # ('key' parameter was introduced in 3.10).
         #
         # bisect_left(data, self.end, key=lambda x: x.datetime)
         #
@@ -59,7 +71,7 @@ class WindowedForecast:
             for i, d in enumerate(data):
                 if d.datetime >= t:
                     return i
-        self.ndata = bisect_left(data, self.end) + 1
+        self.ndata = bisect_left(self.data, self.end) + 1
 
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
         """Return the average of timeseries data from index over the
