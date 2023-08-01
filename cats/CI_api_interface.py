@@ -1,3 +1,4 @@
+import sys
 from collections import namedtuple
 from datetime import datetime
 
@@ -23,11 +24,16 @@ def ciuk_request_url(timestamp: datetime, postcode: str):
     else:
         dt = timestamp.replace(minute=1, second=0, microsecond=0)
 
+    if (len(postcode) > 4):
+        sys.stderr.write(f"Warning: truncating postcode {postcode} to ")
+        postcode = postcode[:-3].strip()
+        sys.stderr.write(f"{postcode}.\n")
+
     return (
         "https://api.carbonintensity.org.uk/regional/intensity/"
         + dt.strftime("%Y-%m-%dT%H:%MZ")
         + "/fw48h/postcode/"
-        + postcode.split()[0]
+        + postcode
     )
 
 
