@@ -119,11 +119,11 @@ def test_average_intensity_with_offset():
     # intensity value at beginning and end of each potential job
     # duration window.
     CI_forecast = [
-        CarbonIntensityPointEstimate(datetime(2023,1,1,8,30), value=26),
-        CarbonIntensityPointEstimate(datetime(2023,1,1,9,0), value=40),
-        CarbonIntensityPointEstimate(datetime(2023,1,1,9,30), value=50),
-        CarbonIntensityPointEstimate(datetime(2023,1,1,10,0), value=60),
-        CarbonIntensityPointEstimate(datetime(2023,1,1,10,30), value=25),
+        CarbonIntensityPointEstimate(26, datetime(2023,1,1,8,30)),
+        CarbonIntensityPointEstimate(40, datetime(2023,1,1,9,0)),
+        CarbonIntensityPointEstimate(50, datetime(2023,1,1,9,30)),
+        CarbonIntensityPointEstimate(60, datetime(2023,1,1,10,0)),
+        CarbonIntensityPointEstimate(25, datetime(2023,1,1,10,30)),
     ]
     duration = 70  # in minutes
     # First available data point is for 08:00 but the job
