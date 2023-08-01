@@ -113,6 +113,10 @@ def main(arguments=None):
         CI_forecast = get_CI_forecast(location, CI_API_interface)
     except InvalidLocationError:
         sys.stderr.write(f"Error: unknown location {location}\n")
+        sys.stderr.write(
+            "Location should be be specified as the outward code,\n"
+            "for example 'SW7' for postcode 'SW7 EAZ'.\n"
+        )
         sys.exit(1)
 
     #############################
