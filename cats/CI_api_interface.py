@@ -1,11 +1,15 @@
+import sys
 from collections import namedtuple
 from datetime import datetime
 
 from .forecast import CarbonIntensityPointEstimate
 
 
+class InvalidLocationError(Exception):
+    pass
+
+
 APIInterface = namedtuple('APIInterface', ['get_request_url', 'parse_response_data'])
-# TODO add a validation function to check the validity of the --location argument
 
 def ciuk_request_url(timestamp: datetime, postcode: str):
     # This transformation is specific to the CI-UK API.
@@ -19,6 +23,11 @@ def ciuk_request_url(timestamp: datetime, postcode: str):
         dt = timestamp.replace(minute=31, second=0, microsecond=0)
     else:
         dt = timestamp.replace(minute=1, second=0, microsecond=0)
+
+    if (len(postcode) > 4):
+        sys.stderr.write(f"Warning: truncating postcode {postcode} to ")
+        postcode = postcode[:-3].strip()
+        sys.stderr.write(f"{postcode}.\n")
 
     return (
         "https://api.carbonintensity.org.uk/regional/intensity/"
@@ -39,6 +48,20 @@ def ciuk_parse_response_data(response: dict):
     :param response:
     :return:
     """
+    def invalid_code(r: dict):
+        try:
+            return "postcode" in r['error']['message']
+        except KeyError:
+            return False
+
+    # carbonintensity.org.uk API's response behavior is inconsistent
+    # with regards to bad postcodes. Passing a single character in the
+    # URL will give a 400 error code with a useful message.  However
+    # giving a longer string, not matching a valid postcode, lead to
+    # no response at all.
+    if (not response) or invalid_code(response):
+        raise InvalidLocationError
+
     datefmt = "%Y-%m-%dT%H:%MZ"
     return [
         CarbonIntensityPointEstimate(

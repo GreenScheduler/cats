@@ -4,9 +4,9 @@ import requests
 import yaml
 import sys
 
-from .check_clean_arguments import validate_jobinfo, validate_duration, validate_location
+from .check_clean_arguments import validate_jobinfo, validate_duration
 from .optimise_starttime import get_avg_estimates  # noqa: F401
-from .CI_api_interface import API_interfaces
+from .CI_api_interface import API_interfaces, InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator
 
@@ -90,15 +90,15 @@ def main(arguments=None):
 
     ## Location
     if args.location:
-        location = validate_location(args.location, choice_CI_API)
+        location = args.location
         sys.stderr.write(f"Using location provided: {location}\n")
     elif "location" in config.keys():
-        location = validate_location(config["location"], choice_CI_API)
+        location = config["location"]
         sys.stderr.write(f"Using location from config file: {location}\n")
     else:
         r = requests.get("https://ipapi.co/json").json()
         postcode = r["postal"]
-        location = validate_location(postcode, choice_CI_API)
+        location = postcode
         sys.stderr.write(f"WARNING: location not provided. Estimating location from IP address: {location}.\n")
 
     ## Duration
@@ -109,7 +109,15 @@ def main(arguments=None):
     ########################
 
     CI_API_interface = API_interfaces[choice_CI_API]
-    CI_forecast = get_CI_forecast(location, CI_API_interface)
+    try:
+        CI_forecast = get_CI_forecast(location, CI_API_interface)
+    except InvalidLocationError:
+        sys.stderr.write(f"Error: unknown location {location}\n")
+        sys.stderr.write(
+            "Location should be be specified as the outward code,\n"
+            "for example 'SW7' for postcode 'SW7 EAZ'.\n"
+        )
+        sys.exit(1)
 
     #############################
     ## Find optimal start time ##
