@@ -1,0 +1,4 @@
+sphinx
+ghp-import
+renku-sphinx-theme
+sphinx_copybutton

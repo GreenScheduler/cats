@@ -1,0 +1,23 @@
+name: Build and deploy docs
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - run: |
+        pip install -r docs/docs-requirements.txt
+    - name: Build sphinx docs
+      run: make -C docs html
+    - name: Deploy sphinx docs
+      run: |
+        git config user.name 'github-action'
+        git config user.email 'github-action'
+        ghp-import -m 'Update sphinx docs' --push --no-history \
+          --branch gh-pages --no-jekyll --force docs/build/html
