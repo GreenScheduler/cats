@@ -32,7 +32,7 @@ pip install git+https://github.com/GreenScheduler/cats
 
 ## Documentation
 
-Full documentation is available at LINK-PENDING. The below sections
+Full documentation is available at [greenscheduler.github.io/cats/](https://greenscheduler.github.io/cats/). The below sections
 demonstrate some capability, for illustration, but please consult
 the documentation for more details.
 
