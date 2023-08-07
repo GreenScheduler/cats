@@ -3,6 +3,8 @@
 Command-line (CLI) reference
 ============================
 
-.. TODODOCS
 
-Coming soon...
+.. argparse::
+  :module: cats
+  :func: parse_arguments
+  :prog: cats
