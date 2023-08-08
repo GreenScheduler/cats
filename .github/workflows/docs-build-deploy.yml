@@ -11,6 +11,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
+    - name: Install cats 
+      run: python3 -m pip install .
     - run: |
         pip install -r docs/docs-requirements.txt
     - name: Build sphinx docs

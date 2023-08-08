@@ -23,16 +23,16 @@ Modules
 .. automodule:: cats.__main__
     :members:
 
-``cats.api_interface``
-^^^^^^^^^^^^^^^^^^^^^^
+``cats.CI_api_interface``
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: cats.api_interface
+.. automodule:: cats.CI_api_interface
     :members:
 
-``cats.api_query``
-^^^^^^^^^^^^^^^^^^
+``cats.CI_api_query``
+^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: cats.api_query
+.. automodule:: cats.CI_api_query
     :members:
 
 ``cats.carbonFootprint``
@@ -47,23 +47,15 @@ Modules
 .. automodule:: cats.forecast
     :members:
 
-``cats.parsedata``
-^^^^^^^^^^^^^^^^^^
 
-.. automodule:: cats.parsedata
+``cats.optimise_starttime``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: cats.optimise_starttime
     :members:
-
-``cats.timeseries_conversion``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: cats.timeseries_conversion
-    :members:
-
 
 Python objects
 --------------
-
-
 
 
 In ``cats.__init__``
@@ -74,9 +66,7 @@ Functions
 
 .. autosummary::
 
-   cats.__init__.findtime
    cats.__init__.parse_arguments
-   cats.__init__.validate_jobinfo
    cats.__init__.main
 
 
@@ -86,34 +76,34 @@ In ``cats.__main__``
 n/a
 
 
-In ``cats.api_interface``
-^^^^^^^^^^^^^^^^^^^^^^^^^
+In ``cats.CI_api_interface``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Functions
 """""""""
 
 .. autosummary::
 
-   cats.api_interface.ciuk_request_url
-   cats.api_interface.ciuk_parse_response_data
+   cats.CI_api_interface.ciuk_request_url
+   cats.CI_api_interface.ciuk_parse_response_data
 
 Variables and constants
 """""""""""""""""""""""
 
 .. autosummary::
 
-   cats.api_interface.APIInterface
-   cats.api_interface.API_interfaces
+   cats.CI_api_interface.APIInterface
+   cats.CI_api_interface.API_interfaces
 
-In ``cats.api_query``
-^^^^^^^^^^^^^^^^^^^^^
+In ``cats.CI_api_query``
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Functions
 """""""""
 
 .. autosummary::
 
-   cats.api_query.get_tuple
+   cats.CI_api_query.get_CI_forecast
 
 
 In ``cats.carbonFootprint``
@@ -146,25 +136,12 @@ Classes
    cats.forecast.CarbonIntensityAverageEstimate
    cats.forecast.WindowedForecast
 
-
-In ``cats.parsedata``
-^^^^^^^^^^^^^^^^^^^^^
-
-Functions
-"""""""""
-
-.. autosummary::
-
-   cats.parsedata.avg_carbon_intensity
-
-
-In ``cats.timeseries_conversion``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In ``cats.optimise_starttime``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Functions
 """""""""
 
 .. autosummary::
 
-   cats.timeseries_conversion.check_duration
-   cats.timeseries_conversion.get_lowest_carbon_intensity
+   cats.optimise_starttime.get_avg_estimates
