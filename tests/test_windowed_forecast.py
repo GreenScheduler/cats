@@ -212,7 +212,8 @@ def test_average_intensity_with_offset_long_job():
         duration = 194  # in minutes
         # First available data point is for 12:30 but the job
         # starts 18 minutes later.
-        job_start = datetime.fromisoformat("2023-05-04T12:48+00:00")
+        # Start time in BST
+        job_start = datetime.fromisoformat("2023-05-04T13:48+01:00")
         result = WindowedForecast(data, duration, start=job_start)[2]
 
         # First and last element in v are interpolated intensity value.
@@ -229,6 +230,8 @@ def test_average_intensity_with_offset_long_job():
             ) / duration
         )
         assert (result == expected)
+        assert (result.start.tzinfo == expected.start.tzinfo)
+        assert (result.end.tzinfo == expected.end.tzinfo)
 
 def test_average_intensity_with_offset_short_job():
     # Case where job is short: start and end time fall between two

@@ -7,7 +7,9 @@ from cats.forecast import CarbonIntensityPointEstimate
 def test_api_call():
     """
     This just checks the API call runs and returns a list of point estimates
-    and confirms that datetime objects are timezone aware
+
+    Also confirms that datetime objects are timezone aware, as per
+    https://docs.python.org/3/library/datetime.html#determining-if-an-object-is-aware-or-naive
     """
 
     api_interface = API_interfaces["carbonintensity.org.uk"]
