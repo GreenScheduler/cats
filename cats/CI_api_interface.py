@@ -1,6 +1,7 @@
 import sys
 from collections import namedtuple
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from .forecast import CarbonIntensityPointEstimate
 
@@ -63,9 +64,13 @@ def ciuk_parse_response_data(response: dict):
         raise InvalidLocationError
 
     datefmt = "%Y-%m-%dT%H:%MZ"
+    # The "Z" at the end of the format string indicates UTC,
+    # however, strptime does not know how to parse this, so we 
+    # need to add tzinfo data.
+    utc = ZoneInfo('UTC')
     return [
         CarbonIntensityPointEstimate(
-            datetime=datetime.strptime(d["from"], datefmt),
+            datetime=datetime.strptime(d["from"], datefmt).replace(tzinfo=utc),
             value=d["intensity"]["forecast"],
         )
         for d in response["data"]["data"]

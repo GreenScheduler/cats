@@ -1,5 +1,6 @@
 import csv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 import math
 from pathlib import Path
 from numpy.testing import assert_allclose
@@ -61,7 +62,7 @@ def test_minimise_average():
         next(csvfile)  # Skip header line
         data = [
             CarbonIntensityPointEstimate(
-                datetime=datetime.fromisoformat(datestr[:-1]),
+                datetime=datetime.fromisoformat(datestr[:-1]+'+00:00'),
                 value=float(intensity_value),
             )
             for datestr, _, _, intensity_value in csvfile
@@ -75,13 +76,49 @@ def test_minimise_average():
         # Intensity point estimates over best runtime period
         v = [10, 8, 7, 7, 5, 8, 8]
         expected = CarbonIntensityAverageEstimate(
-            start=datetime.fromisoformat("2023-05-05T12:00"),
-            end=datetime.fromisoformat("2023-05-05T15:00"),
+            start=datetime.fromisoformat("2023-05-05T12:00+00:00"),
+            end=datetime.fromisoformat("2023-05-05T15:00+00:00"),
             value=sum(
                 [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
             ) / window_size
         )
         assert (result == expected)
+
+
+def test_minimise_average_bst():
+    # We should get a start time in BST if we provide the starting time
+    # in that timezone, even if the intensity estimate is in UTC. This
+    # is needed as the `at` command works in local system time (and that's
+    # what we put in)
+    with open(TEST_DATA, "r") as f:
+        csvfile = csv.reader(f, delimiter=",")
+        next(csvfile)  # Skip header line
+        data = [
+            CarbonIntensityPointEstimate(
+                datetime=datetime.fromisoformat(datestr[:-1]+'+00:00'),
+                value=float(intensity_value),
+            )
+            for datestr, _, _, intensity_value in csvfile
+        ]
+
+        window_size = 6
+        # Data points separated by 30 minutes intervals
+        duration = window_size * 30
+        start_time_bst = data[0].datetime.replace(tzinfo=timezone(timedelta(seconds=-3600)))
+        result = min(WindowedForecast(data, duration, start=start_time_bst))
+
+        # Intensity point estimates over best runtime period
+        v = [10, 8, 7, 7, 5, 8, 8]
+        expected = CarbonIntensityAverageEstimate(
+            start=datetime.fromisoformat("2023-05-05T11:00-01:00"),
+            end=datetime.fromisoformat("2023-05-05T14:00-01:00"),
+            value=sum(
+                [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
+            ) / window_size
+        )
+        assert (result == expected)
+        assert (result.start.tzinfo == expected.start.tzinfo)
+        assert (result.end.tzinfo == expected.end.tzinfo)
 
 
 def test_average_intensity_now():
@@ -90,7 +127,7 @@ def test_average_intensity_now():
         next(csvfile)  # Skip header line
         data = [
             CarbonIntensityPointEstimate(
-                datetime=datetime.fromisoformat(datestr[:-1]),
+                datetime=datetime.fromisoformat(datestr[:-1]+'+00:00'),
                 value=float(intensity_value),
             )
             for datestr, _, _, intensity_value in csvfile
@@ -118,24 +155,25 @@ def test_average_intensity_with_offset():
     # carbon intensity data points. In this case cats interpolate the
     # intensity value at beginning and end of each potential job
     # duration window.
+    utc = ZoneInfo('UTC')
     CI_forecast = [
-        CarbonIntensityPointEstimate(26, datetime(2023,1,1,8,30)),
-        CarbonIntensityPointEstimate(40, datetime(2023,1,1,9,0)),
-        CarbonIntensityPointEstimate(50, datetime(2023,1,1,9,30)),
-        CarbonIntensityPointEstimate(60, datetime(2023,1,1,10,0)),
-        CarbonIntensityPointEstimate(25, datetime(2023,1,1,10,30)),
+        CarbonIntensityPointEstimate(26, datetime(2023,1,1,8,30,tzinfo=utc)),
+        CarbonIntensityPointEstimate(40, datetime(2023,1,1,9,0,tzinfo=utc)),
+        CarbonIntensityPointEstimate(50, datetime(2023,1,1,9,30,tzinfo=utc)),
+        CarbonIntensityPointEstimate(60, datetime(2023,1,1,10,0,tzinfo=utc)),
+        CarbonIntensityPointEstimate(25, datetime(2023,1,1,10,30,tzinfo=utc)),
     ]
     duration = 70  # in minutes
     # First available data point is for 08:00 but the job
     # starts 15 minutes later.
-    job_start = datetime.fromisoformat("2023-01-01T08:45")
+    job_start = datetime.fromisoformat("2023-01-01T08:45+00:00")
     result = WindowedForecast(CI_forecast, duration, start=job_start)[1]
 
     interp1 = 40 + 15 * (50 - 40) / 30
     interp2 = 60 + 25 * (25 - 60) / 30
     expected = CarbonIntensityAverageEstimate(
-        start=datetime(2023,1,1,9,15),
-        end=datetime(2023,1,1,10,25),
+        start=datetime(2023,1,1,9,15,tzinfo=utc),
+        end=datetime(2023,1,1,10,25,tzinfo=utc),
         value=(
             0.5 * (interp1 + 50) * 15 +
             0.5 * (50 + 60) * 30 +
@@ -151,7 +189,7 @@ def test_average_intensity_with_offset():
 
     # When start at 09:15 the WindowedForecast's 'data' attribute
     # should discard the first data point at 08:30.
-    job_start = datetime.fromisoformat("2023-01-01T09:15")
+    job_start = datetime.fromisoformat("2023-01-01T09:15+00:00")
     result = WindowedForecast(CI_forecast, duration, start=job_start)[0]
     assert result == expected
 
@@ -165,7 +203,7 @@ def test_average_intensity_with_offset_long_job():
         next(csvfile)  # Skip header line
         data = [
             CarbonIntensityPointEstimate(
-                datetime=datetime.fromisoformat(datestr[:-1]),
+                datetime=datetime.fromisoformat(datestr[:-1]+'+00:00'),
                 value=float(intensity_value),
             )
             for datestr, _, _, intensity_value in csvfile
@@ -174,7 +212,8 @@ def test_average_intensity_with_offset_long_job():
         duration = 194  # in minutes
         # First available data point is for 12:30 but the job
         # starts 18 minutes later.
-        job_start = datetime.fromisoformat("2023-05-04T12:48")
+        # Start time in BST
+        job_start = datetime.fromisoformat("2023-05-04T13:48+01:00")
         result = WindowedForecast(data, duration, start=job_start)[2]
 
         # First and last element in v are interpolated intensity value.
@@ -191,6 +230,8 @@ def test_average_intensity_with_offset_long_job():
             ) / duration
         )
         assert (result == expected)
+        assert (result.start.tzinfo == expected.start.tzinfo)
+        assert (result.end.tzinfo == expected.end.tzinfo)
 
 def test_average_intensity_with_offset_short_job():
     # Case where job is short: start and end time fall between two
@@ -200,7 +241,7 @@ def test_average_intensity_with_offset_short_job():
         next(csvfile)  # Skip header line
         data = [
             CarbonIntensityPointEstimate(
-                datetime=datetime.fromisoformat(datestr[:-1]),
+                datetime=datetime.fromisoformat(datestr[:-1]+"+00:00"),
                 value=float(intensity_value),
             )
             for datestr, _, _, intensity_value in csvfile
@@ -209,7 +250,7 @@ def test_average_intensity_with_offset_short_job():
         duration = 6  # in minutes
         # First available data point is for 12:30 but the job
         # starts 6 minutes later.
-        job_start = datetime.fromisoformat("2023-05-04T12:48")
+        job_start = datetime.fromisoformat("2023-05-04T12:48+00:00")
         result = WindowedForecast(data, duration, start=job_start)[2]
 
         # Job starts at 12:48 and ends at 12:54. For each candidate
