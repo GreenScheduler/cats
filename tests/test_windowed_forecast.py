@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import math
 from pathlib import Path
@@ -83,6 +83,42 @@ def test_minimise_average():
             ) / window_size
         )
         assert (result == expected)
+
+
+def test_minimise_average_bst():
+    # We should get a start time in BST if we provide the starting time
+    # in that timezone, even if the intensity estimate is in UTC. This
+    # is needed as the `at` command works in local system time (and that's
+    # what we put in)
+    with open(TEST_DATA, "r") as f:
+        csvfile = csv.reader(f, delimiter=",")
+        next(csvfile)  # Skip header line
+        data = [
+            CarbonIntensityPointEstimate(
+                datetime=datetime.fromisoformat(datestr[:-1]+'+00:00'),
+                value=float(intensity_value),
+            )
+            for datestr, _, _, intensity_value in csvfile
+        ]
+
+        window_size = 6
+        # Data points separated by 30 minutes intervals
+        duration = window_size * 30
+        start_time_bst = data[0].datetime.replace(tzinfo=timezone(timedelta(seconds=-3600)))
+        result = min(WindowedForecast(data, duration, start=start_time_bst))
+
+        # Intensity point estimates over best runtime period
+        v = [10, 8, 7, 7, 5, 8, 8]
+        expected = CarbonIntensityAverageEstimate(
+            start=datetime.fromisoformat("2023-05-05T11:00-01:00"),
+            end=datetime.fromisoformat("2023-05-05T14:00-01:00"),
+            value=sum(
+                [0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]
+            ) / window_size
+        )
+        assert (result == expected)
+        assert (result.start.tzinfo == expected.start.tzinfo)
+        assert (result.end.tzinfo == expected.end.tzinfo)
 
 
 def test_average_intensity_now():

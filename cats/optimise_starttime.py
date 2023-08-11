@@ -16,5 +16,10 @@ def get_avg_estimates(data, duration=None):
     #     raise ValueError(
     #         "Windowed method timespan cannot be greater than the cached timespan"
     #     )
-    wf = WindowedForecast(data, duration, start=datetime.now())
+    # NB: datetime.now().astimezone() gives us a timezone aware datetime object
+    # in the current system timezone. The resulting start time from the forecast
+    # works in terms of this timezone (even if the data is in another timezone)
+    # so we end up with something in system time if data is in utc and system
+    # time is in bst (for example)
+    wf = WindowedForecast(data, duration, start=datetime.now().astimezone())
     return wf[0], min(wf)
