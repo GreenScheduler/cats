@@ -45,9 +45,10 @@ def parse_arguments():
     parser.add_argument(
         "--jobinfo", type=str,
         help="Resources used by the job in question, used to estimate total energy usage and carbon footprint. "
-             "E.g. `cpus=2,gpus=0,memory=8,partition=CPU_partition`. Valid components are: "
-             "`cpus`: number of CPU cores, `gpus`: number of GPUs, `memory`: memory available in GB, "
-             "`partition`: one of the partitions keys given in `config.yml`."
+             "E.g. `cpus=2,gpus=0,memory=8,partition=CPU_partition`. Valid components are "
+             "`cpus`: number of CPU cores; `gpus`: number of GPUs; `memory`: memory available in GB; "
+             "`partition`: one of the partitions keys given in `config.yml`. "
+             "Default: if absent, the total carbon footprint is not estimated."
     )
 
     return parser
