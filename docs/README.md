@@ -77,15 +77,9 @@ The HTML pages are in build/html.
 
 ### Requirements
 
-An environment to build the documentation will need the following libraries
-installed to work and produce the right output:
-
-* Python (version compatible with CATS);
-* the latest version of CATS (ensure it is the *latest* on the `main`
-  branch, etc., or the API reference generated will be out-of-date);
-* [Sphinx](https://www.sphinx-doc.org/);
-* the [Sphinx theme 'renku'](https://github.com/SwissDataScienceCenter/renku-sphinx-theme);
-* the ['sphinx_copybutton' extension](https://sphinx-copybutton.readthedocs.io/en/latest/).
+An environment to build the documentation will need certain libraries
+installed to work and produce the right output. The
+``docs-requirements.txt`` file in this directory lists those libraries.
 
 
 #### Environment for building
