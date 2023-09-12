@@ -19,33 +19,35 @@ def parse_arguments():
 
     ### Required
 
-    parser.add_argument("-d", "--duration", type=int, required=True, help="[required] Expected duration of the job in minutes.")
+    parser.add_argument(
+        "-d", "--duration", type=int, required=True, help="[required] Expected duration of the job in minutes.")
 
     ### Optional
 
     parser.add_argument(
         "-a", "--api", type=str,
-        help="Which API should be used to obtain carbon intensity forecasts. Overrides `config.yml`. "
-             "For now, only choice is 'carbonintensity.org.uk' (UK only) (default: 'carbonintensity.org.uk')"
+        help="API to use to obtain carbon intensity forecasts. Overrides `config.yml`. "
+             "For now, only choice is `carbonintensity.org.uk` (hence UK only forecasts). "
+             "Default: `carbonintensity.org.uk`."
     )
     parser.add_argument(
         "-l", "--location", type=str,
-        help="Location of the computing facility. For the UK, first half of a postcode (e.g. 'M15'), "
-             "for other APIs, see doc for exact format. Overrides `config.yml`. "
-             "If absent, location based in IP address is used."
+        help="Location of the computing facility. For the UK, first half of a postcode (e.g. `M15`), "
+             "for other APIs, see documentation for exact format. Overrides `config.yml`. "
+             "Default: if absent, location based in IP address is used."
     )
     parser.add_argument(
         "--config", type=str,
-        help="Path to a config file, default is `config.yml` in current directory. "
-             "Config file is required to obtain carbon footprint estimates. "
-             "template at https://github.com/GreenScheduler/cats/blob/main/config.yml"
+        help="Path to a configuration file. The file is required to obtain carbon footprint estimates. "
+             "Default: `config.yml` in current directory."
+             "Template found at https://github.com/GreenScheduler/cats/blob/main/config.yml."
     )
     parser.add_argument(
         "--jobinfo", type=str,
         help="Resources used by the job in question, used to estimate total energy usage and carbon footprint. "
-             "E.g. 'cpus=2,gpus=0,memory=8,partition=CPU_partition'. "
+             "E.g. `cpus=2,gpus=0,memory=8,partition=CPU_partition`. Valid components are: "
              "`cpus`: number of CPU cores, `gpus`: number of GPUs, `memory`: memory available in GB, "
-             "`partition`: one of the partitions keys in `config.yml`."
+             "`partition`: one of the partitions keys given in `config.yml`."
     )
 
     return parser
