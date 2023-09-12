@@ -5,7 +5,7 @@ from .forecast import CarbonIntensityPointEstimate
 
 def get_CI_forecast(location: str, CI_API_interface) -> list[CarbonIntensityPointEstimate]:
     """
-    get carbon intensity from an API
+    Get carbon intensity from an API
 
     Given the location and an API interface, return a list of predictions of the
     future carbon intensity.
