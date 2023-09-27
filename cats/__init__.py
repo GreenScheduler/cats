@@ -15,7 +15,40 @@ def parse_arguments():
     Parse command line arguments
     :return: [dict] parsed arguments
     """
-    parser = ArgumentParser(prog="cats", description="A climate aware job scheduler")
+    description_text = """
+    The Climate-Aware Task Scheduler (cats) command line programme helps you run your
+    calculations in a way that minimises their impact on the climate by delaying computation
+    until a time when the ammount of CO2 produced to generate the power you will use is
+    predicted to be minimised. By default, the command simply returns information about
+    when the calculation should be undertaken and compares the carbon intensity (gCO2/kWh)
+    of running the calculation now with the carbon intensity at that time in the future.
+    To undertake this calculation, cats needs to know the predicted duration of the 
+    calculation (which you must supply, see `-d`) and your location (which can be inferred from
+    your IP address (but see `-l`). If additional information about the power consumption of
+    your computer is available (see `--jobinfo`) the predicted CO2 usage will be reported.
+
+    To make use of this information, you will need to couple cats with a task scheduler of some
+    kind. The `--scheduler` option is designed to make this easy by returning the start time
+    in a format sutible for commonly available scheduling software.
+    """
+
+    example_text = """
+    Examples\n
+    ********\n
+    
+    Cats can be used to report information on the best time to run a calculation and the amount
+    of CO2. Information about a 90 minute calculation in centeral Oxford can be found by running:
+
+        cats -d 90 --loc OX1 --jobinfo="cpus=2,gpus=0,memory=8,partition=CPU_partition"
+
+    The `at` scheduler is available from the command line on  most Linux and MacOS computers,
+    and can be the easest way to use cats to minimise the carbon intensity of calculations on
+    smaller computers. For example, the above calculation can be scheduled by running:
+
+        mycommand | at -t `cats -d 90 --loc OX1 -s at`
+    """
+
+    parser = ArgumentParser(prog="cats", description=description_text, epilog=example_text)
 
     ### Required
 
@@ -24,6 +57,15 @@ def parse_arguments():
 
     ### Optional
 
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress all output except the optimised run time.")
+
+    parser.add_argument(
+        "-s", "--scheduler", type=str,
+        help="Format optimised run time for the chosen scheduler. Implies -q such that standard output can"
+             "be fed directly into the scheduler. See examples, below. For now, only choice is `at`."
+             "Default: human readable time information."
+    )
     parser.add_argument(
         "-a", "--api", type=str,
         help="API to use to obtain carbon intensity forecasts. Overrides `config.yml`. "
