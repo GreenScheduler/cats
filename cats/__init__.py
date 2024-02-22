@@ -17,6 +17,10 @@ from .CI_api_query import get_CI_forecast  # noqa: F401
 from .carbonFootprint import greenAlgorithmsCalculator, Estimates
 from .forecast import CarbonIntensityAverageEstimate
 
+# To add a scheduler, add a date format here
+# and create a scheduler_<new>(...) function
+SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M"}
+
 def parse_arguments():
     """
     Parse command line arguments
@@ -86,6 +90,9 @@ def parse_arguments():
         "-c", "--command", help="Command to schedule"
     )
     parser.add_argument(
+        "--dateformat", help="Output date format in strftime(3) format or one of the supported schedulers ('at')."
+    )
+    parser.add_argument(
         "-l", "--location", type=str,
         help="Location of the computing facility. For the UK, first half of a postcode (e.g. `M15`), "
              "for other APIs, see documentation for exact format. Overrides `config.yml`. "
@@ -132,11 +139,18 @@ class CATSOutput:
             )
         return out
 
-    def to_json(self, **kwargs) -> str:
+    def to_json(self, dateformat=None, **kwargs) -> str:
+        if "%" not in dateformat:
+            dateformat = SCHEDULER_DATE_FORMAT.get(dateformat, "")
         data = dataclasses.asdict(self)
         for ci in ["carbonIntensityNow", "carbonIntensityOptimal"]:
-            data[ci]["start"] = data[ci]["start"].isoformat()
-            data[ci]["end"] = data[ci]["end"].isoformat()
+            if dateformat == "":
+                data[ci]["start"] = data[ci]["start"].isoformat()
+                data[ci]["end"] = data[ci]["end"].isoformat()
+            else:
+                data[ci]["start"] = data[ci]["start"].strftime(dateformat)
+                data[ci]["end"] = data[ci]["end"].strftime(dateformat)
+
         return json.dumps(data, **kwargs)
 
 
@@ -144,7 +158,7 @@ def schedule_at(output: CATSOutput, args: list[str]) -> None:
     "Schedule job with optimal start time using at(1)"
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     output = subprocess.check_output(
-        ("at", "-t", output.carbonIntensityOptimal.start.strftime("%Y%m%d%H%M")),
+        ("at", "-t", output.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"])),
         stdin=proc.stdout,
     )
 
@@ -247,7 +261,7 @@ def main(arguments=None):
                 **jobinfo,
             ).get_footprint()
     if args.format == "json":
-        print(output.to_json(sort_keys=True, indent=2))
+        print(output.to_json(dateformat=args.dateformat or args.scheduler, sort_keys=True, indent=2))
     else:
         print(output)
     if args.command and args.scheduler == "at":
