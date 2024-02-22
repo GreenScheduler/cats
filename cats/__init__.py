@@ -1,12 +1,13 @@
 from argparse import ArgumentParser
 from typing import Optional
 from datetime import datetime, timedelta
+import subprocess
 import dataclasses
 import requests
 import logging
 import yaml
 import sys
-from pprint import pprint
+import subprocess
 import json
 
 from .check_clean_arguments import validate_jobinfo, validate_duration
@@ -64,19 +65,18 @@ def parse_arguments():
     ### Optional
 
     parser.add_argument(
-        "-q", "--quiet", action="store_true", help="Suppress all output except the optimised run time.")
-
-    parser.add_argument(
         "-s", "--scheduler", type=str,
-        help="Format optimised run time for the chosen scheduler. Implies -q such that standard output can"
-             "be fed directly into the scheduler. See examples, below. For now, only choice is `at`."
-             "Default: human readable time information."
+        help="Pass command using `-c` to scheduler. Currently, the only supported scheduler is at",
+        choices=["at"]
     )
     parser.add_argument(
         "-a", "--api", type=str,
         help="API to use to obtain carbon intensity forecasts. Overrides `config.yml`. "
              "For now, only choice is `carbonintensity.org.uk` (hence UK only forecasts). "
              "Default: `carbonintensity.org.uk`."
+    )
+    parser.add_argument(
+        "-c", "--command", help="Command to schedule"
     )
     parser.add_argument(
         "-l", "--location", type=str,
@@ -100,7 +100,7 @@ def parse_arguments():
     )
 
     parser.add_argument("--format", type=str, help="Format to output optimal start time and carbon emmission"
-                        "estimate savings in. Currently only JSON is supported", choices=["json"])
+                        "estimate savings in. Currently only JSON is supported.", choices=["json"])
 
     return parser
 
@@ -116,7 +116,7 @@ class CATSOutput:
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        out = f"Best job start time: {self.carbonIntensityOptimal.start}\n"
+        out = f"Best job start time: {self.carbonIntensityOptimal.start}"
 
         if self.emmissionEstimate:
             out += (f"Estimated emmissions for running job now: {self.emmissionEstimate.now}\n"
@@ -131,6 +131,15 @@ class CATSOutput:
             data[ci]["start"] = data[ci]["start"].isoformat()
             data[ci]["end"] = data[ci]["end"].isoformat()
         return json.dumps(data, **kwargs)
+
+
+def schedule_at(output: CATSOutput, args: list[str]) -> None:
+    "Schedule job with optimal start time using at(1)"
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    output = subprocess.check_output(
+        ("at", "-t", output.carbonIntensityOptimal.start.strftime("%Y%m%d%H%M")),
+        stdin=proc.stdout,
+    )
 
 
 def main(arguments=None):
@@ -234,6 +243,8 @@ def main(arguments=None):
         print(output.to_json(sort_keys=True, indent=2))
     else:
         print(output)
+    if args.command and args.scheduler == "at":
+        schedule_at(output, args.command.split())
 
 if __name__ == "__main__":
     main()
