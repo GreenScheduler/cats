@@ -23,20 +23,27 @@ def parse_arguments():
     :return: [dict] parsed arguments
     """
     description_text = """
-    The Climate-Aware Task Scheduler (cats) command line programme helps you run your
-    calculations in a way that minimises their impact on the climate by delaying computation
-    until a time when the ammount of CO2 produced to generate the power you will use is
-    predicted to be minimised. By default, the command simply returns information about
-    when the calculation should be undertaken and compares the carbon intensity (gCO2/kWh)
-    of running the calculation now with the carbon intensity at that time in the future.
-    To undertake this calculation, cats needs to know the predicted duration of the 
-    calculation (which you must supply, see `-d`) and your location (which can be inferred from
-    your IP address (but see `-l`). If additional information about the power consumption of
-    your computer is available (see `--jobinfo`) the predicted CO2 usage will be reported.
+    The Climate-Aware Task Scheduler (cats) command line program helps you run
+    your calculations in a way that minimises their impact on the climate by
+    delaying computation until a time when the ammount of CO2 produced to
+    generate the power you will use is predicted to be minimised.
 
-    To make use of this information, you will need to couple cats with a task scheduler of some
-    kind. The `--scheduler` option is designed to make this easy by returning the start time
-    in a format sutible for commonly available scheduling software.
+    By default, the command simply returns information about when the
+    calculation should be undertaken and compares the carbon intensity
+    (gCO2/kWh) of running the calculation now with the carbon intensity at that
+    time in the future. To undertake this calculation, cats needs to know the
+    predicted duration of the calculation (which you must supply, see `-d`) and
+    your location (which can be inferred from your IP address (but see `-l`). If
+    additional information about the power consumption of your computer is
+    available (see `--jobinfo`) the predicted CO2 usage will be reported.
+
+    To make use of this information, you will need to couple cats with a task
+    scheduler of some kind. The command to schedule is specified with the `-c`
+    or `--command` parameter, and the scheduler can be selected using the
+    `--scheduler` option.
+
+    Example:
+       cats -d 1 --loc RG1 --scheduler=at --command='ls'
     """
 
     example_text = """
