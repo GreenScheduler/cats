@@ -8,8 +8,6 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 
 *Currently CATS only works in the UK. If you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know.*
 
-***
-
 ## Features
 
 - Estimates the carbon intensity of the electricity grid in real-time
@@ -18,8 +16,6 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 - Lightweight and easy to integrate into existing workflows
 - Supports Python 3.9+
 
-***
-
 ## Installation
 
 Install via `pip` as follows:
@@ -27,8 +23,6 @@ Install via `pip` as follows:
 ```bash
 pip install git+https://github.com/GreenScheduler/cats
 ```
-
-***
 
 ## Documentation
 
@@ -102,13 +96,9 @@ cats -d 120 --config .config/config.yml \
   --jobinfo cpus=2,gpus=0,memory=8,partition=CPU_partition
 ```
 
-***
-
 ## Contributing
 
 We welcome contributions from the community! If you find a bug or have an idea for a new feature, please open an issue on our GitHub repository or submit a pull request.
-
-***
 
 ## License
 
