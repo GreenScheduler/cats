@@ -41,14 +41,14 @@ the documentation for more details.
 You can run `cats` with:
 
 ```bash
-python -m cats -d <job_duration> --loc <postcode>
+cats -d <job_duration> --loc <postcode>
 ```
 
 The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address. Job duration is in minutes, specified as an integer.
 
 The scheduler then calls a function that estimates the best time to start the job given predicted carbon intensity over the next 48 hours. The workflow is the same as for other popular schedulers. Switching to `cats` should be transparent to cluster users.
 
-It will display the time to start the job on standard out and optionally some information about the carbon intensity on standard error.
+By default, the optimal time to start the job is shown in a human readable format. This information can be output in a machine readable format by passing `--format=json`. The date format in the machine readable output can be controlled using `--dateformat` which accepts a [strftime(3)](https://manpages.debian.org/stable/manpages-dev/strftime.3.en.html) format date.
 
 
 #### Use with schedulers
@@ -56,8 +56,9 @@ It will display the time to start the job on standard out and optionally some in
 You can use CATS with, for example, the ``at`` job scheduler by running:
 
 ```bash
-ls | at -t `python -m cats -d 5 --loc OX1`
+cats -d 5 --loc OX1 --scheduler at --command 'ls'
 ```
+This schedules a command (`ls`) that has an expected runtime less than 5 minutes using the at scheduler.
 
 #### Console demonstration
 
