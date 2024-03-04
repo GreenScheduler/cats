@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from typing import Optional
 from datetime import datetime, timedelta
+from typing import Optional
 import subprocess
 import dataclasses
 import requests
@@ -139,9 +140,7 @@ class CATSOutput:
             )
         return out
 
-    def to_json(self, dateformat=None, **kwargs) -> str:
-        if "%" not in dateformat:
-            dateformat = SCHEDULER_DATE_FORMAT.get(dateformat, "")
+    def to_json(self, dateformat: str = "", **kwargs) -> str:
         data = dataclasses.asdict(self)
         for ci in ["carbonIntensityNow", "carbonIntensityOptimal"]:
             if dateformat == "":
@@ -261,7 +260,11 @@ def main(arguments=None):
                 **jobinfo,
             ).get_footprint()
     if args.format == "json":
-        print(output.to_json(dateformat=args.dateformat or args.scheduler, sort_keys=True, indent=2))
+        if isinstance(args.dateformat, str) and "%" not in args.dateformat:
+            dateformat = SCHEDULER_DATE_FORMAT.get(args.dateformat, "")
+        else:
+            dateformat = args.dateformat or ""
+        print(output.to_json(dateformat, sort_keys=True, indent=2))
     else:
         print(output)
     if args.command and args.scheduler == "at":
