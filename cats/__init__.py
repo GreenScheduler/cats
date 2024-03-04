@@ -64,7 +64,7 @@ def parse_arguments():
     and can be the easest way to use cats to minimise the carbon intensity of calculations on
     smaller computers. For example, the above calculation can be scheduled by running:
 
-        mycommand | at -t `cats -d 90 --loc OX1 -s at`
+        cats -d 90 --loc OX1 -s at -c 'mycommand'
     """
 
     parser = ArgumentParser(prog="cats", description=description_text, epilog=example_text)
@@ -88,7 +88,7 @@ def parse_arguments():
              "Default: `carbonintensity.org.uk`."
     )
     parser.add_argument(
-        "-c", "--command", help="Command to schedule"
+        "-c", "--command", help="Command to schedule, requires --scheduler to be set"
     )
     parser.add_argument(
         "--dateformat", help="Output date format in strftime(3) format or one of the supported schedulers ('at')."
@@ -165,6 +165,10 @@ def schedule_at(output: CATSOutput, args: list[str]) -> None:
 def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
+    if args.command and not args.scheduler:
+        print("cats: To run a command with the -c or --command option, you must\n"
+              "      specify the scheduler with the -s or --scheduler option")
+        sys.exit(1)
 
     ##################################
     ## Validate and clean arguments ##
