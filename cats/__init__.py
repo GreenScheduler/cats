@@ -1,4 +1,8 @@
 import dataclasses
+import logging
+import yaml
+import sys
+import subprocess
 import json
 import logging
 import subprocess
@@ -204,19 +208,6 @@ def main(arguments=None):
     config, CI_API_interface = configure(args)
 
     ## Location
-    if args.location:
-        location = args.location
-        logging.info(f"Using location provided: {location}")
-    elif "location" in config.keys():
-        location = config["location"]
-        logging.info(f"Using location from config file: {location}")
-    else:
-        r = requests.get("https://ipapi.co/json").json()
-        postcode = r["postal"]
-        location = postcode
-        logging.warning(
-            f"location not provided. Estimating location from IP address: {location}."
-        )
 
     ## Duration
     duration = validate_duration(args.duration)

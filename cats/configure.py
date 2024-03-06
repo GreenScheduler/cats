@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from typing import Any
 
 import yaml
+import requests
 
 from .CI_api_interface import API_interfaces, APIInterface
 
@@ -18,8 +19,9 @@ from .CI_api_interface import API_interfaces, APIInterface
 def configure(args):
     configmapping = config_from_file(configpath=args.config)
     CI_API_interface = CI_API_from_config_or_args(args, configmapping)
+    location = get_location_from_config_or_args(args, configmapping)
 
-    return configmapping, CI_API_interface
+    return configmapping, CI_API_interface, location
 
 
 def config_from_file(configpath = "") -> Mapping[str, Any]:
@@ -55,3 +57,19 @@ def CI_API_from_config_or_args(args, config) -> APIInterface:
             f"Error: {api} is not a valid API choice. It must be one of "
             "\n".join(API_interfaces.keys())
         )
+
+
+def get_location_from_config_or_args(args, config) -> str:
+    if args.location:
+        logging.info(f"Using location provided: {location}")
+        return args.location
+    if "location" in config.keys():
+        logging.info(f"Using location from config file: {location}")
+        return config["location"]
+
+    logging.warning(
+        "location not provided. Estimating location from IP address: "
+        f"{location}."
+    )
+    r = requests.get("https://ipapi.co/json").json()
+    return r["postal"]
