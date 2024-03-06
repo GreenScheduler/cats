@@ -7,11 +7,9 @@ from argparse import ArgumentParser
 from datetime import timedelta
 from typing import Optional
 
-import requests
-import yaml
-
-from .carbonFootprint import Estimates, greenAlgorithmsCalculator
-from .check_clean_arguments import validate_duration, validate_jobinfo
+from .configure import configure
+from .check_clean_arguments import validate_jobinfo, validate_duration
+from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .CI_api_interface import API_interfaces, InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .forecast import CarbonIntensityAverageEstimate
@@ -203,21 +201,8 @@ def main(arguments=None):
     ## Validate and clean arguments ##
     ##################################
 
-    ## config file
-    if args.config:
-        # if path to config file provided, it is used
-        with open(args.config, "r") as f:
-            config = yaml.safe_load(f)
-        logging.info(f"Using provided config file: {args.config}\n")
-    else:
-        # if no path provided, look for `config.yml` in current directory
-        try:
-            with open("config.yml", "r") as f:
-                config = yaml.safe_load(f)
-            logging.info("Using config.yml found in current directory\n")
-        except FileNotFoundError:
-            config = {}
-            logging.warning("config file not found")
+    config = configure(args)
+
 
     ## CI API choice
     list_CI_APIs = ["carbonintensity.org.uk"]
