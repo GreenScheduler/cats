@@ -45,18 +45,3 @@ def validate_jobinfo(jobinfo: str, expected_partition_names):
             return {}
 
     return info
-
-
-def validate_duration(duration):
-    # make sure it can be converted to integer
-    try:
-        duration_int = int(duration)
-    except ValueError:
-        raise ValueError(
-            "--duration needs to be an integer or float (number of minutes)"
-        )
-    # make sure it's positive
-    if duration_int <= 0:
-        raise ValueError("--duration needs to be positive (number of minutes)")
-
-    return duration_int

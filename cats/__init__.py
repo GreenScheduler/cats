@@ -12,7 +12,7 @@ from datetime import timedelta
 from typing import Optional
 
 from .configure import configure
-from .check_clean_arguments import validate_jobinfo, validate_duration
+from .check_clean_arguments import validate_jobinfo
 from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .CI_api_interface import API_interfaces, InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
@@ -200,17 +200,7 @@ def main(arguments=None):
             "      specify the scheduler with the -s or --scheduler option"
         )
         sys.exit(1)
-
-    ##################################
-    ## Validate and clean arguments ##
-    ##################################
-
-    config, CI_API_interface = configure(args)
-
-    ## Location
-
-    ## Duration
-    duration = validate_duration(args.duration)
+    config, CI_API_interface, location, duration = configure(args)
 
     ########################
     ## Obtain CI forecast ##

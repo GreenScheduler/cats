@@ -21,7 +21,17 @@ def configure(args):
     CI_API_interface = CI_API_from_config_or_args(args, configmapping)
     location = get_location_from_config_or_args(args, configmapping)
 
-    return configmapping, CI_API_interface, location
+    msg = "Job duration must be a positive integer (number of minutes)"
+    try:
+        duration = int(args.duration)
+    except ValueError:
+        logging.eror(msg)
+        raise ValueError
+    if duration <= 0:
+        logger.error(msg)
+        raise ValueError
+
+    return configmapping, CI_API_interface, location, duration
 
 
 def config_from_file(configpath = "") -> Mapping[str, Any]:
