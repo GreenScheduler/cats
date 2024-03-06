@@ -201,23 +201,7 @@ def main(arguments=None):
     ## Validate and clean arguments ##
     ##################################
 
-    config = configure(args)
-
-
-    ## CI API choice
-    list_CI_APIs = ["carbonintensity.org.uk"]
-
-    choice_CI_API = "carbonintensity.org.uk"  # default value
-    if "api" in config.keys():
-        choice_CI_API = config["api"]
-    if args.api:
-        choice_CI_API = args.api
-
-    if choice_CI_API not in list_CI_APIs:
-        raise ValueError(
-            f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}."
-        )
-    logging.info(f"Using {choice_CI_API} for carbon intensity forecasts\n")
+    config, CI_API_interface = configure(args)
 
     ## Location
     if args.location:
@@ -241,7 +225,6 @@ def main(arguments=None):
     ## Obtain CI forecast ##
     ########################
 
-    CI_API_interface = API_interfaces[choice_CI_API]
     try:
         CI_forecast = get_CI_forecast(location, CI_API_interface)
     except InvalidLocationError:

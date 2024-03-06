@@ -12,10 +12,14 @@ from typing import Any
 
 import yaml
 
+from .CI_api_interface import API_interfaces, APIInterface
+
 
 def configure(args):
     configmapping = config_from_file(configpath=args.config)
-    return configmapping
+    CI_API_interface = CI_API_from_config_or_args(args, configmapping)
+
+    return configmapping, CI_API_interface
 
 
 def config_from_file(configpath = "") -> Mapping[str, Any]:
@@ -33,3 +37,21 @@ def config_from_file(configpath = "") -> Mapping[str, Any]:
         except FileNotFoundError:
             logging.warning("config file not found")
             return {}
+
+
+def CI_API_from_config_or_args(args, config) -> APIInterface:
+    try:
+        api = args.api if args.api else config["api"]
+    except KeyError:
+        api = 'carbonintensity.org.uk'  # default value
+        logging.warning(
+            "Unspecified carbon intensity forecast service, "
+            f"using {api}"
+        )
+    try:
+        return API_interfaces[api]
+    except KeyError:
+        logging.error(
+            f"Error: {api} is not a valid API choice. It must be one of "
+            "\n".join(API_interfaces.keys())
+        )
