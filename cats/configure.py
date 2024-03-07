@@ -8,6 +8,7 @@ forecast provider.  A configuration consits of:
 - Interface to carbon intensity forecast provider (See TODO)
 """
 from collections.abc import Mapping
+import logging
 from typing import Any
 
 import yaml
@@ -28,13 +29,13 @@ def configure(args):
         logging.eror(msg)
         raise ValueError
     if duration <= 0:
-        logger.error(msg)
+        logging.error(msg)
         raise ValueError
 
     return configmapping, CI_API_interface, location, duration
 
 
-def config_from_file(configpath = "") -> Mapping[str, Any]:
+def config_from_file(configpath="") -> Mapping[str, Any]:
     if configpath:
         # if path to config file provided, it is used
         with open(configpath, "r") as f:
