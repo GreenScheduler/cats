@@ -10,14 +10,14 @@ You can use CATS with the ``at`` job scheduler by running:
 
 .. code-block:: console
 
-   $ <command> | at -t `python -m cats -d <job_duration> --loc <postcode>`
+   $ cats -d <job_duration> --loc <postcode> --scheduler at --command '<command>'
 
 As an example, if you want to schedule a run of ``ls`` with a 5 minute
 duration, in the 'OX1' postcode that would look like:
 
 .. code-block:: console
 
-   $ ls | at -t `python -m cats -d 5 --loc OX1`
+   $ cats -d 5 --loc OX1 --scheduler at --command 'ls'
 
 
 Demonstration
