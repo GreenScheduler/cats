@@ -147,7 +147,6 @@ def parse_arguments():
 class CATSOutput:
     """Carbon Aware Task Scheduler output"""
 
-    carbonIntensityAPI: str
     carbonIntensityNow: CarbonIntensityAverageEstimate
     carbonIntensityOptimal: CarbonIntensityAverageEstimate
     location: str
