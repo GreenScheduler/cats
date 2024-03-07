@@ -72,15 +72,18 @@ def CI_API_from_config_or_args(args, config) -> APIInterface:
 
 def get_location_from_config_or_args(args, config) -> str:
     if args.location:
+        location = args.location
         logging.info(f"Using location provided: {location}")
-        return args.location
+        return location
     if "location" in config.keys():
+        location = config["location"]
         logging.info(f"Using location from config file: {location}")
-        return config["location"]
+        return location
 
+    r = requests.get("https://ipapi.co/json").json()
+    location = r["postal"]
     logging.warning(
         "location not provided. Estimating location from IP address: "
         f"{location}."
     )
-    r = requests.get("https://ipapi.co/json").json()
-    return r["postal"]
+    return location
