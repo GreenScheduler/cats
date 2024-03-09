@@ -10,7 +10,8 @@ class InvalidLocationError(Exception):
     pass
 
 
-APIInterface = namedtuple('APIInterface', ['get_request_url', 'parse_response_data'])
+APIInterface = namedtuple("APIInterface", ["get_request_url", "parse_response_data"])
+
 
 def ciuk_request_url(timestamp: datetime, postcode: str):
     # This transformation is specific to the CI-UK API.
@@ -25,7 +26,7 @@ def ciuk_request_url(timestamp: datetime, postcode: str):
     else:
         dt = timestamp.replace(minute=1, second=0, microsecond=0)
 
-    if (len(postcode) > 4):
+    if len(postcode) > 4:
         sys.stderr.write(f"Warning: truncating postcode {postcode} to ")
         postcode = postcode[:-3].strip()
         sys.stderr.write(f"{postcode}.\n")
@@ -49,9 +50,10 @@ def ciuk_parse_response_data(response: dict):
     :param response:
     :return:
     """
+
     def invalid_code(r: dict):
         try:
-            return "postcode" in r['error']['message']
+            return "postcode" in r["error"]["message"]
         except KeyError:
             return False
 
@@ -65,9 +67,9 @@ def ciuk_parse_response_data(response: dict):
 
     datefmt = "%Y-%m-%dT%H:%MZ"
     # The "Z" at the end of the format string indicates UTC,
-    # however, strptime does not know how to parse this, so we 
+    # however, strptime does not know how to parse this, so we
     # need to add tzinfo data.
-    utc = ZoneInfo('UTC')
+    utc = ZoneInfo("UTC")
     return [
         CarbonIntensityPointEstimate(
             datetime=datetime.strptime(d["from"], datefmt).replace(tzinfo=utc),
@@ -76,9 +78,10 @@ def ciuk_parse_response_data(response: dict):
         for d in response["data"]["data"]
     ]
 
+
 API_interfaces = {
     "carbonintensity.org.uk": APIInterface(
         get_request_url=ciuk_request_url,
         parse_response_data=ciuk_parse_response_data,
-        ),
-    }
+    ),
+}

@@ -9,7 +9,8 @@ class CarbonIntensityPointEstimate:
     instance based on the first attribute. See
     https://peps.python.org/pep-0557
     """
-    value: float # the first attribute is used automatically for sorting methods
+
+    value: float  # the first attribute is used automatically for sorting methods
     datetime: datetime
 
 
@@ -20,18 +21,18 @@ class CarbonIntensityAverageEstimate:
     of class instance based on the first attribute.  See
     https://peps.python.org/pep-0557
     """
+
     value: float
     start: datetime  # Start of the time-integration window
     end: datetime  # End of the time-integration window
 
 
 class WindowedForecast:
-
     def __init__(
-            self,
-            data: list[CarbonIntensityPointEstimate],
-            duration: int,  # in minutes
-            start: datetime,
+        self,
+        data: list[CarbonIntensityPointEstimate],
+        duration: int,  # in minutes
+        start: datetime,
     ):
         self.data_stepsize = data[1].datetime - data[0].datetime
         self.start = start
@@ -46,10 +47,11 @@ class WindowedForecast:
             for i, d in enumerate(data):
                 if d.datetime > t:
                     return i - 1
+
         # bisect_right(data, start) returns the index of the first
         # data point with datetime value immediately preceding the job
         # start time
-        self.data = data[bisect_right(data, start):]
+        self.data = data[bisect_right(data, start) :]
 
         # Find number of data points in a window, by finding the index
         # of the closest data point past the job end time. Could be
@@ -62,6 +64,7 @@ class WindowedForecast:
             for i, d in enumerate(data):
                 if d.datetime >= t:
                     return i
+
         self.ndata = bisect_left(self.data, self.end) + 1
 
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
@@ -97,9 +100,7 @@ class WindowedForecast:
         # window_data <- [lbound] + [...bulk...] + [rbound] where
         # lbound and rbound are interpolated intensity values.
         window_data = (
-            [lbound] +
-            self.data[index + 1: index + self.ndata - 1] +
-            [rbound]
+            [lbound] + self.data[index + 1 : index + self.ndata - 1] + [rbound]
         )
         acc = [
             0.5 * (a.value + b.value) * (b.datetime - a.datetime).total_seconds()
@@ -114,9 +115,9 @@ class WindowedForecast:
 
     @staticmethod
     def interp(
-            p1: CarbonIntensityPointEstimate,
-            p2: CarbonIntensityPointEstimate,
-            when: datetime
+        p1: CarbonIntensityPointEstimate,
+        p2: CarbonIntensityPointEstimate,
+        when: datetime,
     ) -> CarbonIntensityPointEstimate:
         """Return carbon intensity pt estimate at a time between data
         points, assuming points are joined by a straight line (linear

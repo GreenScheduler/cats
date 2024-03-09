@@ -1,6 +1,6 @@
 from collections import namedtuple
-import yaml
 
+import yaml
 
 Estimates = namedtuple("Estimates", ["now", "best", "savings"])
 

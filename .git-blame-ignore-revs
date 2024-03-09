@@ -1,0 +1,13 @@
+# This file lists commits to be ignored when running git-blame(1)
+# Add commit IDs to this when the commit is a trivial change such
+# as autoformatting commits
+
+# You can use this file with git-blame by using --ignore-revs-file:
+#    git blame --ignore-revs-file .git-blame-ignore-revs
+# To set this file to be ignored on each git-blame invocation:
+#    git config blame.ignoreRevsFile .git-blame-ignore-revs
+# By default, GitHub will use the set of commits in this file in its Blame view:
+# https://docs.github.com/en/repositories/working-with-files/using-files/viewing-a-file#ignore-commits-in-the-blame-view
+
+# initial pre-commit run and ruff autoformatting
+9031aafa07bdc3a93a2019648bbf50b894446b70
