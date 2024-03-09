@@ -53,4 +53,3 @@ Modules
 
 .. automodule:: cats.optimise_starttime
     :members:
-

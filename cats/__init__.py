@@ -1,26 +1,26 @@
-from argparse import ArgumentParser
-from typing import Optional
-from datetime import datetime, timedelta
-from typing import Optional
-import subprocess
 import dataclasses
-import requests
-import logging
-import yaml
-import sys
-import subprocess
 import json
+import logging
+import subprocess
+import sys
+from argparse import ArgumentParser
+from datetime import timedelta
+from typing import Optional
 
-from .check_clean_arguments import validate_jobinfo, validate_duration
-from .optimise_starttime import get_avg_estimates  # noqa: F401
+import requests
+import yaml
+
+from .carbonFootprint import Estimates, greenAlgorithmsCalculator
+from .check_clean_arguments import validate_duration, validate_jobinfo
 from .CI_api_interface import API_interfaces, InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
-from .carbonFootprint import greenAlgorithmsCalculator, Estimates
 from .forecast import CarbonIntensityAverageEstimate
+from .optimise_starttime import get_avg_estimates  # noqa: F401
 
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
 SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M"}
+
 
 def parse_arguments():
     """
@@ -54,7 +54,7 @@ def parse_arguments():
     example_text = """
     Examples\n
     ********\n
-    
+
     Cats can be used to report information on the best time to run a calculation and the amount
     of CO2. Information about a 90 minute calculation in centeral Oxford can be found by running:
 
@@ -67,57 +67,79 @@ def parse_arguments():
         cats -d 90 --loc OX1 -s at -c 'mycommand'
     """
 
-    parser = ArgumentParser(prog="cats", description=description_text, epilog=example_text)
+    parser = ArgumentParser(
+        prog="cats", description=description_text, epilog=example_text
+    )
 
     ### Required
 
     parser.add_argument(
-        "-d", "--duration", type=int, required=True, help="[required] Expected duration of the job in minutes.")
+        "-d",
+        "--duration",
+        type=int,
+        required=True,
+        help="[required] Expected duration of the job in minutes.",
+    )
 
     ### Optional
 
     parser.add_argument(
-        "-s", "--scheduler", type=str,
+        "-s",
+        "--scheduler",
+        type=str,
         help="Pass command using `-c` to scheduler. Currently, the only supported scheduler is at",
-        choices=["at"]
+        choices=["at"],
     )
     parser.add_argument(
-        "-a", "--api", type=str,
+        "-a",
+        "--api",
+        type=str,
         help="API to use to obtain carbon intensity forecasts. Overrides `config.yml`. "
-             "For now, only choice is `carbonintensity.org.uk` (hence UK only forecasts). "
-             "Default: `carbonintensity.org.uk`."
+        "For now, only choice is `carbonintensity.org.uk` (hence UK only forecasts). "
+        "Default: `carbonintensity.org.uk`.",
     )
     parser.add_argument(
         "-c", "--command", help="Command to schedule, requires --scheduler to be set"
     )
     parser.add_argument(
-        "--dateformat", help="Output date format in strftime(3) format or one of the supported schedulers ('at')."
+        "--dateformat",
+        help="Output date format in strftime(3) format or one of the supported schedulers ('at').",
     )
     parser.add_argument(
-        "-l", "--location", type=str,
+        "-l",
+        "--location",
+        type=str,
         help="Location of the computing facility. For the UK, first half of a postcode (e.g. `M15`), "
-             "for other APIs, see documentation for exact format. Overrides `config.yml`. "
-             "Default: if absent, location based in IP address is used."
+        "for other APIs, see documentation for exact format. Overrides `config.yml`. "
+        "Default: if absent, location based in IP address is used.",
     )
     parser.add_argument(
-        "--config", type=str,
+        "--config",
+        type=str,
         help="Path to a configuration file. The file is required to obtain carbon footprint estimates. "
-             "Default: `config.yml` in current directory."
-             "Template found at https://github.com/GreenScheduler/cats/blob/main/config.yml."
+        "Default: `config.yml` in current directory."
+        "Template found at https://github.com/GreenScheduler/cats/blob/main/config.yml.",
     )
     parser.add_argument(
-        "--jobinfo", type=str,
+        "--jobinfo",
+        type=str,
         help="Resources used by the job in question, used to estimate total energy usage and carbon footprint. "
-             "E.g. `cpus=2,gpus=0,memory=8,partition=CPU_partition`. Valid components are "
-             "`cpus`: number of CPU cores; `gpus`: number of GPUs; `memory`: memory available in GB; "
-             "`partition`: one of the partitions keys given in `config.yml`. "
-             "Default: if absent, the total carbon footprint is not estimated."
+        "E.g. `cpus=2,gpus=0,memory=8,partition=CPU_partition`. Valid components are "
+        "`cpus`: number of CPU cores; `gpus`: number of GPUs; `memory`: memory available in GB; "
+        "`partition`: one of the partitions keys given in `config.yml`. "
+        "Default: if absent, the total carbon footprint is not estimated.",
     )
 
-    parser.add_argument("--format", type=str, help="Format to output optimal start time and carbon emmission"
-                        "estimate savings in. Currently only JSON is supported.", choices=["json"])
+    parser.add_argument(
+        "--format",
+        type=str,
+        help="Format to output optimal start time and carbon emmission"
+        "estimate savings in. Currently only JSON is supported.",
+        choices=["json"],
+    )
 
     return parser
+
 
 @dataclasses.dataclass
 class CATSOutput:
@@ -134,7 +156,8 @@ class CATSOutput:
         out = f"Best job start time: {self.carbonIntensityOptimal.start}"
 
         if self.emmissionEstimate:
-            out += (f"Estimated emmissions for running job now: {self.emmissionEstimate.now}\n"
+            out += (
+                f"Estimated emmissions for running job now: {self.emmissionEstimate.now}\n"
                 f"Estimated emmissions for running delayed job: {self.emmissionEstimate.best})\n"
                 f" (- {self.emmissionEstimate.savings})"
             )
@@ -157,7 +180,11 @@ def schedule_at(output: CATSOutput, args: list[str]) -> None:
     "Schedule job with optimal start time using at(1)"
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     output = subprocess.check_output(
-        ("at", "-t", output.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"])),
+        (
+            "at",
+            "-t",
+            output.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
+        ),
         stdin=proc.stdout,
     )
 
@@ -166,8 +193,10 @@ def main(arguments=None):
     parser = parse_arguments()
     args = parser.parse_args(arguments)
     if args.command and not args.scheduler:
-        print("cats: To run a command with the -c or --command option, you must\n"
-              "      specify the scheduler with the -s or --scheduler option")
+        print(
+            "cats: To run a command with the -c or --command option, you must\n"
+            "      specify the scheduler with the -s or --scheduler option"
+        )
         sys.exit(1)
 
     ##################################
@@ -191,16 +220,18 @@ def main(arguments=None):
             logging.warning("config file not found")
 
     ## CI API choice
-    list_CI_APIs = ['carbonintensity.org.uk']
+    list_CI_APIs = ["carbonintensity.org.uk"]
 
-    choice_CI_API = 'carbonintensity.org.uk' # default value
-    if 'api' in config.keys():
+    choice_CI_API = "carbonintensity.org.uk"  # default value
+    if "api" in config.keys():
         choice_CI_API = config["api"]
     if args.api:
         choice_CI_API = args.api
 
     if choice_CI_API not in list_CI_APIs:
-        raise ValueError(f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}.")
+        raise ValueError(
+            f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}."
+        )
     logging.info(f"Using {choice_CI_API} for carbon intensity forecasts\n")
 
     ## Location
@@ -214,7 +245,9 @@ def main(arguments=None):
         r = requests.get("https://ipapi.co/json").json()
         postcode = r["postal"]
         location = postcode
-        logging.warning(f"location not provided. Estimating location from IP address: {location}.")
+        logging.warning(
+            f"location not provided. Estimating location from IP address: {location}."
+        )
 
     ## Duration
     duration = validate_duration(args.duration)
@@ -240,9 +273,7 @@ def main(arguments=None):
 
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
-    now_avg, best_avg = get_avg_estimates(
-        CI_forecast, duration=duration
-    )
+    now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
     output = CATSOutput(choice_CI_API, now_avg, best_avg, location, "GBR")
 
     ################################
@@ -250,16 +281,20 @@ def main(arguments=None):
     ################################
 
     if args.jobinfo:
-        jobinfo = validate_jobinfo(args.jobinfo, expected_partition_names=config['partitions'].keys())
+        jobinfo = validate_jobinfo(
+            args.jobinfo, expected_partition_names=config["partitions"].keys()
+        )
 
         if not (jobinfo and config):
-            logging.warning("Not enough information to estimate total carbon footprint, "
-                            "both --jobinfo and config files are needed.\n")
+            logging.warning(
+                "Not enough information to estimate total carbon footprint, "
+                "both --jobinfo and config files are needed.\n"
+            )
         else:
             output.emmissionEstimate = greenAlgorithmsCalculator(
                 config=config,
                 runtime=timedelta(minutes=args.duration),
-                averageBest_carbonIntensity=best_avg.value, # TODO replace with real carbon intensity
+                averageBest_carbonIntensity=best_avg.value,  # TODO replace with real carbon intensity
                 averageNow_carbonIntensity=now_avg.value,
                 **jobinfo,
             ).get_footprint()
@@ -273,6 +308,7 @@ def main(arguments=None):
         print(output)
     if args.command and args.scheduler == "at":
         schedule_at(output, args.command.split())
+
 
 if __name__ == "__main__":
     main()

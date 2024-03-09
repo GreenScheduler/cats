@@ -1,6 +1,7 @@
 import re
 import sys
 
+
 def validate_jobinfo(jobinfo: str, expected_partition_names):
     """Parses a string of job info keys in the form
 
@@ -30,7 +31,9 @@ def validate_jobinfo(jobinfo: str, expected_partition_names):
 
     # Validate partition value
     if info["partition"] not in expected_partition_names:
-        sys.stderr.write(f"ERROR: job info key 'partition' should be one of {expected_partition_names}. Typo?\n")
+        sys.stderr.write(
+            f"ERROR: job info key 'partition' should be one of {expected_partition_names}. Typo?\n"
+        )
         return {}
 
     # check that `cpus`, `gpus` and `memory` are numeric and convert to int
@@ -43,12 +46,15 @@ def validate_jobinfo(jobinfo: str, expected_partition_names):
 
     return info
 
+
 def validate_duration(duration):
     # make sure it can be converted to integer
     try:
         duration_int = int(duration)
     except ValueError:
-        raise ValueError("--duration needs to be an integer or float (number of minutes)")
+        raise ValueError(
+            "--duration needs to be an integer or float (number of minutes)"
+        )
     # make sure it's positive
     if duration_int <= 0:
         raise ValueError("--duration needs to be positive (number of minutes)")
