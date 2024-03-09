@@ -24,3 +24,7 @@
 
   [project.scripts]
     cats = "cats:main"
+
+  [tool.ruff.lint]
+    # Pyflakes (`F`), subset of the pycodestyle (`E`) and unsorted imports (`I001`)
+    select = ["E4", "E7", "E9", "F", "I001"]
