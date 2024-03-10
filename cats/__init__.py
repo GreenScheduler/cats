@@ -12,8 +12,8 @@ from datetime import timedelta
 from typing import Optional
 
 from .configure import configure
+from .carbonFootprint import Estimates, greenAlgorithmsCalculator
 from .check_clean_arguments import validate_jobinfo
-from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .forecast import CarbonIntensityAverageEstimate
