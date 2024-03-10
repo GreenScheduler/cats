@@ -1,8 +1,8 @@
 """This module exports a function :py:func:`configure
 <cats.configure.configure>` that processes both command line arguments
-and configuration file. This function returns a configuration for cats
-to make a request to a carcon intensity forecast provider.  A
-configuration consits of:
+and configuration file. This function returns a runtime configuration
+for cats to make a request to a carcon intensity forecast provider.  A
+runtime configuration consits of:
 
 - location (postcode)
 - job duration
