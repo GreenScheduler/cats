@@ -1,8 +1,4 @@
 import dataclasses
-import logging
-import yaml
-import sys
-import subprocess
 import json
 import logging
 import subprocess
@@ -11,11 +7,11 @@ from argparse import ArgumentParser
 from datetime import timedelta
 from typing import Optional
 
-from .configure import configure
 from .carbonFootprint import Estimates, greenAlgorithmsCalculator
 from .check_clean_arguments import validate_jobinfo
 from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
+from .configure import configure
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
 
@@ -222,7 +218,7 @@ def main(arguments=None):
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
     now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(choice_CI_API, now_avg, best_avg, location, "GBR")
+    output = CATSOutput(now_avg, best_avg, location, "GBR")
 
     ################################
     ## Calculate carbon footprint ##

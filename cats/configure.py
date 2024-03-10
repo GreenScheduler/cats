@@ -9,12 +9,13 @@ configuration consits of:
 - Interface to carbon intensity forecast provider (See TODO)
 
 """
-from collections.abc import Mapping
+
 import logging
+from collections.abc import Mapping
 from typing import Any
 
-import yaml
 import requests
+import yaml
 
 from .CI_api_interface import API_interfaces, APIInterface
 
@@ -74,17 +75,17 @@ def CI_API_from_config_or_args(args, config) -> APIInterface:
     try:
         api = args.api if args.api else config["api"]
     except KeyError:
-        api = 'carbonintensity.org.uk'  # default value
+        api = "carbonintensity.org.uk"  # default value
         logging.warning(
-            "Unspecified carbon intensity forecast service, "
-            f"using {api}"
+            "Unspecified carbon intensity forecast service, " f"using {api}"
         )
     try:
         return API_interfaces[api]
     except KeyError:
         logging.error(
-            f"Error: {api} is not a valid API choice. It must be one of "
-            "\n".join(API_interfaces.keys())
+            f"Error: {api} is not a valid API choice. It must be one of " "\n".join(
+                API_interfaces.keys()
+            )
         )
 
 
@@ -101,7 +102,6 @@ def get_location_from_config_or_args(args, config) -> str:
     r = requests.get("https://ipapi.co/json").json()
     location = r["postal"]
     logging.warning(
-        "location not provided. Estimating location from IP address: "
-        f"{location}."
+        "location not provided. Estimating location from IP address: " f"{location}."
     )
     return location

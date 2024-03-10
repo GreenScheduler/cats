@@ -1,20 +1,22 @@
-from contextlib import contextmanager
-from pathlib import Path
 import os
+from contextlib import contextmanager
 
 import pytest
 import yaml
 
-from cats.configure import config_from_file
-from cats.configure import get_location_from_config_or_args
-from cats.configure import CI_API_from_config_or_args
 from cats import parse_arguments
 from cats.CI_api_interface import API_interfaces
+from cats.configure import (
+    CI_API_from_config_or_args,
+    config_from_file,
+    get_location_from_config_or_args,
+)
 
 CATS_CONFIG = {
     "location": "EH8",
     "api": "carbonintensity.org.uk",
 }
+
 
 @contextmanager
 def change_dir(p):
@@ -38,10 +40,12 @@ def test_config_from_file():
         config_from_file(missing_file)
         config_from_file()
 
+
 def test_config_from_file_default(local_config_file):
     with change_dir(local_config_file):
         configmapping = config_from_file()
     assert configmapping == CATS_CONFIG
+
 
 def test_get_location_from_config_or_args():
     expected_location = "SW7"
@@ -59,6 +63,7 @@ def test_get_location_from_config_or_args():
     config = {}
     location = get_location_from_config_or_args(args, config)
     assert location != ""
+
 
 def get_CI_API_from_config_or_args(args, config):
     expected_interface = API_interfaces["carbonintensity.org.uk"]
