@@ -1,5 +1,6 @@
 import os
 from contextlib import contextmanager
+from unittest.mock import Mock, patch
 
 import pytest
 import yaml
@@ -47,8 +48,16 @@ def test_config_from_file_default(local_config_file):
     assert configmapping == CATS_CONFIG
 
 
-def test_get_location_from_config_or_args():
+@patch("cats.configure.requests")
+def test_get_location_from_config_or_args(mock_requests):
     expected_location = "SW7"
+    mock_requests.get.return_value = Mock(
+        **{
+            "status_code": 200,
+            "json.return_value": {"postal": expected_location},
+        }
+    )
+
     args = parse_arguments().parse_args(
         ["--location", expected_location, "--duration", "1"]
     )
@@ -62,7 +71,8 @@ def test_get_location_from_config_or_args():
     args = parse_arguments().parse_args(["--duration", "1"])
     config = {}
     location = get_location_from_config_or_args(args, config)
-    assert location != ""
+    mock_requests.get.assert_called_once()
+    assert location == expected_location
 
 
 def get_CI_API_from_config_or_args(args, config):
