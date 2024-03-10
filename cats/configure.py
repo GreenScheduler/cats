@@ -18,6 +18,8 @@ import requests
 
 from .CI_api_interface import API_interfaces, APIInterface
 
+__all__ = ["configure"]
+
 
 def configure(args) -> tuple[dict, APIInterface, str, int]:
     """Return the runtime cats configuration from list of command line
