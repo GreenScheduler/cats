@@ -11,6 +11,7 @@ runtime configuration consits of:
 """
 
 import logging
+import sys
 from collections.abc import Mapping
 from typing import Any
 
@@ -99,8 +100,16 @@ def get_location_from_config_or_args(args, config) -> str:
         logging.info(f"Using location from config file: {location}")
         return location
 
-    r = requests.get("https://ipapi.co/json").json()
-    location = r["postal"]
+    r = requests.get("https://ipapi.co/json/")
+    if r.status_code != 200:
+        logging.error(
+            "Could not get location from ipapi.co.\n"
+            f"Got Error {r.status_code} - {r.json()['reason']}\n"
+            f"{r.json()['message']}"
+        )
+        sys.exit(1)
+    location = r.json()["postal"]
+    assert location
     logging.warning(
         "location not provided. Estimating location from IP address: " f"{location}."
     )
