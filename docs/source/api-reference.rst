@@ -23,6 +23,12 @@ Modules
 .. automodule:: cats.__main__
     :members:
 
+``cats.configure``
+^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: cats.configure
+   :members:
+
 ``cats.CI_api_interface``
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
