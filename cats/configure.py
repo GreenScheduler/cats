@@ -20,10 +20,10 @@ import yaml
 
 from .CI_api_interface import API_interfaces, APIInterface
 
-__all__ = ["configure"]
+__all__ = ["get_runtime_config"]
 
 
-def configure(args) -> tuple[dict, APIInterface, str, int]:
+def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
     """Return the runtime cats configuration from list of command line
     arguments and content of configuration file.
 

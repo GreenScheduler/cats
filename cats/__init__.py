@@ -11,7 +11,7 @@ from .carbonFootprint import Estimates, greenAlgorithmsCalculator
 from .check_clean_arguments import validate_jobinfo
 from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
-from .configure import configure
+from .configure import get_runtime_config
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
 
@@ -195,7 +195,7 @@ def main(arguments=None):
             "      specify the scheduler with the -s or --scheduler option"
         )
         sys.exit(1)
-    config, CI_API_interface, location, duration = configure(args)
+    config, CI_API_interface, location, duration = get_runtime_config(args)
 
     ########################
     ## Obtain CI forecast ##
