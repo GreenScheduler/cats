@@ -7,7 +7,9 @@ import yaml
 
 from cats.configure import config_from_file
 from cats.configure import get_location_from_config_or_args
+from cats.configure import CI_API_from_config_or_args
 from cats import parse_arguments
+from cats.CI_api_interface import API_interfaces
 
 CATS_CONFIG = {
     "location": "EH8",
@@ -57,3 +59,22 @@ def test_get_location_from_config_or_args():
     config = {}
     location = get_location_from_config_or_args(args, config)
     assert location != ""
+
+def get_CI_API_from_config_or_args(args, config):
+    expected_interface = API_interfaces["carbonintensity.org.uk"]
+    args = parse_arguments().parse_args(
+        ["--api", "carbonintensity.org.uk", "--duration", "1"]
+    )
+    API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
+    assert API_interface == expected_interface
+
+    args = parse_arguments().parse_args(["--duration", "1"])
+    API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
+    assert API_interface == expected_interface
+
+    args = parse_arguments().parse_args(
+        ["--api", "doesnotexist.co.uk", "--duration", "1"]
+    )
+    API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
+    with pytest.raises(KeyError):
+        CI_API_from_config_or_args(args, CATS_CONFIG)
