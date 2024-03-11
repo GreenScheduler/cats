@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command-line (CLI) reference &mdash; CATS 0.1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+      <link rel="stylesheet" href="_static/fonts.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/favicon-32x32.png"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=01f34227"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=a56c686a"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api-reference.html" />
+    <link rel="prev" title="Use with Schedulers" href="use-with-schedulers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CATS
+              <img src="_static/cats_dalle_img_200x200px_for_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use-with-schedulers.html">Use with Schedulers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command-line (CLI) reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#named-arguments">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CATS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Command-line (CLI) reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cli-reference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="command-line-cli-reference">
+<span id="cli-reference"></span><h1>Command-line (CLI) reference<a class="headerlink" href="#command-line-cli-reference" title="Link to this heading"></a></h1>
+<p><blockquote>
+<div><p>The Climate-Aware Task Scheduler (cats) command line program helps you run
+your calculations in a way that minimises their impact on the climate by
+delaying computation until a time when the ammount of CO2 produced to
+generate the power you will use is predicted to be minimised.</p>
+<p>By default, the command simply returns information about when the
+calculation should be undertaken and compares the carbon intensity
+(gCO2/kWh) of running the calculation now with the carbon intensity at that
+time in the future. To undertake this calculation, cats needs to know the
+predicted duration of the calculation (which you must supply, see <cite>-d</cite>) and
+your location (which can be inferred from your IP address (but see <cite>-l</cite>). If
+additional information about the power consumption of your computer is
+available (see <cite>–jobinfo</cite>) the predicted CO2 usage will be reported.</p>
+<p>To make use of this information, you will need to couple cats with a task
+scheduler of some kind. The command to schedule is specified with the <cite>-c</cite>
+or <cite>–command</cite> parameter, and the scheduler can be selected using the
+<cite>–scheduler</cite> option.</p>
+<dl class="simple">
+<dt>Example:</dt><dd><p>cats -d 1 –loc RG1 –scheduler=at –command=’ls’</p>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">cats</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="o">-</span><span class="n">d</span> <span class="n">DURATION</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="p">{</span><span class="n">at</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span> <span class="n">API</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">COMMAND</span><span class="p">]</span>
+            <span class="p">[</span><span class="o">--</span><span class="n">dateformat</span> <span class="n">DATEFORMAT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LOCATION</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">config</span> <span class="n">CONFIG</span><span class="p">]</span>
+            <span class="p">[</span><span class="o">--</span><span class="n">jobinfo</span> <span class="n">JOBINFO</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">format</span> <span class="p">{</span><span class="n">json</span><span class="p">}]</span>
+</pre></div>
+</div>
+<section id="named-arguments">
+<h2>Named Arguments<a class="headerlink" href="#named-arguments" title="Link to this heading"></a></h2>
+<dl class="option-list">
+<dt><kbd>-d, --duration</kbd></dt>
+<dd><p>[required] Expected duration of the job in minutes.</p>
+</dd>
+<dt><kbd>-s, --scheduler</kbd></dt>
+<dd><p>Possible choices: at</p>
+<p>Pass command using <cite>-c</cite> to scheduler. Currently, the only supported scheduler is at</p>
+</dd>
+<dt><kbd>-a, --api</kbd></dt>
+<dd><p>API to use to obtain carbon intensity forecasts. Overrides <cite>config.yml</cite>. For now, only choice is <cite>carbonintensity.org.uk</cite> (hence UK only forecasts). Default: <cite>carbonintensity.org.uk</cite>.</p>
+</dd>
+<dt><kbd>-c, --command</kbd></dt>
+<dd><p>Command to schedule, requires –scheduler to be set</p>
+</dd>
+<dt><kbd>--dateformat</kbd></dt>
+<dd><p>Output date format in strftime(3) format or one of the supported schedulers (‘at’).</p>
+</dd>
+<dt><kbd>-l, --location</kbd></dt>
+<dd><p>Location of the computing facility. For the UK, first half of a postcode (e.g. <cite>M15</cite>), for other APIs, see documentation for exact format. Overrides <cite>config.yml</cite>. Default: if absent, location based in IP address is used.</p>
+</dd>
+<dt><kbd>--config</kbd></dt>
+<dd><p>Path to a configuration file. The file is required to obtain carbon footprint estimates. Default: <cite>config.yml</cite> in current directory.Template found at <a class="reference external" href="https://github.com/GreenScheduler/cats/blob/main/config.yml">https://github.com/GreenScheduler/cats/blob/main/config.yml</a>.</p>
+</dd>
+<dt><kbd>--jobinfo</kbd></dt>
+<dd><p>Resources used by the job in question, used to estimate total energy usage and carbon footprint. E.g. <cite>cpus=2,gpus=0,memory=8,partition=CPU_partition</cite>. Valid components are <cite>cpus</cite>: number of CPU cores; <cite>gpus</cite>: number of GPUs; <cite>memory</cite>: memory available in GB; <cite>partition</cite>: one of the partitions keys given in <cite>config.yml</cite>. Default: if absent, the total carbon footprint is not estimated.</p>
+</dd>
+<dt><kbd>--format</kbd></dt>
+<dd><p>Possible choices: json</p>
+<p>Format to output optimal start time and carbon emmissionestimate savings in. Currently only JSON is supported.</p>
+</dd>
+</dl>
+</section>
+<p><blockquote>
+<div><p>Examples</p>
+<p>Cats can be used to report information on the best time to run a calculation and the amount
+of CO2. Information about a 90 minute calculation in centeral Oxford can be found by running:</p>
+<blockquote>
+<div><p>cats -d 90 –loc OX1 –jobinfo=”cpus=2,gpus=0,memory=8,partition=CPU_partition”</p>
+</div></blockquote>
+<p>The <cite>at</cite> scheduler is available from the command line on  most Linux and MacOS computers,
+and can be the easest way to use cats to minimise the carbon intensity of calculations on
+smaller computers. For example, the above calculation can be scheduled by running:</p>
+<blockquote>
+<div><p>cats -d 90 –loc OX1 -s at -c ‘mycommand’</p>
+</div></blockquote>
+</div></blockquote>
+</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="use-with-schedulers.html" class="btn btn-neutral float-left" title="Use with Schedulers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api-reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
