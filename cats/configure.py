@@ -77,9 +77,7 @@ def CI_API_from_config_or_args(args, config) -> APIInterface:
         api = args.api if args.api else config["api"]
     except KeyError:
         api = "carbonintensity.org.uk"  # default value
-        logging.warning(
-            "Unspecified carbon intensity forecast service, " f"using {api}"
-        )
+        logging.warning(f"Unspecified carbon intensity forecast service, using {api}")
     try:
         return API_interfaces[api]
     except KeyError:
@@ -93,7 +91,7 @@ def CI_API_from_config_or_args(args, config) -> APIInterface:
 def get_location_from_config_or_args(args, config) -> str:
     if args.location:
         location = args.location
-        logging.info(f"Using location provided: {location}")
+        logging.info(f"Using location provided from command line: {location}")
         return location
     if "location" in config.keys():
         location = config["location"]
@@ -111,6 +109,6 @@ def get_location_from_config_or_args(args, config) -> str:
     location = r.json()["postal"]
     assert location
     logging.warning(
-        "location not provided. Estimating location from IP address: " f"{location}."
+        f"location not provided. Estimating location from IP address: {location}."
     )
     return location
