@@ -24,7 +24,7 @@ Modules
     :members:
 
 ``cats.configure``
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 .. automodule:: cats.configure
    :members:
