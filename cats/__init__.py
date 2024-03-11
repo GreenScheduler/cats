@@ -7,13 +7,11 @@ from argparse import ArgumentParser
 from datetime import timedelta
 from typing import Optional
 
-import requests
-import yaml
-
 from .carbonFootprint import Estimates, greenAlgorithmsCalculator
-from .check_clean_arguments import validate_duration, validate_jobinfo
-from .CI_api_interface import API_interfaces, InvalidLocationError
+from .check_clean_arguments import validate_jobinfo
+from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
+from .configure import get_runtime_config
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
 
@@ -145,7 +143,6 @@ def parse_arguments():
 class CATSOutput:
     """Carbon Aware Task Scheduler output"""
 
-    carbonIntensityAPI: str
     carbonIntensityNow: CarbonIntensityAverageEstimate
     carbonIntensityOptimal: CarbonIntensityAverageEstimate
     location: str
@@ -198,65 +195,12 @@ def main(arguments=None):
             "      specify the scheduler with the -s or --scheduler option"
         )
         sys.exit(1)
-
-    ##################################
-    ## Validate and clean arguments ##
-    ##################################
-
-    ## config file
-    if args.config:
-        # if path to config file provided, it is used
-        with open(args.config, "r") as f:
-            config = yaml.safe_load(f)
-        logging.info(f"Using provided config file: {args.config}\n")
-    else:
-        # if no path provided, look for `config.yml` in current directory
-        try:
-            with open("config.yml", "r") as f:
-                config = yaml.safe_load(f)
-            logging.info("Using config.yml found in current directory\n")
-        except FileNotFoundError:
-            config = {}
-            logging.warning("config file not found")
-
-    ## CI API choice
-    list_CI_APIs = ["carbonintensity.org.uk"]
-
-    choice_CI_API = "carbonintensity.org.uk"  # default value
-    if "api" in config.keys():
-        choice_CI_API = config["api"]
-    if args.api:
-        choice_CI_API = args.api
-
-    if choice_CI_API not in list_CI_APIs:
-        raise ValueError(
-            f"{choice_CI_API} is not a valid API choice, it needs to be one of {list_CI_APIs}."
-        )
-    logging.info(f"Using {choice_CI_API} for carbon intensity forecasts\n")
-
-    ## Location
-    if args.location:
-        location = args.location
-        logging.info(f"Using location provided: {location}")
-    elif "location" in config.keys():
-        location = config["location"]
-        logging.info(f"Using location from config file: {location}")
-    else:
-        r = requests.get("https://ipapi.co/json").json()
-        postcode = r["postal"]
-        location = postcode
-        logging.warning(
-            f"location not provided. Estimating location from IP address: {location}."
-        )
-
-    ## Duration
-    duration = validate_duration(args.duration)
+    config, CI_API_interface, location, duration = get_runtime_config(args)
 
     ########################
     ## Obtain CI forecast ##
     ########################
 
-    CI_API_interface = API_interfaces[choice_CI_API]
     try:
         CI_forecast = get_CI_forecast(location, CI_API_interface)
     except InvalidLocationError:
@@ -274,7 +218,7 @@ def main(arguments=None):
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
     now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(choice_CI_API, now_avg, best_avg, location, "GBR")
+    output = CATSOutput(now_avg, best_avg, location, "GBR")
 
     ################################
     ## Calculate carbon footprint ##
