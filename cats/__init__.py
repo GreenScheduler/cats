@@ -154,8 +154,8 @@ class CATSOutput:
 
         if self.emmissionEstimate:
             out += (
-                f"Estimated emmissions for running job now: {self.emmissionEstimate.now}\n"
-                f"Estimated emmissions for running delayed job: {self.emmissionEstimate.best})\n"
+                f"\nEstimated emmissions for running job now: {self.emmissionEstimate.now}\n"
+                f"Estimated emmissions for running delayed job: {self.emmissionEstimate.best}"
                 f" (- {self.emmissionEstimate.savings})"
             )
         return out
