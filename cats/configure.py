@@ -112,3 +112,34 @@ def get_location_from_config_or_args(args, config) -> str:
         f"location not provided. Estimating location from IP address: {location}."
     )
     return location
+
+
+def read_device_config(args, key, config):
+    if not (nunits := getattr(args, key.lower()) or config.get("nunits")):
+        logging.error(f"No number of units specified for device {key}")
+    try:
+        power = config["power"]
+    except KeyError:
+        logging.error(f"Can't find power specification for device {key}")
+        power = None
+    return nunits, power
+
+
+def get_job_info(args, profiles: dict) -> list[tuple[int, float]]:
+    if args.profile:
+        try:
+            profile = profiles[args.profile]
+        except KeyError:
+            logging.error(
+                f"job info key 'profile' should be one of {profiles.keys()}. Typo?\n"
+            )
+            sys.exit(1)
+    else:
+        profile_key, profile = next(iter(profiles.items()))
+        logging.warning(f"Using default profile {profile_key}")
+
+    jobinfo = [read_device_config(args, k, v) for k, v in profile.items()]
+    if any([not (nunits and power) for nunits, power in jobinfo]):
+        logging.error(f"Errors when processing profile {profile_key}")
+        sys.exit(1)
+    return jobinfo

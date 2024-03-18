@@ -11,6 +11,7 @@ from cats.configure import (
     CI_API_from_config_or_args,
     config_from_file,
     get_location_from_config_or_args,
+    get_job_info,
 )
 
 CATS_CONFIG = {
@@ -93,3 +94,40 @@ def get_CI_API_from_config_or_args(args, config):
     API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
     with pytest.raises(KeyError):
         CI_API_from_config_or_args(args, CATS_CONFIG)
+
+
+def test_get_jobinfo():
+    profiles = {
+        "CPU_partition": {
+            "cpu": {
+                "model": "Xeon Gold 6142",
+                "power": 9.4,
+                "nunits": 8,
+            }
+        },
+        "GPU_partition": {
+            "cpu": {"model": "AMD EPYC 7763", "power": 4.4, "nunits": 1},
+            "gpu": {
+                "nunits": 2,
+                "power": 300,
+            },
+        },
+    }
+    args = parse_arguments().parse_args(["--duration", "2"])
+    assert get_job_info(args, profiles) == [(8, 9.4)]
+
+    args = parse_arguments().parse_args(
+        ["--duration", "2", "--profile", "GPU_partition"]
+    )
+    assert get_job_info(args, profiles) == [(1, 4.4), (2, 300)]
+
+    args = parse_arguments().parse_args(
+        ["--duration", "2", "--profile", "GPU_partition", "--cpu", "2"]
+    )
+    assert get_job_info(args, profiles) == [(2, 4.4), (2, 300)]
+
+    args = parse_arguments().parse_args(
+        ["--duration", "2", "--profile", "unknown_profile"]
+    )
+    with pytest.raises(SystemExit):
+        get_job_info(args, profiles)
