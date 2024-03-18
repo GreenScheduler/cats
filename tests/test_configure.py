@@ -10,8 +10,8 @@ from cats.CI_api_interface import API_interfaces
 from cats.configure import (
     CI_API_from_config_or_args,
     config_from_file,
-    get_location_from_config_or_args,
     get_job_info,
+    get_location_from_config_or_args,
 )
 
 CATS_CONFIG = {
