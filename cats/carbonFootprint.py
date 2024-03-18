@@ -1,3 +1,4 @@
+import datetime
 from collections import namedtuple
 
 import yaml
@@ -8,45 +9,30 @@ Estimates = namedtuple("Estimates", ["now", "best", "savings"])
 class greenAlgorithmsCalculator:
     def __init__(
         self,
-        config,
-        partition,
-        runtime,
-        memory,
-        cpus,
-        gpus,
-        averageBest_carbonIntensity,
-        averageNow_carbonIntensity,
+        PUE: float,
+        jobinfo: list[tuple[int, float]],
+        runtime: datetime.timedelta,
+        averageBest_carbonIntensity: float,
+        averageNow_carbonIntensity: float,
     ):
         """
-
-        :param partition: [str] has to match one of the partitions in `config.yml`
+        :param PUE: [float] Cluster PUE
+        :param jobinfo: [list[tuple[int, float]]]
         :param runtime: [datetime.timedelta]
-        :param memory: [int] in GB
-        :param cpus: [int]
-        :param gpus: [int]
         :param averageBest_carbonIntensity: [float] in gCO2e/kWh
         :param averageNow_carbonIntensity: [float] in gCO2e/kWh
         """
-        # ### Load cluster specific info
-        # with open(config, "r") as stream:
-        #     try:
-        #         self.cluster_info = yaml.safe_load(stream)
-        #     except yaml.YAMLError as exc:
-        #         print(exc)
-        self.cluster_info = config
 
-        ### Load fixed parameters
+        #  Load fixed parameters
         with open("fixed_parameters.yaml", "r") as stream:
             try:
                 self.fParams = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
                 print(exc)
 
-        self.partition = partition
+        self.PUE = PUE
+        self.jobinfo = jobinfo
         self.runtime = runtime
-        self.memory = memory
-        self.cpus = cpus
-        self.gpus = gpus
         self.averageBest_carbonIntensity = averageBest_carbonIntensity
         self.averageNow_carbonIntensity = averageNow_carbonIntensity
 
@@ -113,65 +99,15 @@ class greenAlgorithmsCalculator:
             text_flying = f"{footprint_g / fParams['flight_NYC_MEL']:,.2f} flights between New York and Melbourne"
         return text_flying
 
-    def calculate_energies(self):
-        ### Power draw CPU and GPU
-        partition_info = self.cluster_info["partitions"][self.partition]
-        if partition_info["type"] == "CPU":
-            TDP2use4CPU = partition_info["TDP"]
-            TDP2use4GPU = 0
-        else:
-            TDP2use4CPU = partition_info["TDP_CPU"]
-            TDP2use4GPU = partition_info["TDP"]
-
-        ### Energy usage
-        energies = {
-            "energy_CPUs": self.runtime.total_seconds()
-            / 3600
-            * self.cpus
-            * TDP2use4CPU
-            / 1000,  # in kWh
-            "energy_GPUs": self.runtime.total_seconds()
-            / 3600
-            * self.gpus
-            * TDP2use4GPU
-            / 1000,  # in kWh
-            "energy_memory": self.runtime.total_seconds()
-            / 3600
-            * self.memory
-            * self.fParams["power_memory_perGB"]
-            / 1000,  # in kWh
-        }
-
-        energies["total_energy"] = self.cluster_info["PUE"] * (
-            energies["energy_CPUs"]
-            + energies["energy_GPUs"]
-            + energies["energy_memory"]
-        )
-
-        return energies
-
-    def calculate_CF(self, energies):
-        CF_best = {
-            "CF_CPUs": energies["energy_CPUs"] * self.averageBest_carbonIntensity,
-            "CF_GPUs": energies["energy_GPUs"] * self.averageBest_carbonIntensity,
-            "CF_memory": energies["energy_memory"] * self.averageBest_carbonIntensity,
-            "total_CF": energies["total_energy"] * self.averageBest_carbonIntensity,
-        }
-
-        CF_now = {
-            "CF_CPUs": energies["energy_CPUs"] * self.averageNow_carbonIntensity,
-            "CF_GPUs": energies["energy_GPUs"] * self.averageNow_carbonIntensity,
-            "CF_memory": energies["energy_memory"] * self.averageNow_carbonIntensity,
-            "total_CF": energies["total_energy"] * self.averageNow_carbonIntensity,
-        }
-
-        return CF_best, CF_now
-
     def get_footprint(self):
-        energies = self.calculate_energies()
-        CF_best, CF_now = self.calculate_CF(energies)
-        best = CF_best["total_CF"]
-        now = CF_now["total_CF"]
+        runtime = self.runtime.total_seconds() / 3600
+        energy = (
+            self.PUE
+            * runtime
+            * sum([(nunits * power) / 1000 for nunits, power in self.jobinfo])
+        )
+        best = energy * self.averageBest_carbonIntensity
+        now = energy * self.averageNow_carbonIntensity
 
         return Estimates(
             *[self.formatText_footprint(e) for e in [now, best, now - best]]

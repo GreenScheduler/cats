@@ -8,7 +8,6 @@ from datetime import timedelta
 from typing import Optional
 
 from .carbonFootprint import Estimates, greenAlgorithmsCalculator
-from .check_clean_arguments import validate_jobinfo
 from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
@@ -219,7 +218,7 @@ def main(arguments=None):
             "      specify the scheduler with the -s or --scheduler option"
         )
         sys.exit(1)
-    config, CI_API_interface, location, duration = get_runtime_config(args)
+    CI_API_interface, location, duration, jobinfo, PUE = get_runtime_config(args)
 
     ########################
     ## Obtain CI forecast ##
@@ -248,24 +247,15 @@ def main(arguments=None):
     ## Calculate carbon footprint ##
     ################################
 
-    if args.jobinfo:
-        jobinfo = validate_jobinfo(
-            args.jobinfo, expected_partition_names=config["partitions"].keys()
-        )
+    if args.footprint:
+        output.emmissionEstimate = greenAlgorithmsCalculator(
+            PUE=PUE,
+            jobinfo=jobinfo,
+            runtime=timedelta(minutes=args.duration),
+            averageBest_carbonIntensity=best_avg.value,
+            averageNow_carbonIntensity=now_avg.value,
+        ).get_footprint()
 
-        if not (jobinfo and config):
-            logging.warning(
-                "Not enough information to estimate total carbon footprint, "
-                "both --jobinfo and config files are needed.\n"
-            )
-        else:
-            output.emmissionEstimate = greenAlgorithmsCalculator(
-                config=config,
-                runtime=timedelta(minutes=args.duration),
-                averageBest_carbonIntensity=best_avg.value,  # TODO replace with real carbon intensity
-                averageNow_carbonIntensity=now_avg.value,
-                **jobinfo,
-            ).get_footprint()
     if args.format == "json":
         if isinstance(args.dateformat, str) and "%" not in args.dateformat:
             dateformat = SCHEDULER_DATE_FORMAT.get(args.dateformat, "")
