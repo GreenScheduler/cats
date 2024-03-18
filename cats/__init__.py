@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from datetime import timedelta
 from typing import Optional
 
-from .carbonFootprint import Estimates, greenAlgorithmsCalculator
+from .carbonFootprint import Estimates, get_footprint_reduction_estimate
 from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
@@ -248,13 +248,13 @@ def main(arguments=None):
     ################################
 
     if args.footprint:
-        output.emmissionEstimate = greenAlgorithmsCalculator(
+        output.emmissionEstimate = get_footprint_reduction_estimate(
             PUE=PUE,
             jobinfo=jobinfo,
             runtime=timedelta(minutes=args.duration),
             averageBest_carbonIntensity=best_avg.value,
             averageNow_carbonIntensity=now_avg.value,
-        ).get_footprint()
+        )
 
     if args.format == "json":
         if isinstance(args.dateformat, str) and "%" not in args.dateformat:
