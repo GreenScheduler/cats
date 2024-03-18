@@ -19,6 +19,7 @@ import requests
 import yaml
 
 from .CI_api_interface import API_interfaces, APIInterface
+from .constants import MEMORY_POWER_PER_GB
 
 __all__ = ["get_runtime_config"]
 
@@ -150,6 +151,10 @@ def get_job_info(args, profiles: dict) -> list[tuple[int, float]]:
         logging.warning(f"Using default profile {profile_key}")
 
     jobinfo = [read_device_config(args, k, v) for k, v in profile.items()]
+    if not args.memory:
+        logging.error("Missing memory footprint, use --memory")
+        sys.exit(1)
+    jobinfo += [(args.memory, MEMORY_POWER_PER_GB)]
     if any([not (nunits and power) for nunits, power in jobinfo]):
         logging.error(f"Errors when processing profile {profile_key}")
         sys.exit(1)

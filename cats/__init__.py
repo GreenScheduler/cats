@@ -154,6 +154,11 @@ def parse_arguments():
         type=positive_integer,
         help="Number of cpus used by the job",
     )
+    parser.add_argument(
+        "--memory",
+        type=positive_integer,
+        help="Amount of memory used by the job",
+    )
 
     return parser
 

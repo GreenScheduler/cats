@@ -13,6 +13,7 @@ from cats.configure import (
     get_job_info,
     get_location_from_config_or_args,
 )
+from cats.constants import MEMORY_POWER_PER_GB
 
 CATS_CONFIG = {
     "location": "EH8",
@@ -113,21 +114,29 @@ def test_get_jobinfo():
             },
         },
     }
-    args = parse_arguments().parse_args(["--duration", "2"])
-    assert get_job_info(args, profiles) == [(8, 9.4)]
+    args = parse_arguments().parse_args(["--duration", "2", "--memory", "8"])
+    assert get_job_info(args, profiles) == [(8, 9.4), (8, MEMORY_POWER_PER_GB)]
 
     args = parse_arguments().parse_args(
-        ["--duration", "2", "--profile", "GPU_partition"]
+        ["--duration", "2", "--profile", "GPU_partition", "--memory", "8"]
     )
-    assert get_job_info(args, profiles) == [(1, 4.4), (2, 300)]
+    assert get_job_info(args, profiles) == [
+        (1, 4.4),
+        (2, 300),
+        (8, MEMORY_POWER_PER_GB),
+    ]
 
     args = parse_arguments().parse_args(
-        ["--duration", "2", "--profile", "GPU_partition", "--cpu", "2"]
+        ["--duration", "2", "--profile", "GPU_partition", "--cpu", "2", "--memory", "8"]
     )
-    assert get_job_info(args, profiles) == [(2, 4.4), (2, 300)]
+    assert get_job_info(args, profiles) == [
+        (2, 4.4),
+        (2, 300),
+        (8, MEMORY_POWER_PER_GB),
+    ]
 
     args = parse_arguments().parse_args(
-        ["--duration", "2", "--profile", "unknown_profile"]
+        ["--duration", "2", "--profile", "unknown_profile", "--memory", "8"]
     )
     with pytest.raises(SystemExit):
         get_job_info(args, profiles)
