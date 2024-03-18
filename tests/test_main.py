@@ -1,4 +1,5 @@
 # Tests main() function
+import platform
 import subprocess
 from datetime import datetime, timedelta
 from unittest.mock import patch
@@ -23,9 +24,12 @@ OUTPUT = CATSOutput(
 )
 
 
-@pytest.mark.skip
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="Windows does not have the at(1) scheduler"
+)
 def test_schedule_at():
     schedule_at(OUTPUT, ["ls"])
+    # check that the job was correctly scheduled by checking the at queue (atq)
     assert now_start.strftime(AT_OUTPUT) in subprocess.check_output(["atq"]).decode(
         "utf-8"
     )
