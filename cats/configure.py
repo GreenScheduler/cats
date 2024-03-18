@@ -27,14 +27,14 @@ def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
     """Return the runtime cats configuration from list of command line
     arguments and content of configuration file.
 
-    Returns a tupe containing a dictionary reprensenting the
-    configuration file, an instance of :py:class:`APIInterface
-    <cats.CI_api_interface.APIInterface>`, the location as a string
-    and the duration in minutes as an integer.
+    Returns a tuple containing an instance of :py:class:`APIInterface
+    <cats.CI_api_interface.APIInterface>`, the location as a string,
+    the duration in minutes as an integer, as well as information on
+    the number of cpus/gpus used by the job and their power consumption.
 
     :param args: Command line arguments
     :return: Runtime cats configuration
-    :rtype: tuple[dict, APIInterface, str, int]
+    :rtype: tuple[APIInterface, str, int, list[tuple[int, float]]]
     :raises ValueError: If job duration cannot be interpreted as a positive integer.
 
     """
@@ -52,7 +52,18 @@ def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
         logging.error(msg)
         raise ValueError
 
-    return configmapping, CI_API_interface, location, duration
+    if args.footprint:
+        for entry in ["profiles", "PUE"]:
+            if entry not in configmapping.keys():
+                logging.error(f"Missing entry {entry} in configuration file")
+                sys.exit(1)
+        jobinfo = get_job_info(args, configmapping["profiles"])
+        PUE = configmapping["PUE"]
+    else:
+        jobinfo = None
+        PUE = None
+
+    return configmapping, CI_API_interface, location, duration, jobinfo, PUE
 
 
 def config_from_file(configpath="") -> Mapping[str, Any]:

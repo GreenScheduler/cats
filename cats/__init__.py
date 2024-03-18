@@ -140,6 +140,11 @@ def parse_arguments():
         choices=["json"],
     )
     parser.add_argument(
+        "-f",
+        "--footprint",
+        action="store_true",
+    )
+    parser.add_argument(
         "--cpu",
         type=positive_integer,
         help="Number of cpus used by the job",
@@ -164,7 +169,7 @@ class CATSOutput:
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        out = f"Best job start time: {self.carbonIntensityOptimal.start}"
+        out = f"Best job start time: {self.carbonIntensityOptimal.start}\n"
 
         if self.emmissionEstimate:
             out += (
