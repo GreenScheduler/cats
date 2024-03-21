@@ -19,6 +19,7 @@ import requests
 import yaml
 
 from .CI_api_interface import API_interfaces, APIInterface
+from .constants import MEMORY_POWER_PER_GB
 
 __all__ = ["get_runtime_config"]
 
@@ -27,14 +28,14 @@ def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
     """Return the runtime cats configuration from list of command line
     arguments and content of configuration file.
 
-    Returns a tupe containing a dictionary reprensenting the
-    configuration file, an instance of :py:class:`APIInterface
-    <cats.CI_api_interface.APIInterface>`, the location as a string
-    and the duration in minutes as an integer.
+    Returns a tuple containing an instance of :py:class:`APIInterface
+    <cats.CI_api_interface.APIInterface>`, the location as a string,
+    the duration in minutes as an integer, as well as information on
+    the number of cpus/gpus used by the job and their power consumption.
 
     :param args: Command line arguments
     :return: Runtime cats configuration
-    :rtype: tuple[dict, APIInterface, str, int]
+    :rtype: tuple[APIInterface, str, int, list[tuple[int, float]]]
     :raises ValueError: If job duration cannot be interpreted as a positive integer.
 
     """
@@ -52,7 +53,18 @@ def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
         logging.error(msg)
         raise ValueError
 
-    return configmapping, CI_API_interface, location, duration
+    if args.footprint:
+        for entry in ["profiles", "PUE"]:
+            if entry not in configmapping.keys():
+                logging.error(f"Missing entry {entry} in configuration file")
+                sys.exit(1)
+        jobinfo = get_job_info(args, configmapping["profiles"])
+        PUE = configmapping["PUE"]
+    else:
+        jobinfo = None
+        PUE = None
+
+    return configmapping, CI_API_interface, location, duration, jobinfo, PUE
 
 
 def config_from_file(configpath="") -> Mapping[str, Any]:
@@ -112,3 +124,38 @@ def get_location_from_config_or_args(args, config) -> str:
         f"location not provided. Estimating location from IP address: {location}."
     )
     return location
+
+
+def read_device_config(args, key, config):
+    if not (nunits := getattr(args, key.lower()) or config.get("nunits")):
+        logging.error(f"No number of units specified for device {key}")
+    try:
+        power = config["power"]
+    except KeyError:
+        logging.error(f"Can't find power specification for device {key}")
+        power = None
+    return nunits, power
+
+
+def get_job_info(args, profiles: dict) -> list[tuple[int, float]]:
+    if args.profile:
+        try:
+            profile = profiles[args.profile]
+        except KeyError:
+            logging.error(
+                f"job info key 'profile' should be one of {profiles.keys()}. Typo?\n"
+            )
+            sys.exit(1)
+    else:
+        profile_key, profile = next(iter(profiles.items()))
+        logging.warning(f"Using default profile {profile_key}")
+
+    jobinfo = [read_device_config(args, k, v) for k, v in profile.items()]
+    if not args.memory:
+        logging.error("Missing memory footprint, use --memory")
+        sys.exit(1)
+    jobinfo += [(args.memory, MEMORY_POWER_PER_GB)]
+    if any([not (nunits and power) for nunits, power in jobinfo]):
+        logging.error(f"Errors when processing profile {profile_key}")
+        sys.exit(1)
+    return jobinfo
