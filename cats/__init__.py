@@ -72,6 +72,7 @@ def parse_arguments():
     def positive_integer(string):
         n = int(string)
         assert n >= 0
+        return n
 
     ### Required
 
