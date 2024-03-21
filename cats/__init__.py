@@ -152,7 +152,7 @@ def parse_arguments():
     parser.add_argument(
         "--memory",
         type=positive_integer,
-        help="Amount of memory used by the job",
+        help="Amount of memory used by the job, in GB",
     )
 
     return parser
