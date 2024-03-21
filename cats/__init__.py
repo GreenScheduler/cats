@@ -70,13 +70,8 @@ def parse_arguments():
     )
 
     def positive_integer(string):
-        try:
-            n = int(string)
-            assert n >= 0
-            return n
-        except (ValueError, AssertionError):
-            logging.error("Must be a positive integer")
-            sys.exit(1)
+        n = int(string)
+        assert n >= 0
 
     ### Required
 
