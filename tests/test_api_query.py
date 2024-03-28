@@ -15,7 +15,10 @@ def test_api_call():
 
     api_interface = API_interfaces["carbonintensity.org.uk"]
     response = cats.CI_api_query.get_CI_forecast("OX1", api_interface)
-
+    response_full_postcode = response = cats.CI_api_query.get_CI_forecast(
+        "OX1 3QD", api_interface
+    )
+    assert response == response_full_postcode
     assert isinstance(response, list)
     for item in response:
         assert isinstance(item, CarbonIntensityPointEstimate)

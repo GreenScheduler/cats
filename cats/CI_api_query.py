@@ -31,7 +31,7 @@ def get_CI_forecast(
     return CI_API_interface.parse_response_data(data)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     from .CI_api_interface import API_interfaces
 
     # test example using Manchester as a location
