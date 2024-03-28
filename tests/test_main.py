@@ -1,12 +1,9 @@
 # Tests main() function
-import platform
 import subprocess
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-import pytest
-
-from cats import CATSOutput, main, schedule_at
+from cats import SCHEDULER_DATE_FORMAT, CATSOutput, main, schedule_at
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
 from cats.forecast import CarbonIntensityAverageEstimate
 
@@ -24,12 +21,20 @@ OUTPUT = CATSOutput(
 )
 
 
-@pytest.mark.skipif(
-    platform.system() == "Windows", reason="Windows does not have the at(1) scheduler"
-)
-def test_schedule_at():
+def test_schedule_at(fp):
+    fp.register_subprocess(["ls"], stdout=b"foobar.txt")
+    fp.register_subprocess(
+        [
+            "at",
+            "-t",
+            OUTPUT.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
+        ]
+    )
     schedule_at(OUTPUT, ["ls"])
     # check that the job was correctly scheduled by checking the at queue (atq)
+    fp.register_subprocess(
+        ["atq"], stdout=f"1\t\t{now_start.strftime(AT_OUTPUT)}".encode("utf-8")
+    )
     assert now_start.strftime(AT_OUTPUT) in subprocess.check_output(["atq"]).decode(
         "utf-8"
     )
