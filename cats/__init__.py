@@ -69,13 +69,9 @@ def parse_arguments():
     )
 
     def positive_integer(string):
-        try:
-            n = int(string)
-            assert n >= 0
-            return n
-        except (ValueError, AssertionError):
-            logging.error("Must be a positive integer")
-            sys.exit(1)
+        n = int(string)
+        assert n >= 0
+        return n
 
     ### Required
 
@@ -156,7 +152,7 @@ def parse_arguments():
     parser.add_argument(
         "--memory",
         type=positive_integer,
-        help="Amount of memory used by the job",
+        help="Amount of memory used by the job, in GB",
     )
 
     return parser
@@ -177,8 +173,8 @@ class CATSOutput:
 
         if self.emmissionEstimate:
             out += (
-                f"Estimated emmissions for running job now: {self.emmissionEstimate.now}\n"
-                f"Estimated emmissions for running delayed job: {self.emmissionEstimate.best})\n"
+                f"\nEstimated emmissions for running job now: {self.emmissionEstimate.now}\n"
+                f"Estimated emmissions for running delayed job: {self.emmissionEstimate.best}"
                 f" (- {self.emmissionEstimate.savings})"
             )
         return out
@@ -209,7 +205,7 @@ def schedule_at(output: CATSOutput, args: list[str]) -> None:
     )
 
 
-def main(arguments=None):
+def main(arguments=None) -> Optional[int]:
     parser = parse_arguments()
     args = parser.parse_args(arguments)
     if args.command and not args.scheduler:
@@ -217,7 +213,8 @@ def main(arguments=None):
             "cats: To run a command with the -c or --command option, you must\n"
             "      specify the scheduler with the -s or --scheduler option"
         )
-        sys.exit(1)
+        return 1
+
     CI_API_interface, location, duration, jobinfo, PUE = get_runtime_config(args)
 
     ########################
@@ -232,7 +229,7 @@ def main(arguments=None):
             "Location should be be specified as the outward code,\n"
             "for example 'SW7' for postcode 'SW7 EAZ'.\n"
         )
-        sys.exit(1)
+        return 1
 
     #############################
     ## Find optimal start time ##
@@ -269,4 +266,4 @@ def main(arguments=None):
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
