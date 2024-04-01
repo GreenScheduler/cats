@@ -10,8 +10,10 @@ from cats.CI_api_interface import API_interfaces
 from cats.configure import (
     CI_API_from_config_or_args,
     config_from_file,
+    get_job_info,
     get_location_from_config_or_args,
 )
+from cats.constants import MEMORY_POWER_PER_GB
 
 CATS_CONFIG = {
     "location": "EH8",
@@ -93,3 +95,48 @@ def get_CI_API_from_config_or_args(args, config):
     API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
     with pytest.raises(KeyError):
         CI_API_from_config_or_args(args, CATS_CONFIG)
+
+
+def test_get_jobinfo():
+    profiles = {
+        "CPU_partition": {
+            "cpu": {
+                "model": "Xeon Gold 6142",
+                "power": 9.4,
+                "nunits": 8,
+            }
+        },
+        "GPU_partition": {
+            "cpu": {"model": "AMD EPYC 7763", "power": 4.4, "nunits": 1},
+            "gpu": {
+                "nunits": 2,
+                "power": 300,
+            },
+        },
+    }
+    args = parse_arguments().parse_args(["--duration", "2", "--memory", "8"])
+    assert get_job_info(args, profiles) == [(8, 9.4), (8, MEMORY_POWER_PER_GB)]
+
+    args = parse_arguments().parse_args(
+        ["--duration", "2", "--profile", "GPU_partition", "--memory", "8"]
+    )
+    assert get_job_info(args, profiles) == [
+        (1, 4.4),
+        (2, 300),
+        (8, MEMORY_POWER_PER_GB),
+    ]
+
+    args = parse_arguments().parse_args(
+        ["--duration", "2", "--profile", "GPU_partition", "--cpu", "2", "--memory", "8"]
+    )
+    assert get_job_info(args, profiles) == [
+        (2, 4.4),
+        (2, 300),
+        (8, MEMORY_POWER_PER_GB),
+    ]
+
+    args = parse_arguments().parse_args(
+        ["--duration", "2", "--profile", "unknown_profile", "--memory", "8"]
+    )
+    with pytest.raises(SystemExit):
+        get_job_info(args, profiles)

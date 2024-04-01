@@ -69,6 +69,11 @@ def parse_arguments():
         prog="cats", description=description_text, epilog=example_text
     )
 
+    def positive_integer(string):
+        n = int(string)
+        assert n >= 0
+        return n
+
     ### Required
 
     parser.add_argument(
@@ -119,21 +124,36 @@ def parse_arguments():
         "Template found at https://github.com/GreenScheduler/cats/blob/main/config.yml.",
     )
     parser.add_argument(
-        "--jobinfo",
+        "--profile",
         type=str,
-        help="Resources used by the job in question, used to estimate total energy usage and carbon footprint. "
-        "E.g. `cpus=2,gpus=0,memory=8,partition=CPU_partition`. Valid components are "
-        "`cpus`: number of CPU cores; `gpus`: number of GPUs; `memory`: memory available in GB; "
-        "`partition`: one of the partitions keys given in `config.yml`. "
-        "Default: if absent, the total carbon footprint is not estimated.",
+        help="Hardware profile, specified in configuration file",
     )
-
     parser.add_argument(
         "--format",
         type=str,
         help="Format to output optimal start time and carbon emmission"
         "estimate savings in. Currently only JSON is supported.",
         choices=["json"],
+    )
+    parser.add_argument(
+        "-f",
+        "--footprint",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--cpu",
+        type=positive_integer,
+        help="Number of cpus used by the job",
+    )
+    parser.add_argument(
+        "--gpu",
+        type=positive_integer,
+        help="Number of cpus used by the job",
+    )
+    parser.add_argument(
+        "--memory",
+        type=positive_integer,
+        help="Amount of memory used by the job, in GB",
     )
 
     return parser
@@ -150,7 +170,7 @@ class CATSOutput:
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        out = f"Best job start time: {self.carbonIntensityOptimal.start}"
+        out = f"Best job start time: {self.carbonIntensityOptimal.start}\n"
 
         if self.emmissionEstimate:
             out += (
