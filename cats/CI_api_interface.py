@@ -51,7 +51,7 @@ def ciuk_parse_response_data(response: dict):
     :return:
     """
 
-    def invalid_code(r: dict):
+    def invalid_code(r: dict) -> bool:
         try:
             return "postcode" in r["error"]["message"]
         except KeyError:
