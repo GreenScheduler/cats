@@ -169,7 +169,7 @@ class CATSOutput:
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        out = f"Best job start time: {self.carbonIntensityOptimal.start}\n"
+        out = f"Best job start time: {self.carbonIntensityOptimal.start}"
 
         if self.emmissionEstimate:
             out += (
