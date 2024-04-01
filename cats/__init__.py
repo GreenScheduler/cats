@@ -252,8 +252,8 @@ def main(arguments=None):
             PUE=PUE,
             jobinfo=jobinfo,
             runtime=timedelta(minutes=args.duration),
-            averageBest_carbonIntensity=best_avg.value,
-            averageNow_carbonIntensity=now_avg.value,
+            average_best_ci=best_avg.value,
+            average_now_ci=now_avg.value,
         )
 
     if args.format == "json":
