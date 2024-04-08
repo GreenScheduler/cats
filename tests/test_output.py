@@ -31,10 +31,11 @@ OUTPUT_WITH_EMISSION_ESTIMATE = CATSOutput(
 @pytest.mark.parametrize(
     "output,expected",
     [
-        (OUTPUT, "Best job start time: 2024-03-16 02:00:00"),
+        (OUTPUT, "Best job start time: 2024-03-16 02:00:00\n"),
         (
             OUTPUT_WITH_EMISSION_ESTIMATE,
             """Best job start time: 2024-03-16 02:00:00
+
 Estimated emmissions for running job now: 19
 Estimated emmissions for running delayed job: 9 (- 10)""",
         ),
