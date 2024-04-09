@@ -1,6 +1,6 @@
 import re
 import sys
-from typing import Iterable, Optional, TypedDict
+from typing import Iterable, Optional, TypedDict, cast
 
 
 class JobInfo(TypedDict):
@@ -28,7 +28,11 @@ def validate_jobinfo(
         "cpus",
         "gpus",
     )
-    info = dict([match.groups() for match in re.finditer(r"(\w+)=([\w.]+)", jobinfo)])
+    
+    info_list = [match.groups() for match in re.finditer(r"(\w+)=([\w.]+)", jobinfo)]
+    info = {}
+    for item in info_list:
+        info[item[0]] = item[1]
 
     # Check if some information is missing
     if missing_keys := set(expected_info_keys) - set(info.keys()):
@@ -46,11 +50,11 @@ def validate_jobinfo(
     for key in [k for k in info if k != "partition"]:
         try:
             info[key] = int(info[key])
-            assert info[key] >= 0
+            assert int(info[key]) >= 0
         except (ValueError, AssertionError):
             sys.stderr.write(
                 f"ERROR: job info key {key} should be a positive integer\n"
             )
             return None
 
-    return JobInfo(info)
+    return cast(JobInfo, info)
