@@ -41,8 +41,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Check types with mypy
       run: |
-        python3 -m pip install mypy
-        python3 -m pip install types-PyYAML types-redis types-requests types-ujson
+        python3 -m pip install '.[types]'
         python3 -m mypy cats
     - name: Test with pytest
       run: |
