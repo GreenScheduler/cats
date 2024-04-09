@@ -215,7 +215,7 @@ def main(arguments=None) -> int:
             "      specify the scheduler with the -s or --scheduler option"
         )
         return 1
-    config, CI_API_interface, location, duration = get_runtime_config(args)
+    config, CI_API_interface, location, duration, _jobinfo, _PUE = get_runtime_config(args)
 
     ########################
     ## Obtain CI forecast ##
