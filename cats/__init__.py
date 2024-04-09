@@ -218,7 +218,7 @@ class CATSOutput:
 def schedule_at(output: CATSOutput, args: list[str]) -> None:
     "Schedule job with optimal start time using at(1)"
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
-    output = subprocess.check_output(
+    proc_output = subprocess.check_output(
         (
             "at",
             "-t",
@@ -228,7 +228,7 @@ def schedule_at(output: CATSOutput, args: list[str]) -> None:
     )
 
 
-def main(arguments=None) -> Optional[int]:
+def main(arguments=None) -> int:
     parser = parse_arguments()
     args = parser.parse_args(arguments)
     if args.command and not args.scheduler:
@@ -286,6 +286,7 @@ def main(arguments=None) -> Optional[int]:
         print(output)
     if args.command and args.scheduler == "at":
         schedule_at(output, args.command.split())
+    return 0
 
 
 if __name__ == "__main__":
