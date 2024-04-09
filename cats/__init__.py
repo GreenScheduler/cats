@@ -268,6 +268,8 @@ def main(arguments=None) -> int:
     ################################
 
     if args.footprint:
+        assert PUE is not None, "PUE not set by get_runtime_config!"
+        assert jobinfo is not None, "jobinfo not set by get_runtime_config!"
         output.emmissionEstimate = get_footprint_reduction_estimate(
             PUE=PUE,
             jobinfo=jobinfo,

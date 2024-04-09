@@ -13,7 +13,7 @@ runtime configuration consits of:
 import logging
 import sys
 from collections.abc import Mapping
-from typing import Any
+from typing import Optional, Any
 
 import requests
 import yaml
@@ -24,7 +24,9 @@ from .constants import MEMORY_POWER_PER_GB
 __all__ = ["get_runtime_config"]
 
 
-def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
+def get_runtime_config(args) -> tuple[APIInterface, str, int, 
+                                      Optional[list[tuple[int, float]]],
+                                      Optional[float]]:
     """Return the runtime cats configuration from list of command line
     arguments and content of configuration file.
 
