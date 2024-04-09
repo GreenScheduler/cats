@@ -47,7 +47,7 @@ def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
     try:
         duration = int(args.duration)
     except ValueError:
-        logging.eror(msg)
+        logging.error(msg)
         raise ValueError
     if duration <= 0:
         logging.error(msg)
@@ -91,13 +91,14 @@ def CI_API_from_config_or_args(args, config) -> APIInterface:
         api = "carbonintensity.org.uk"  # default value
         logging.warning(f"Unspecified carbon intensity forecast service, using {api}")
     try:
-        return API_interfaces[api]
+        interface = API_interfaces[api]
     except KeyError:
         logging.error(
             f"Error: {api} is not a valid API choice. It must be one of " "\n".join(
                 API_interfaces.keys()
             )
         )
+    return interface
 
 
 def get_location_from_config_or_args(args, config) -> str:
