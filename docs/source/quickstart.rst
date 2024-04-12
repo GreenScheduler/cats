@@ -102,7 +102,7 @@ top-level ``profiles`` section:
 The name of the profile section is arbitrary, but each profile section
 *must* contain one ``cpu`` section, or one ``gpu`` section, or both.
 Each hardware type (``cpu`` or ``gpu``) section *must* contain the
-``power`` and ``nunits`` sections. The ``model`` section is optional,
+``power`` (in Watts, for one unit) and ``nunits`` sections. The ``model`` section is optional,
 meant for documentation.
 
 When running ``cats``, you can specify which profile to use for carbon
