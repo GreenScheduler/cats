@@ -64,7 +64,7 @@ def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
         jobinfo = None
         PUE = None
 
-    return configmapping, CI_API_interface, location, duration, jobinfo, PUE
+    return CI_API_interface, location, duration, jobinfo, PUE
 
 
 def config_from_file(configpath="") -> Mapping[str, Any]:
