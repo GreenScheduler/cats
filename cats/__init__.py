@@ -3,8 +3,9 @@ import json
 import logging
 import subprocess
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta
+from pathlib import Path
 from typing import Optional
 
 from .carbonFootprint import Estimates, get_footprint_reduction_estimate
@@ -17,6 +18,10 @@ from .optimise_starttime import get_avg_estimates  # noqa: F401
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
 SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M"}
+
+
+def indent_lines(lines, spaces):
+    return "\n".join(" " * spaces + line for line in lines.split("\n"))
 
 
 def parse_arguments():
@@ -35,9 +40,10 @@ def parse_arguments():
     (gCO2/kWh) of running the calculation now with the carbon intensity at that
     time in the future. To undertake this calculation, cats needs to know the
     predicted duration of the calculation (which you must supply, see `-d`) and
-    your location (which can be inferred from your IP address (but see `-l`). If
-    additional information about the power consumption of your computer is
-    available (see `--jobinfo`) the predicted CO2 usage will be reported.
+    your location, either inferred from your IP address, or passed using `-l`.
+    If additional information about the power consumption of your computer is
+    available and passed to CATS via the `--config` option, the predicted CO2
+    usage will be reported.
 
     To make use of this information, you will need to couple cats with a task
     scheduler of some kind. The command to schedule is specified with the `-c`
@@ -48,24 +54,41 @@ def parse_arguments():
        cats -d 1 --loc RG1 --scheduler=at --command='ls'
     """
 
-    example_text = """
-    Examples\n
-    ********\n
+    config_text = indent_lines(
+        Path(__file__).with_name("config.yml").read_text(), spaces=8
+    )
+    example_text = f"""
+    Examples
+    ********
 
-    Cats can be used to report information on the best time to run a calculation and the amount
-    of CO2. Information about a 90 minute calculation in centeral Oxford can be found by running:
+    CATS can be used to report information on the best time to run a calculation
+    and the amount of CO2. Information about a 90 minute calculation in centeral
+    Oxford can be found by running:
 
-        cats -d 90 --loc OX1 --jobinfo="cpus=2,gpus=0,memory=8,partition=CPU_partition"
+        cats -d 90 --loc OX1
 
-    The `at` scheduler is available from the command line on  most Linux and MacOS computers,
-    and can be the easest way to use cats to minimise the carbon intensity of calculations on
-    smaller computers. For example, the above calculation can be scheduled by running:
+    The `at` scheduler is available from the command line on most Linux and
+    MacOS computers, and can be the easest way to use cats to minimise the
+    carbon intensity of calculations on smaller computers. For example, the
+    above calculation can be scheduled by running:
 
         cats -d 90 --loc OX1 -s at -c 'mycommand'
+
+    To report carbon footprint, pass the `--config` option to select a
+    configuration file and the `--profile` option to select a profile. An
+    example config file is given below:
+
+{config_text}
+
+    The configuration file is documented in the Quickstart section of the online
+    documentation.
     """
 
     parser = ArgumentParser(
-        prog="cats", description=description_text, epilog=example_text
+        prog="cats",
+        description=description_text,
+        epilog=example_text,
+        formatter_class=RawDescriptionHelpFormatter,
     )
 
     def positive_integer(string):

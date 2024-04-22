@@ -30,8 +30,9 @@ Documentation is available at [greenscheduler.github.io/cats/](https://greensche
 
 We recommend the
 [quickstart](https://greenscheduler.github.io/cats/quickstart.html#basic-usage)
-if you are new to CATS. CATS can optionally display [carbon footprint
-savings](https://greenscheduler.github.io/cats/quickstart.html#displaying-carbon-footprint-estimates).
+if you are new to CATS. CATS can optionally [display carbon footprint
+savings](https://greenscheduler.github.io/cats/quickstart.html#displaying-carbon-footprint-estimates)
+using a [configuration file](cats/config.yml).
 
 ### Console demonstration
 CATS predicting optimal start time for the `ls` command in the `OX1` postcode:
