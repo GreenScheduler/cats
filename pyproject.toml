@@ -4,6 +4,7 @@
 
 [tool.setuptools]
   packages = ["cats"]
+  package-data.cats = ["config.yml"]
 
 [project]
   name = "climate-aware-task-scheduler"

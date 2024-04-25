@@ -79,25 +79,10 @@ file <configuration-file>`.
 You can define an arbitraty number of profiles as subsection of the
 top-level ``profiles`` section:
 
-.. code-block:: yaml
+.. literalinclude :: ../../cats/config.yml
+   :language: yaml
    :caption: *An example provision of machine information by YAML file
              to enable estimation of the carbon footprint reduction.*
-
-   profiles:
-     my_cpu_only_profile:
-       cpu:
-         model: "Xeon Gold 6142"
-         power: 9.4 # in W, per core
-         nunits: 2
-     my_gpu_profile:
-       gpu:
-         model: "NVIDIA A100-SXM-80GB GPUs"
-         power: 300
-         nunits: 2
-       cpu:
-         model: "AMD EPYC 7763"
-         power: 4.4
-         nunits: 1
 
 The name of the profile section is arbitrary, but each profile section
 *must* contain one ``cpu`` section, or one ``gpu`` section, or both.
