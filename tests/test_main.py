@@ -21,7 +21,7 @@ OUTPUT = CATSOutput(
 )
 
 
-def test_schedule_at(fp):
+def test_schedule_at_success(fp):
     fp.register_subprocess(["ls"], stdout=b"foobar.txt")
     fp.register_subprocess(
         [
@@ -37,6 +37,13 @@ def test_schedule_at(fp):
     )
     assert now_start.strftime(AT_OUTPUT) in subprocess.check_output(["atq"]).decode(
         "utf-8"
+    )
+
+
+def test_schedule_at_missing():
+    assert (
+        schedule_at(OUTPUT, ["ls"], at_command="at_imaginary")
+        == "No at command found in PATH, please install one"
     )
 
 

@@ -194,17 +194,30 @@ Estimated emissions at optimal time       = {self.emmissionEstimate.best} (- {se
         return json.dumps(data, **kwargs)
 
 
-def schedule_at(output: CATSOutput, args: list[str]) -> None:
-    "Schedule job with optimal start time using at(1)"
+def schedule_at(
+    output: CATSOutput, args: list[str], at_command: str = "at"
+) -> Optional[str]:
+    """Schedule job with optimal start time using at(1)
+
+    :return: Error as a string, or None if successful
+    """
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
-    output = subprocess.check_output(
-        (
-            "at",
-            "-t",
-            output.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
-        ),
-        stdin=proc.stdout,
-    )
+    try:
+        output = subprocess.check_output(
+            (
+                at_command,
+                "-t",
+                output.carbonIntensityOptimal.start.strftime(
+                    SCHEDULER_DATE_FORMAT["at"]
+                ),
+            ),
+            stdin=proc.stdout,
+        )
+        return None
+    except FileNotFoundError:
+        return "No at command found in PATH, please install one"
+    except subprocess.CalledProcessError as e:
+        return f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}"
 
 
 def main(arguments=None) -> Optional[int]:
@@ -264,7 +277,9 @@ def main(arguments=None) -> Optional[int]:
     else:
         print(output)
     if args.command and args.scheduler == "at":
-        schedule_at(output, args.command.split())
+        if err := schedule_at(output, args.command.split()):
+            print(err)
+            return 1
 
 
 if __name__ == "__main__":
