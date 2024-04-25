@@ -61,3 +61,6 @@ def test_main_failures(get_CI_forecast):
 
     # Invalid location
     assert main(["-d", "5", "--loc", "oxford"]) == 1
+
+    # Duration larger than API maximum
+    assert main(["-d", "5000", "--loc", "OX1"]) == 1

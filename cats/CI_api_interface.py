@@ -10,7 +10,9 @@ class InvalidLocationError(Exception):
     pass
 
 
-APIInterface = namedtuple("APIInterface", ["get_request_url", "parse_response_data"])
+APIInterface = namedtuple(
+    "APIInterface", ["get_request_url", "parse_response_data", "max_duration"]
+)
 
 
 def ciuk_request_url(timestamp: datetime, postcode: str):
@@ -83,5 +85,6 @@ API_interfaces = {
     "carbonintensity.org.uk": APIInterface(
         get_request_url=ciuk_request_url,
         parse_response_data=ciuk_parse_response_data,
+        max_duration=2880,  # 48h
     ),
 }

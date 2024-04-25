@@ -231,6 +231,12 @@ def main(arguments=None) -> Optional[int]:
         return 1
 
     CI_API_interface, location, duration, jobinfo, PUE = get_runtime_config(args)
+    if duration > CI_API_interface.max_duration:
+        print(
+            f"""API allows a maximum job duration of {CI_API_interface.max_duration} minutes.
+This is usually due to forecast limitations."""
+        )
+        return 1
 
     ########################
     ## Obtain CI forecast ##
