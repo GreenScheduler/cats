@@ -31,12 +31,23 @@ OUTPUT_WITH_EMISSION_ESTIMATE = CATSOutput(
 @pytest.mark.parametrize(
     "output,expected",
     [
-        (OUTPUT, "Best job start time: 2024-03-16 02:00:00"),
+        (
+            OUTPUT,
+            """Best job start time 2024-03-16 02:00:00
+Carbon intensity if job started now       = 50.00 gCO2eq/kWh
+Carbon intensity at optimal time          = 20.00 gCO2eq/kWh
+
+Use --format=json to get this in machine readable format""",
+        ),
         (
             OUTPUT_WITH_EMISSION_ESTIMATE,
-            """Best job start time: 2024-03-16 02:00:00
-Estimated emmissions for running job now: 19
-Estimated emmissions for running delayed job: 9 (- 10)""",
+            """Best job start time 2024-03-16 02:00:00
+Carbon intensity if job started now       = 50.00 gCO2eq/kWh
+Carbon intensity at optimal time          = 20.00 gCO2eq/kWh
+Estimated emissions if job started now    = 19
+Estimated emissions at optimal time       = 9 (- 10)
+
+Use --format=json to get this in machine readable format""",
         ),
     ],
 )

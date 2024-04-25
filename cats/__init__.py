@@ -169,14 +169,16 @@ class CATSOutput:
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        out = f"Best job start time: {self.carbonIntensityOptimal.start}"
+        out = f"""Best job start time {self.carbonIntensityOptimal.start}
+Carbon intensity if job started now       = {self.carbonIntensityNow.value:.2f} gCO2eq/kWh
+Carbon intensity at optimal time          = {self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh"""
 
         if self.emmissionEstimate:
-            out += (
-                f"\nEstimated emmissions for running job now: {self.emmissionEstimate.now}\n"
-                f"Estimated emmissions for running delayed job: {self.emmissionEstimate.best}"
-                f" (- {self.emmissionEstimate.savings})"
-            )
+            out += f"""
+Estimated emissions if job started now    = {self.emmissionEstimate.now}
+Estimated emissions at optimal time       = {self.emmissionEstimate.best} (- {self.emmissionEstimate.savings})"""
+
+        out += "\n\nUse --format=json to get this in machine readable format"
         return out
 
     def to_json(self, dateformat: str = "", **kwargs) -> str:
