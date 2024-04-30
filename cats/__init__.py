@@ -226,7 +226,7 @@ def schedule_at(
     """
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     try:
-        output = subprocess.check_output(
+        proc_output = subprocess.check_output(
             (
                 at_command,
                 "-t",
