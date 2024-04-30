@@ -13,7 +13,7 @@ runtime configuration consits of:
 import logging
 import sys
 from collections.abc import Mapping
-from typing import Any
+from typing import Optional, Any
 
 import requests
 import yaml
@@ -24,7 +24,9 @@ from .constants import MEMORY_POWER_PER_GB
 __all__ = ["get_runtime_config"]
 
 
-def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
+def get_runtime_config(args) -> tuple[APIInterface, str, int, 
+                                      Optional[list[tuple[int, float]]],
+                                      Optional[float]]:
     """Return the runtime cats configuration from list of command line
     arguments and content of configuration file.
 
@@ -47,7 +49,7 @@ def get_runtime_config(args) -> tuple[dict, APIInterface, str, int]:
     try:
         duration = int(args.duration)
     except ValueError:
-        logging.eror(msg)
+        logging.error(msg)
         raise ValueError
     if duration <= 0:
         logging.error(msg)
@@ -91,13 +93,14 @@ def CI_API_from_config_or_args(args, config) -> APIInterface:
         api = "carbonintensity.org.uk"  # default value
         logging.warning(f"Unspecified carbon intensity forecast service, using {api}")
     try:
-        return API_interfaces[api]
+        interface = API_interfaces[api]
     except KeyError:
         logging.error(
             f"Error: {api} is not a valid API choice. It must be one of " "\n".join(
                 API_interfaces.keys()
             )
         )
+    return interface
 
 
 def get_location_from_config_or_args(args, config) -> str:
