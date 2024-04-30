@@ -26,75 +26,18 @@ pip install git+https://github.com/GreenScheduler/cats
 
 ## Documentation
 
-Full documentation is available at [greenscheduler.github.io/cats/](https://greenscheduler.github.io/cats/). The below sections
-demonstrate some capability, for illustration, but please consult
-the documentation for more details.
+Documentation is available at [greenscheduler.github.io/cats/](https://greenscheduler.github.io/cats/).
 
-#### Basic example
+We recommend the
+[quickstart](https://greenscheduler.github.io/cats/quickstart.html#basic-usage)
+if you are new to CATS. CATS can optionally [display carbon footprint
+savings](https://greenscheduler.github.io/cats/quickstart.html#displaying-carbon-footprint-estimates)
+using a [configuration file](cats/config.yml).
 
-You can run `cats` with:
-
-```bash
-cats -d <job_duration> --loc <postcode>
-```
-
-The postcode is optional, and can be pulled from the `config.yml` file or, if that is not present, inferred using the server IP address. Job duration is in minutes, specified as an integer.
-
-The scheduler then calls a function that estimates the best time to start the job given predicted carbon intensity over the next 48 hours. The workflow is the same as for other popular schedulers. Switching to `cats` should be transparent to cluster users.
-
-By default, the optimal time to start the job is shown in a human readable format. This information can be output in a machine readable format by passing `--format=json`. The date format in the machine readable output can be controlled using `--dateformat` which accepts a [strftime(3)](https://manpages.debian.org/stable/manpages-dev/strftime.3.en.html) format date.
-
-
-#### Use with schedulers
-
-You can use CATS with, for example, the ``at`` job scheduler by running:
-
-```bash
-cats -d 5 --loc OX1 --scheduler at --command 'ls'
-```
-This schedules a command (`ls`) that has an expected runtime less than 5 minutes using the at scheduler.
-
-#### Console demonstration
+### Console demonstration
+CATS predicting optimal start time for the `ls` command in the `OX1` postcode:
 
 ![CATS animated usage example](cats.gif)
-
-#### Displaying carbon footprint estimates
-
-`cats` is able to provide an estimate for the carbon footprint
-reduction resulting from delaying your job.  To enable the footprint
-estimation, you must provide information about the machine in the form
-of a YAML configuration file.  An example is given below:
-
-```yaml
-location: "EH8"
-api: "carbonintensity.org.uk"
-PUE: 1.20 # > 1
-partitions:
-  CPU_partition:
-    type: CPU # CPU or GPU
-    model: "Xeon Gold 6142"
-    TDP: 9.4 # Thermal Design Power in W/core
-  GPU_partition:
-    type: GPU
-    model: "NVIDIA A100-SXM-80GB GPUs"
-    TDP: 300
-    CPU_model: "AMD EPYC 7763"
-    TDP_CPU: 4.4
-```
-
-Use the `--config` option to specify a path to the configuration
-file. If no path is specified, `cats` looks for a file named
-`config.yml` in the current directory.
-
-Additionally, to obtain carbon footprints, job-specific information
-must be provided to `cats` through the `--jobinfo` option.  The
-example below demonstrates running `cats` with footprint estimation
-for a job using 8GB of memory, 2 CPU cores and no GPU:
-
-```bash
-cats -d 120 --config .config/config.yml \
-  --jobinfo cpus=2,gpus=0,memory=8,partition=CPU_partition
-```
 
 ## Contributing
 
