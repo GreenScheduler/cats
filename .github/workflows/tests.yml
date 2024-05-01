@@ -9,12 +9,13 @@ on:
     paths:
     - '**.py'
     - '.github/workflows/tests.yml'
+    - 'pyproject.toml'
   pull_request:
     branches: [ main ]
     paths:
     - '**.py'
     - '.github/workflows/tests.yml'
-  workflow_dispatch:
+    - 'pyproject.toml'
 
 jobs:
   build:
