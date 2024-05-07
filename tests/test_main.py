@@ -47,6 +47,12 @@ def test_schedule_at_missing():
     )
 
 
+def test_schedule_at_failure():
+    assert schedule_at(OUTPUT, ["ls"], at_command="/usr/bin/false").startswith(
+        "Scheduling with at failed with code 1, see output below:"
+    )
+
+
 def raiseLocationError():
     raise InvalidLocationError
 
