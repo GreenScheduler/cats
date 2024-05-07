@@ -21,7 +21,7 @@ OUTPUT = CATSOutput(
 )
 
 
-def test_schedule_at(fp):
+def test_schedule_at_success(fp):
     fp.register_subprocess(["ls"], stdout=b"foobar.txt")
     fp.register_subprocess(
         [
@@ -40,6 +40,19 @@ def test_schedule_at(fp):
     )
 
 
+def test_schedule_at_missing():
+    assert (
+        schedule_at(OUTPUT, ["ls"], at_command="at_imaginary")
+        == "No at command found in PATH, please install one"
+    )
+
+
+def test_schedule_at_failure():
+    assert schedule_at(OUTPUT, ["ls"], at_command="/usr/bin/false").startswith(
+        "Scheduling with at failed with code 1, see output below:"
+    )
+
+
 def raiseLocationError():
     raise InvalidLocationError
 
@@ -54,3 +67,6 @@ def test_main_failures(get_CI_forecast):
 
     # Invalid location
     assert main(["-d", "5", "--loc", "oxford"]) == 1
+
+    # Duration larger than API maximum
+    assert main(["-d", "5000", "--loc", "OX1"]) == 1

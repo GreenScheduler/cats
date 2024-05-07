@@ -192,14 +192,16 @@ class CATSOutput:
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        out = f"Best job start time: {self.carbonIntensityOptimal.start}"
+        out = f"""Best job start time {self.carbonIntensityOptimal.start}
+Carbon intensity if job started now       = {self.carbonIntensityNow.value:.2f} gCO2eq/kWh
+Carbon intensity at optimal time          = {self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh"""
 
         if self.emmissionEstimate:
-            out += (
-                f"\nEstimated emmissions for running job now: {self.emmissionEstimate.now}\n"
-                f"Estimated emmissions for running delayed job: {self.emmissionEstimate.best}"
-                f" (- {self.emmissionEstimate.savings})"
-            )
+            out += f"""
+Estimated emissions if job started now    = {self.emmissionEstimate.now}
+Estimated emissions at optimal time       = {self.emmissionEstimate.best} (- {self.emmissionEstimate.savings})"""
+
+        out += "\n\nUse --format=json to get this in machine readable format"
         return out
 
     def to_json(self, dateformat: str = "", **kwargs) -> str:
@@ -215,17 +217,30 @@ class CATSOutput:
         return json.dumps(data, **kwargs)
 
 
-def schedule_at(output: CATSOutput, args: list[str]) -> None:
-    "Schedule job with optimal start time using at(1)"
+def schedule_at(
+    output: CATSOutput, args: list[str], at_command: str = "at"
+) -> Optional[str]:
+    """Schedule job with optimal start time using at(1)
+
+    :return: Error as a string, or None if successful
+    """
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
-    proc_output = subprocess.check_output(
-        (
-            "at",
-            "-t",
-            output.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
-        ),
-        stdin=proc.stdout,
-    )
+    try:
+        proc_output = subprocess.check_output(
+            (
+                at_command,
+                "-t",
+                output.carbonIntensityOptimal.start.strftime(
+                    SCHEDULER_DATE_FORMAT["at"]
+                ),
+            ),
+            stdin=proc.stdout,
+        )
+        return None
+    except FileNotFoundError:
+        return "No at command found in PATH, please install one"
+    except subprocess.CalledProcessError as e:
+        return f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}"
 
 
 def main(arguments=None) -> int:
@@ -239,6 +254,12 @@ def main(arguments=None) -> int:
         return 1
 
     CI_API_interface, location, duration, jobinfo, PUE = get_runtime_config(args)
+    if duration > CI_API_interface.max_duration:
+        print(
+            f"""API allows a maximum job duration of {CI_API_interface.max_duration} minutes.
+This is usually due to forecast limitations."""
+        )
+        return 1
 
     ########################
     ## Obtain CI forecast ##
@@ -287,7 +308,9 @@ def main(arguments=None) -> int:
     else:
         print(output)
     if args.command and args.scheduler == "at":
-        schedule_at(output, args.command.split())
+        if err := schedule_at(output, args.command.split()):
+            print(err)
+            return 1
     return 0
 
 
