@@ -14,7 +14,7 @@ You can run CATS with:
 
    $ cats --duration 480 --location "EH8"
 
-The ``--postcode`` option is optional, and can be pulled from a
+The ``--location`` option is optional, and can be pulled from a
 configuration file (see :ref:`configuration-file`), or inferred using
 the server's IP address.
 
