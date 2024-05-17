@@ -8,9 +8,20 @@
 
 [project]
   name = "climate-aware-task-scheduler"
-  version = "0.1.0"
+  version = "1.0rc1"
   description = "Climate aware task scheduler"
-  authors = []
+  authors = [
+    { name = "Colin Sauze" },
+    { name = "Andrew Walker"},
+    { name = "Loïc Lannelongue" },
+    { name = "Thibault Lestang" },
+    { name = "Tony Greenberg" },
+    { name = "Lincoln Colling" },
+    { name = "Adam Ward" },
+    { name = "Abhishek Dasgupta" },
+    { name = "Carlos Martinez" },
+    { name = "Sadie Bartholomew" }
+  ]
   license = { file = "LICENSE" }
   requires-python = ">=3.9"
   readme = "README.md"
