@@ -30,9 +30,9 @@ def test_has_right_length():
     window_size = 160  # In number of time intervals
     wf = WindowedForecast(DATA, window_size, start=DATA[0].datetime)
 
-    # Expecting (200 - 160 - 1) (39) data points in the time
+    # Expecting (200 - 160 + 1) (41) data points in the time
     # integrated timeseries.
-    assert len(wf) == NDATA - window_size - 1
+    assert len(wf) == NDATA - window_size + 1
 
 
 def test_values():
@@ -46,7 +46,7 @@ def test_values():
     wf = WindowedForecast(DATA, window_size, start=DATA[0].datetime)
     expected = [
         math.cos((i + window_size) * step) - math.cos(i * step)
-        for i in range(len(DATA) - window_size - 1)
+        for i in range(len(DATA) - window_size + 1)
     ]
     # average
     expected = [e / (window_size * step) for e in expected]
