@@ -83,6 +83,22 @@ def test_minimise_average(sample_data):
     )
     assert result == expected
 
+def test_maximum_duration(sample_data):
+    window_size = 95  # corresponds to 2850 minutes
+    # Data points separated by 30 minutes intervals
+    duration = window_size * 30
+    result = min(WindowedForecast(sample_data, duration, start=sample_data[0].datetime))
+
+    # Intensity point estimates over best runtime period
+    # In this case, the entire period is selected which is 2850 minutes long
+    v = [s.value for s in sample_data]
+    expected = CarbonIntensityAverageEstimate(
+        start=datetime.fromisoformat("2023-05-04T12:30+00:00"),
+        end=datetime.fromisoformat("2023-05-06T12:00+00:00"),
+        value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
+    )
+    assert result == expected
+
 
 def test_minimise_average_bst(sample_data):
     # We should get a start time in BST if we provide the starting time
