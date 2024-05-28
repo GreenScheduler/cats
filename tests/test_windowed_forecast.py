@@ -40,6 +40,13 @@ def sample_data():
         return data
 
 
+def test_repr():
+    est = CarbonIntensityPointEstimate(
+        datetime=datetime.fromisoformat("2023-05-04T12:30+00:00"), value=12.0
+    )
+    assert repr(est) == "2023-05-04T12:30:00+00:00\t12.0"
+
+
 def test_has_right_length():
     window_size = 160  # In number of time intervals
     wf = WindowedForecast(DATA, window_size, start=DATA[0].datetime)
@@ -82,6 +89,7 @@ def test_minimise_average(sample_data):
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
     )
     assert result == expected
+
 
 def test_maximum_duration(sample_data):
     window_size = 95  # corresponds to 2850 minutes
