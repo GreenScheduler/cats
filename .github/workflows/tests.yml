@@ -35,7 +35,7 @@ jobs:
         cache: 'pip'
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip 
+        python3 -m pip install --upgrade pip
         python3 -m pip install '.[test]'
     - name: Lint with flake8
       run: |
