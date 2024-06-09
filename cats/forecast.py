@@ -13,6 +13,9 @@ class CarbonIntensityPointEstimate:
     value: float  # the first attribute is used automatically for sorting methods
     datetime: datetime
 
+    def __repr__(self):
+        return f"{self.datetime.isoformat()}\t{self.value}"
+
 
 @dataclass(order=True)
 class CarbonIntensityAverageEstimate:
@@ -62,10 +65,10 @@ class WindowedForecast:
         #
         def bisect_left(data, t):
             for i, d in enumerate(data):
-                if d.datetime >= t:
-                    return i
+                if d.datetime + self.data_stepsize >= t:
+                    return i + 1
 
-        self.ndata = bisect_left(self.data, self.end) + 1
+        self.ndata = bisect_left(self.data, self.end)  # window size
 
     def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
         """Return the average of timeseries data from index over the
@@ -84,24 +87,30 @@ class WindowedForecast:
         # intensity is interpolated between the first (index) and
         # second data point (index + 1) in the window.  The ending
         # intensity value is interpolated between the last and
-        # penultimate data points in he window.
+        # penultimate data points in the window.
         window_start = self.start + index * self.data_stepsize
         window_end = self.end + index * self.data_stepsize
+
+        # lbound: carbon intensity point estimate at window start
         lbound = self.interp(
             self.data[index],
             self.data[index + 1],
             when=window_start,
         )
-        rbound = self.interp(
-            self.data[index + self.ndata - 2],
-            self.data[index + self.ndata - 1],
-            when=window_end,
-        )
+        # rbound: carbon intensity point estimate at window end
+        # Handle case when last data point exactly matches last carbon intensity,
+        # so there is no further data point to interpolate from.
+        if index + self.ndata == len(self.data):
+            rbound = self.data[-1]
+        else:
+            rbound = self.interp(
+                self.data[index + self.ndata - 1],
+                self.data[index + self.ndata],
+                when=window_end,
+            )
         # window_data <- [lbound] + [...bulk...] + [rbound] where
         # lbound and rbound are interpolated intensity values.
-        window_data = (
-            [lbound] + self.data[index + 1 : index + self.ndata - 1] + [rbound]
-        )
+        window_data = [lbound] + self.data[index + 1 : index + self.ndata] + [rbound]
         acc = [
             0.5 * (a.value + b.value) * (b.datetime - a.datetime).total_seconds()
             for a, b in zip(window_data[:-1], window_data[1:])
@@ -138,4 +147,4 @@ class WindowedForecast:
             yield self.__getitem__(index)
 
     def __len__(self):
-        return len(self.data) - self.ndata
+        return len(self.data) - self.ndata + 1
