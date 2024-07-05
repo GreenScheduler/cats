@@ -75,13 +75,14 @@ def parse_arguments():
         cats -d 90 --loc OX1 -s at -c 'mycommand'
 
     To report carbon footprint, pass the `--config` option to select a
-    configuration file and the `--profile` option to select a profile. An
+    configuration file and the `--profile` option to select a profile.
+    The configuration file is documented in the Quickstart section of the online
+    documentation. An
     example config file is given below:
 
-{config_text}
+.. code-block:: yaml
 
-    The configuration file is documented in the Quickstart section of the online
-    documentation.
+{config_text}
     """
 
     parser = ArgumentParser(
@@ -226,7 +227,7 @@ def schedule_at(
     """
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     try:
-        proc_output = subprocess.check_output(
+        subprocess.check_output(
             (
                 at_command,
                 "-t",
