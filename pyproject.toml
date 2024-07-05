@@ -8,7 +8,7 @@
 
 [project]
   name = "climate-aware-task-scheduler"
-  version = "1.0rc1"
+  version = "1.0.0"
   description = "Climate aware task scheduler"
   authors = [
     { name = "Colin Sauze" },
@@ -25,7 +25,14 @@
   license = { file = "LICENSE" }
   requires-python = ">=3.9"
   readme = "README.md"
-  classifiers = ["License :: OSI Approved :: MIT License"]
+  classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+  ]
   dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
 
   [project.optional-dependencies]
