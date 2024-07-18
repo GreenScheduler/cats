@@ -12,6 +12,8 @@
 import os
 import sys
 
+import cats
+
 sys.path.insert(0, os.path.abspath("../.."))  # cats repo root directory
 
 
@@ -26,7 +28,7 @@ authors = (
 author = authors
 copyright = f"2023, {authors}"
 # The full version, including alpha/beta/rc tags
-release = "1.0.0"
+release = cats.__version__
 
 # Add media: image for logo and a favicon for the browser tab
 html_logo = "_static/cats_dalle_img_200x200px_for_logo.png"

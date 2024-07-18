@@ -1,5 +1,5 @@
 [build-system]
-  requires = ['setuptools>=40.8.0']
+  requires = ['setuptools>=61.0.0']
   build-backend = 'setuptools.build_meta'
 
 [tool.setuptools]
@@ -8,7 +8,7 @@
 
 [project]
   name = "climate-aware-task-scheduler"
-  version = "1.0.0"
+  dynamic = ["version"]
   description = "Climate aware task scheduler"
   authors = [
     { name = "Colin Sauze" },
@@ -34,6 +34,9 @@
     "Intended Audience :: System Administrators",
   ]
   dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
+
+  [tool.setuptools.dynamic]
+    version = {attr = "cats.__version__"}
 
   [project.optional-dependencies]
     test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov"]
