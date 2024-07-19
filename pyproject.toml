@@ -41,7 +41,7 @@
   [project.optional-dependencies]
     test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov"]
     types = ["mypy", "types-PyYAML", "types-redis", "types-requests", "types-ujson"]
-    docs = ["sphinx", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton"]
+    docs = ["sphinx==6.*", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton"]
 
   [project.urls]
     Home = "https://github.com/GreenScheduler/cats"
