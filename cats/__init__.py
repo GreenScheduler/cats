@@ -33,7 +33,7 @@ def parse_arguments():
     """
     description_text = f"""
     Climate-Aware Task Scheduler (version {__version__})
-    --------------------------------------------------------------------------
+
     The Climate-Aware Task Scheduler (cats) command line program helps you run
     your calculations in a way that minimises their impact on the climate by
     delaying computation until a time when the ammount of CO2 produced to
