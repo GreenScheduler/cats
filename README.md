@@ -21,8 +21,15 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 Install via `pip` as follows:
 
 ```bash
+pip install climate-aware-task-scheduler
+```
+
+To install the development version:
+
+```bash
 pip install git+https://github.com/GreenScheduler/cats
 ```
+
 
 ## Documentation
 
