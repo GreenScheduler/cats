@@ -11,16 +11,10 @@ please see :ref:`cli-reference`.
 Modules
 -------
 
-``cats.__init__``
+``cats``
 ^^^^^^^^^^^^^^^^^
 
-.. automodule:: cats.__init__
-    :members:
-
-``cats.__main__``
-^^^^^^^^^^^^^^^^^
-
-.. automodule:: cats.__main__
+.. automodule:: cats
     :members:
 
 ``cats.configure``

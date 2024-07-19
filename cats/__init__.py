@@ -15,6 +15,8 @@ from .configure import get_runtime_config
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
 
+__version__ = "1.0.0"
+
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
 SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M"}
@@ -29,7 +31,9 @@ def parse_arguments():
     Parse command line arguments
     :return: [dict] parsed arguments
     """
-    description_text = """
+    description_text = f"""
+    Climate-Aware Task Scheduler (version {__version__})
+    --------------------------------------------------------------------------
     The Climate-Aware Task Scheduler (cats) command line program helps you run
     your calculations in a way that minimises their impact on the climate by
     delaying computation until a time when the ammount of CO2 produced to
@@ -75,13 +79,14 @@ def parse_arguments():
         cats -d 90 --loc OX1 -s at -c 'mycommand'
 
     To report carbon footprint, pass the `--config` option to select a
-    configuration file and the `--profile` option to select a profile. An
+    configuration file and the `--profile` option to select a profile.
+    The configuration file is documented in the Quickstart section of the online
+    documentation. An
     example config file is given below:
 
-{config_text}
+.. code-block:: yaml
 
-    The configuration file is documented in the Quickstart section of the online
-    documentation.
+{config_text}
     """
 
     parser = ArgumentParser(
@@ -226,7 +231,7 @@ def schedule_at(
     """
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     try:
-        proc_output = subprocess.check_output(
+        subprocess.check_output(
             (
                 at_command,
                 "-t",

@@ -1,5 +1,5 @@
 [build-system]
-  requires = ['setuptools>=40.8.0']
+  requires = ['setuptools>=61.0.0']
   build-backend = 'setuptools.build_meta'
 
 [tool.setuptools]
@@ -8,7 +8,7 @@
 
 [project]
   name = "climate-aware-task-scheduler"
-  version = "1.0rc1"
+  dynamic = ["version"]
   description = "Climate aware task scheduler"
   authors = [
     { name = "Colin Sauze" },
@@ -25,12 +25,23 @@
   license = { file = "LICENSE" }
   requires-python = ">=3.9"
   readme = "README.md"
-  classifiers = ["License :: OSI Approved :: MIT License"]
+  classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+  ]
   dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
+
+  [tool.setuptools.dynamic]
+    version = {attr = "cats.__version__"}
 
   [project.optional-dependencies]
     test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov"]
     types = ["mypy", "types-PyYAML", "types-redis", "types-requests", "types-ujson"]
+    docs = ["sphinx", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton"]
 
   [project.urls]
     Home = "https://github.com/GreenScheduler/cats"

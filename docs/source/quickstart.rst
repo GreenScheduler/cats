@@ -76,7 +76,7 @@ quantity of hardware the job using. This information is provided by
 adding a section ``profiles`` to the :ref:`cats YAML configuration
 file <configuration-file>`.
 
-You can define an arbitraty number of profiles as subsection of the
+You can define an arbitrary number of profiles as subsection of the
 top-level ``profiles`` section:
 
 .. literalinclude :: ../../cats/config.yml
@@ -106,6 +106,6 @@ at the command line:
         --profile my_gpu_profile --gpu 4 --cpu 1
 
 .. warning::
-   The ``--profile`` option is optional. Is not provided, ``cats`` uses the
+   The ``--profile`` option is optional. If not provided, ``cats`` uses the
    first profile defined in the configuration file as the default
    profile.
