@@ -12,6 +12,7 @@ runtime configuration consits of:
 
 import logging
 import sys
+import os
 from collections.abc import Mapping
 from typing import Any, Optional
 
@@ -76,7 +77,16 @@ def config_from_file(configpath="") -> Mapping[str, Any]:
             return yaml.safe_load(f)
         logging.info(f"Using provided config file: {configpath}\n")
     else:
-        # if no path provided, look for `config.yml` in current directory
+        # if no path provided, try to use config environment variable
+        cfile = os.getenv("CATS_CONFIG_FILE")
+        if cfile is not None:
+            try:
+                with open(cfile, "r") as f:
+                    return yaml.safe_load(f)
+                logging.info("Using config.yml found in CATS_CONFIG_FILE\n")
+            except FileNotFoundError:
+                logging.warning("CATS_CONFIG_FILE config file not found")
+        # if no path provided and no env variable, look for `config.yml` in current directory
         try:
             with open("config.yml", "r") as f:
                 return yaml.safe_load(f)
