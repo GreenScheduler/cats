@@ -45,17 +45,17 @@ Use the ``--config`` option to specify a path to the configuration
 file, relative to the current directory.
 
 In case of a missing location command line argument, ``cats`` looks
-for a file named ``config.yaml`` in the current directory.
+for a file named ``config.yaml`` or ``config.yml`` in the current directory.
 
 .. code-block:: shell
 
    #  Override duration value at the command line
-   cats --config /path/to/config.yaml --location "OX1"
+   cats --config /path/to/config.y(a)ml --location "OX1"
 
 .. code-block:: shell
 
-   #  location information is assumed to be provided in
-   #  ./config.yaml.  If not, 'cats' errors out.
+   #  Location information is assumed to be provided in
+   #  ./config.yaml or ./config.yml.  If not, 'cats' errors out.
    cats --duration 480
 
 
