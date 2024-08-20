@@ -66,7 +66,7 @@ def parse_arguments():
     ********
 
     CATS can be used to report information on the best time to run a calculation
-    and the amount of CO2. Information about a 90 minute calculation in centeral
+    and the amount of CO2. Information about a 90 minute calculation in central
     Oxford can be found by running:
 
         cats -d 90 --loc OX1
@@ -81,8 +81,7 @@ def parse_arguments():
     To report carbon footprint, pass the `--config` option to select a
     configuration file and the `--profile` option to select a profile.
     The configuration file is documented in the Quickstart section of the online
-    documentation. An
-    example config file is given below:
+    documentation. An example config file is given below:
 
 .. code-block:: yaml
 
@@ -170,12 +169,12 @@ def parse_arguments():
     parser.add_argument(
         "--cpu",
         type=positive_integer,
-        help="Number of cpus used by the job",
+        help="Number of CPUs used by the job",
     )
     parser.add_argument(
         "--gpu",
         type=positive_integer,
-        help="Number of cpus used by the job",
+        help="Number of GPUs used by the job",
     )
     parser.add_argument(
         "--memory",
