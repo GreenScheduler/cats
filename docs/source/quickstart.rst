@@ -52,11 +52,22 @@ for a file named ``config.yaml`` or ``config.yml`` in the current directory.
    #  Override duration value at the command line
    cats --config /path/to/config.y(a)ml --location "OX1"
 
-.. code-block:: shell
+When ``--duration`` information is not provided via the option, and
+location information is not provided in the YAML configuration file
+specified or detected, CATS will try to estimate location from the
+machine IP address:
 
-   #  Location information is assumed to be provided in
-   #  ./config.yaml or ./config.yml.  If not, 'cats' errors out.
-   cats --duration 480
+.. code-block:: console
+
+   $ cats --duration 480
+   WARNING:root:config file not found
+   WARNING:root:Unspecified carbon intensity forecast service, using carbonintensity.org.uk
+   WARNING:root:location not provided. Estimating location from IP address: RG2.
+   Best job start time 2024-08-22 07:30:49.800951+01:00
+   Carbon intensity if job started now       = 117.95 gCO2eq/kWh
+   Carbon intensity at optimal time          = 60.93 gCO2eq/kWh
+
+   Use --format=json to get this in machine readable format
 
 
 Displaying carbon footprint estimates
