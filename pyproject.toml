@@ -33,7 +33,7 @@
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
   ]
-  dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
+  dependencies = ["requests-cache>=1.0", "PyYAML>=6.0", "matplotlib>=3.0"]
 
   [tool.setuptools.dynamic]
     version = {attr = "cats.__version__"}
