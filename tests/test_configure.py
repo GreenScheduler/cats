@@ -50,6 +50,12 @@ def test_config_from_file_default(local_config_file):
     assert configmapping == CATS_CONFIG
 
 
+def test_config_from_env(local_config_file):
+    os.environ["CATS_CONFIG_FILE"] = str(local_config_file / "config.yml")
+    configmapping = config_from_file()
+    assert configmapping == CATS_CONFIG
+
+
 @patch("cats.configure.requests")
 def test_get_location_from_config_or_args(mock_requests):
     expected_location = "SW7"
