@@ -15,6 +15,7 @@ from .configure import get_runtime_config
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
+from .plotting import plotplan
 
 __version__ = "1.0.0"
 
@@ -193,6 +194,11 @@ def parse_arguments():
         action="store_true",
         help="Disable all terminal output colouring (alias to --no-colour)",
     )
+    parser.add_argument(
+        "--plot",
+        help="Create a plot of the forcast and optimised plan for the job",
+        action="store_true",
+    )
 
     return parser
 
@@ -360,6 +366,8 @@ This is usually due to forecast limitations."""
         print(output.to_json(dateformat, sort_keys=True, indent=2))
     else:
         print(output)
+    if args.plot:
+        plotplan(CI_forecast, output)
     if args.command and args.scheduler == "at":
         if err := schedule_at(output, args.command.split()):
             print(err)
