@@ -14,6 +14,7 @@ from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
+from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NOCOLOUR
 
 __version__ = "1.0.0"
 
@@ -182,6 +183,12 @@ def parse_arguments():
         type=positive_integer,
         help="Amount of memory used by the job, in GB",
     )
+    parser.add_argument(
+        "-n",
+        "--no-colour",  # or could use American spelling like many other CLIs?
+        action="store_true",
+        help="Turn off terminal colouring to highlight key information",
+    )
 
     return parser
 
@@ -194,10 +201,18 @@ class CATSOutput:
     carbonIntensityOptimal: CarbonIntensityAverageEstimate
     location: str
     countryISO3: str
+    colour: bool
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        out = f"""Best job start time {self.carbonIntensityOptimal.start}
+        # Show ASCII art 'CATS' banner before any main output
+        # TODO: log warnings appear first: find a way to move them to come after
+        if self.colour:
+            out = CATS_ASCII_BANNER_COLOUR
+        else:
+            out = CATS_ASCII_BANNER_NOCOLOUR
+
+        out += f"""Best job start time    = {self.carbonIntensityOptimal.start}
 Carbon intensity if job started now       = {self.carbonIntensityNow.value:.2f} gCO2eq/kWh
 Carbon intensity at optimal time          = {self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh"""
 
@@ -287,7 +302,7 @@ This is usually due to forecast limitations."""
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
     now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(now_avg, best_avg, location, "GBR")
+    output = CATSOutput(now_avg, best_avg, location, "GBR", not args.no_colour)
 
     ################################
     ## Calculate carbon footprint ##
