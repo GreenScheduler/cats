@@ -234,7 +234,7 @@ Carbon intensity at optimal time          = {col_ci_opt}{self.carbonIntensityOpt
 Estimated emissions if job started now    = {col_ee_now}{self.emmissionEstimate.now}{col_normal}
 Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.best} (- {self.emmissionEstimate.savings}){col_normal}"""
 
-        out += "\n\nUse --format=json to get this in machine readable format"
+        logging.info("Use '--format=json' to get this in machine readable format")
         return out
 
     def to_json(self, dateformat: str = "", **kwargs) -> str:
