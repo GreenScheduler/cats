@@ -209,18 +209,30 @@ class CATSOutput:
         # TODO: log warnings appear first: find a way to move them to come after
         if self.colour:
             out = CATS_ASCII_BANNER_COLOUR
+            col_normal = "\33[0m"  # reset colour
+            col_dt_opt = "\33[32m"  # green
+            col_ci_opt = "\33[32m"  # green
+            col_ci_now = "\33[33m"  # yellow
+            col_ee_now = "\33[33m"  # yellow
+            col_ee_opt = "\33[32m"  # green
         else:
             out = CATS_ASCII_BANNER_NOCOLOUR
+            col_normal = ""
+            col_dt_opt = ""
+            col_ci_opt = ""
+            col_ci_now = ""
+            col_ee_now = ""
+            col_ee_opt = ""
 
         out += f"""
-Best job start time                       = {self.carbonIntensityOptimal.start}
-Carbon intensity if job started now       = {self.carbonIntensityNow.value:.2f} gCO2eq/kWh
-Carbon intensity at optimal time          = {self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh"""
+Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start}{col_normal}
+Carbon intensity if job started now       = {col_ci_now}{self.carbonIntensityNow.value:.2f} gCO2eq/kWh{col_normal}
+Carbon intensity at optimal time          = {col_ci_opt}{self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh{col_normal}"""
 
         if self.emmissionEstimate:
             out += f"""
-Estimated emissions if job started now    = {self.emmissionEstimate.now}
-Estimated emissions at optimal time       = {self.emmissionEstimate.best} (- {self.emmissionEstimate.savings})"""
+Estimated emissions if job started now    = {col_ee_now}{self.emmissionEstimate.now}{col_normal}
+Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.best} (- {self.emmissionEstimate.savings}){col_normal}"""
 
         out += "\n\nUse --format=json to get this in machine readable format"
         return out
