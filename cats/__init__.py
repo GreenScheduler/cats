@@ -187,7 +187,7 @@ def parse_arguments():
         "-n",
         "--no-colour",  # or could use American spelling like many other CLIs?
         action="store_true",
-        help="Turn off terminal colouring to highlight key information",
+        help="Disable all terminal output colouring",
     )
 
     return parser
