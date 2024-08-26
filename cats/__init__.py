@@ -212,7 +212,8 @@ class CATSOutput:
         else:
             out = CATS_ASCII_BANNER_NOCOLOUR
 
-        out += f"""Best job start time    = {self.carbonIntensityOptimal.start}
+        out += f"""
+Best job start time                       = {self.carbonIntensityOptimal.start}
 Carbon intensity if job started now       = {self.carbonIntensityNow.value:.2f} gCO2eq/kWh
 Carbon intensity at optimal time          = {self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh"""
 
