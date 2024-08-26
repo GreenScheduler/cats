@@ -14,7 +14,7 @@ from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
-from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NOCOLOUR
+from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 
 __version__ = "1.0.0"
 
@@ -205,10 +205,7 @@ class CATSOutput:
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
-        # Show ASCII art 'CATS' banner before any main output
-        # TODO: log warnings appear first: find a way to move them to come after
         if self.colour:
-            out = CATS_ASCII_BANNER_COLOUR
             # Default colour
             col_normal = "\33[0m"  # reset any colour
 
@@ -221,7 +218,6 @@ class CATSOutput:
             col_ci_now = "\33[31m"  # red i.e. 'bad' in traffic light rating
             col_ee_now = "\33[31m"  # red
         else:
-            out = CATS_ASCII_BANNER_NOCOLOUR
             col_normal = ""
             col_dt_opt = ""
             col_ci_opt = ""
@@ -229,7 +225,7 @@ class CATSOutput:
             col_ee_now = ""
             col_ee_opt = ""
 
-        out += f"""
+        out = f"""
 Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start}{col_normal}
 Carbon intensity if job started now       = {col_ci_now}{self.carbonIntensityNow.value:.2f} gCO2eq/kWh{col_normal}
 Carbon intensity at optimal time          = {col_ci_opt}{self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh{col_normal}"""
@@ -253,6 +249,15 @@ Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.
                 data[ci]["end"] = data[ci]["end"].strftime(dateformat)
 
         return json.dumps(data, **kwargs)
+
+
+def print_banner(colour):
+    """Print an ASCII art banner with the CATS title, optionally in colour.
+    """
+    if colour:
+        print(CATS_ASCII_BANNER_COLOUR)
+    else:
+        print(CATS_ASCII_BANNER_NO_COLOUR)
 
 
 def schedule_at(
@@ -284,6 +289,10 @@ def schedule_at(
 def main(arguments=None) -> int:
     parser = parse_arguments()
     args = parser.parse_args(arguments)
+
+    # Print CATS ASCII art banner, before any output from printing or logging
+    print_banner(not args.no_colour)
+
     if args.command and not args.scheduler:
         print(
             "cats: To run a command with the -c or --command option, you must\n"
