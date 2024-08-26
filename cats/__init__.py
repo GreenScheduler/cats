@@ -209,12 +209,17 @@ class CATSOutput:
         # TODO: log warnings appear first: find a way to move them to come after
         if self.colour:
             out = CATS_ASCII_BANNER_COLOUR
-            col_normal = "\33[0m"  # reset colour
-            col_dt_opt = "\33[32m"  # green
+            # Default colour
+            col_normal = "\33[0m"  # reset any colour
+
+            # Optimal information colours
+            col_dt_opt = "\33[32m"  # green i.e. 'good' in traffic light rating
             col_ci_opt = "\33[32m"  # green
-            col_ci_now = "\33[33m"  # yellow
-            col_ee_now = "\33[33m"  # yellow
             col_ee_opt = "\33[32m"  # green
+
+            # 'NOw' non-optimal colours
+            col_ci_now = "\33[31m"  # red i.e. 'bad' in traffic light rating
+            col_ee_now = "\33[31m"  # red
         else:
             out = CATS_ASCII_BANNER_NOCOLOUR
             col_normal = ""
