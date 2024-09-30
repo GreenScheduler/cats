@@ -209,12 +209,12 @@ class CATSOutput:
             # Default colour
             col_normal = "\33[0m"  # reset any colour
 
-            # Optimal information colours
+            # Colours to indicate optimal/better results
             col_dt_opt = "\33[32m"  # green i.e. 'good' in traffic light rating
             col_ci_opt = "\33[32m"  # green
             col_ee_opt = "\33[32m"  # green
 
-            # 'NOw' non-optimal colours
+            # Colours to indicate original and non-optimal results
             col_ci_now = "\33[31m"  # red i.e. 'bad' in traffic light rating
             col_ee_now = "\33[31m"  # red
         else:
