@@ -206,7 +206,7 @@ class CATSOutput:
     carbonIntensityOptimal: CarbonIntensityAverageEstimate
     location: str
     countryISO3: str
-    colour: bool
+    colour: bool = False
     emmissionEstimate: Optional[Estimates] = None
 
     def __str__(self) -> str:
@@ -256,13 +256,13 @@ Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.
         return json.dumps(data, **kwargs)
 
 
-def print_banner(colour):
+def print_banner(disable_colour):
     """Print an ASCII art banner with the CATS title, optionally in colour.
     """
-    if colour:
-        print(CATS_ASCII_BANNER_COLOUR)
-    else:
+    if disable_colour:
         print(CATS_ASCII_BANNER_NO_COLOUR)
+    else:
+        print(CATS_ASCII_BANNER_COLOUR)
 
 
 def schedule_at(
@@ -294,9 +294,10 @@ def schedule_at(
 def main(arguments=None) -> int:
     parser = parse_arguments()
     args = parser.parse_args(arguments)
+    colour_output = args.no_colour or args.no_color
 
     # Print CATS ASCII art banner, before any output from printing or logging
-    print_banner(not args.no_colour)
+    print_banner(colour_output)
 
     if args.command and not args.scheduler:
         print(
@@ -334,7 +335,7 @@ This is usually due to forecast limitations."""
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
     now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(now_avg, best_avg, location, "GBR", not args.no_colour)
+    output = CATSOutput(now_avg, best_avg, location, "GBR", not colour_output)
 
     ################################
     ## Calculate carbon footprint ##
