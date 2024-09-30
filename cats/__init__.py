@@ -206,8 +206,8 @@ class CATSOutput:
     carbonIntensityOptimal: CarbonIntensityAverageEstimate
     location: str
     countryISO3: str
-    colour: bool = False
     emmissionEstimate: Optional[Estimates] = None
+    colour: bool = False
 
     def __str__(self) -> str:
         if self.colour:
