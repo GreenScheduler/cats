@@ -171,12 +171,12 @@ def parse_arguments():
     parser.add_argument(
         "--cpu",
         type=positive_integer,
-        help="Number of cpus used by the job",
+        help="Number of CPUs used by the job",
     )
     parser.add_argument(
         "--gpu",
         type=positive_integer,
-        help="Number of cpus used by the job",
+        help="Number of GPUs used by the job",
     )
     parser.add_argument(
         "--memory",
