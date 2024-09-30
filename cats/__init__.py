@@ -185,9 +185,14 @@ def parse_arguments():
     )
     parser.add_argument(
         "-n",
-        "--no-colour",  # or could use American spelling like many other CLIs?
+        "--no-colour",
         action="store_true",
         help="Disable all terminal output colouring",
+    )
+    parser.add_argument(
+        "--no-color",
+        action="store_true",
+        help="Disable all terminal output colouring (alias to --no-colour)",
     )
 
     return parser
