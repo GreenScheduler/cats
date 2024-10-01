@@ -335,7 +335,8 @@ This is usually due to forecast limitations."""
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
     now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(now_avg, best_avg, location, "GBR", not colour_output)
+    output = CATSOutput(
+        now_avg, best_avg, location, "GBR", colour=not colour_output)
 
     ################################
     ## Calculate carbon footprint ##
