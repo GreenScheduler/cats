@@ -25,7 +25,6 @@ affiliations:
 #- name: Independent Researcher, Country
 #  index: 3
 date: 27 November 2024
-#bibliography: paper.bib
 
 ---
 
@@ -42,24 +41,3 @@ also provides an assessment of the carbon savings due to delaying compute (vs co
 
 # Statement of need
 
-# Mathematics
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-# Figures
-
-Figures can be included like this:
-
-Figure sizes can be customized by adding an optional second parameter:
-
-# Acknowledgements
-
-
-# References
