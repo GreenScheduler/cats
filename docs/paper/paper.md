@@ -3,9 +3,20 @@ title: 'CATS: The Climate Aware Task Scheduler'
 tags:
   - Python
 authors:
+  - name: Sadie L. Bartholomew
+  - name: Lincoln Colling
+  - name: Abhishek Dasgupta
+  - name: Anthony J. Greenberg
+  - name: Loïc Lannelongue
+  - name: Thibault Lestang
+  - name: Carlos Martinez
+  - name: Nicolas Payette
+  - name: Colin Sauze
   - name: Andrew M. Walker
     orcid: 0000-0003-3121-3255
+    corresponding: true
     affiliation: 1
+  - name: Adam Ward
 #  - name: Author Without ORCID
 #    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
 #    affiliation: "1, 2" # (Multiple affiliations must be quoted)
@@ -70,7 +81,7 @@ Submitting the computation to a queueing system is relatively straightforward an
 
 ![illustration of the carbon intensity time series for (blue) with the predicted energy use for running a eight hour calculation now (red) or at a time that minimises the integrated carbon intensity (green).\label{fig:schedule}](fig1.png)
 
-We imagine that providing further information about the carbon cost of the proposed computation improves the educational impact of CATS. This can be enabled with the --footprint command line option. To provide this footprint information CATS must be configured with information about the hardware (principally the per-core power consumption of the processors) via “profiles” in the configuration file. Different profiles can allow for different classes of computation (for example, one that only uses the cpu, or one that uses the CPU and an attached GPU). This information, together with the grid carbon intensity and job duration, allows the total power consumption of the computation to be estimated along with the implied CO2 cost if it were to be run now, or if the start time were to be delayed to minimise the carbon intensity. This estimate is computed following REF - green algorithms project? before being reported. In addition, this information can be included in graphical output.
+We imagine that providing further information about the carbon cost of the proposed computation improves the educational impact of CATS. This can be enabled with the `--footprint` command line option. To provide this footprint information CATS must be configured with information about the hardware (principally the per-core power consumption of the processors) via “profiles” in the configuration file. Different profiles can allow for different classes of computation (for example, one that only uses the cpu, or one that uses the CPU and an attached GPU). This information, together with the grid carbon intensity and job duration, allows the total power consumption of the computation to be estimated along with the implied CO2 cost if it were to be run now, or if the start time were to be delayed to minimise the carbon intensity. This estimate is computed following REF - green algorithms project? before being reported. In addition, this information can be included in graphical output.
 
 # Limitations and future work
 
