@@ -33,21 +33,19 @@ OUTPUT_WITH_EMISSION_ESTIMATE = CATSOutput(
     [
         (
             OUTPUT,
-            """Best job start time 2024-03-16 02:00:00
+            """
+Best job start time                       = 2024-03-16 02:00:00
 Carbon intensity if job started now       = 50.00 gCO2eq/kWh
-Carbon intensity at optimal time          = 20.00 gCO2eq/kWh
-
-Use --format=json to get this in machine readable format""",
+Carbon intensity at optimal time          = 20.00 gCO2eq/kWh""",
         ),
         (
             OUTPUT_WITH_EMISSION_ESTIMATE,
-            """Best job start time 2024-03-16 02:00:00
+            """
+Best job start time                       = 2024-03-16 02:00:00
 Carbon intensity if job started now       = 50.00 gCO2eq/kWh
 Carbon intensity at optimal time          = 20.00 gCO2eq/kWh
 Estimated emissions if job started now    = 19
-Estimated emissions at optimal time       = 9 (- 10)
-
-Use --format=json to get this in machine readable format""",
+Estimated emissions at optimal time       = 9 (- 10)""",
         ),
     ],
 )
@@ -62,13 +60,13 @@ def test_string_repr(output, expected):
             OUTPUT,
             """{"carbonIntensityNow": {"end": "2024-03-15T17:00:00", "start": "2024-03-15T16:00:00", "value": 50}, """
             """"carbonIntensityOptimal": {"end": "2024-03-16T03:00:00", "start": "2024-03-16T02:00:00", "value": 20}, """
-            """"countryISO3": "GBR", "emmissionEstimate": null, "location": "OX1"}""",
+            """"colour": false, "countryISO3": "GBR", "emmissionEstimate": null, "location": "OX1"}""",
         ),
         (
             OUTPUT_WITH_EMISSION_ESTIMATE,
             """{"carbonIntensityNow": {"end": "2024-03-15T17:00:00", "start": "2024-03-15T16:00:00", "value": 50}, """
             """"carbonIntensityOptimal": {"end": "2024-03-16T03:00:00", "start": "2024-03-16T02:00:00", "value": 20}, """
-            """"countryISO3": "GBR", "emmissionEstimate": [19, 9, 10], "location": "OX1"}""",
+            """"colour": false, "countryISO3": "GBR", "emmissionEstimate": [19, 9, 10], "location": "OX1"}""",
         ),
     ],
 )
@@ -83,13 +81,13 @@ def test_output_json(output, expected):
             OUTPUT,
             """{"carbonIntensityNow": {"end": "202403151700", "start": "202403151600", "value": 50}, """
             """"carbonIntensityOptimal": {"end": "202403160300", "start": "202403160200", "value": 20}, """
-            """"countryISO3": "GBR", "emmissionEstimate": null, "location": "OX1"}""",
+            """"colour": false, "countryISO3": "GBR", "emmissionEstimate": null, "location": "OX1"}""",
         ),
         (
             OUTPUT_WITH_EMISSION_ESTIMATE,
             """{"carbonIntensityNow": {"end": "202403151700", "start": "202403151600", "value": 50}, """
             """"carbonIntensityOptimal": {"end": "202403160300", "start": "202403160200", "value": 20}, """
-            """"countryISO3": "GBR", "emmissionEstimate": [19, 9, 10], "location": "OX1"}""",
+            """"colour": false, "countryISO3": "GBR", "emmissionEstimate": [19, 9, 10], "location": "OX1"}""",
         ),
     ],
 )

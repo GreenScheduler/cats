@@ -1,12 +1,12 @@
 """This module exports a function :py:func:`configure
 <cats.configure.configure>` that processes both command line arguments
 and configuration file. This function returns a runtime configuration
-for cats to make a request to a carcon intensity forecast provider.  A
+for cats to make a request to a carbon intensity forecast provider.  A
 runtime configuration consits of:
 
 - location (postcode)
 - job duration
-- Interface to carbon intensity forecast provider (See TODO)
+- interface to carbon intensity forecast provider (See TODO)
 
 """
 

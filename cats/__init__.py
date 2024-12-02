@@ -14,6 +14,7 @@ from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
 from .forecast import CarbonIntensityAverageEstimate
 from .optimise_starttime import get_avg_estimates  # noqa: F401
+from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 
 __version__ = "1.0.0"
 
@@ -181,6 +182,17 @@ def parse_arguments():
         type=positive_integer,
         help="Amount of memory used by the job, in GB",
     )
+    parser.add_argument(
+        "-n",
+        "--no-colour",
+        action="store_true",
+        help="Disable all terminal output colouring",
+    )
+    parser.add_argument(
+        "--no-color",
+        action="store_true",
+        help="Disable all terminal output colouring (alias to --no-colour)",
+    )
 
     return parser
 
@@ -194,18 +206,40 @@ class CATSOutput:
     location: str
     countryISO3: str
     emmissionEstimate: Optional[Estimates] = None
+    colour: bool = False
 
     def __str__(self) -> str:
-        out = f"""Best job start time {self.carbonIntensityOptimal.start}
-Carbon intensity if job started now       = {self.carbonIntensityNow.value:.2f} gCO2eq/kWh
-Carbon intensity at optimal time          = {self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh"""
+        if self.colour:
+            # Default colour
+            col_normal = "\33[0m"  # reset any colour
+
+            # Colours to indicate optimal/better results
+            col_dt_opt = "\33[32m"  # green i.e. 'good' in traffic light rating
+            col_ci_opt = "\33[32m"  # green
+            col_ee_opt = "\33[32m"  # green
+
+            # Colours to indicate original and non-optimal results
+            col_ci_now = "\33[31m"  # red i.e. 'bad' in traffic light rating
+            col_ee_now = "\33[31m"  # red
+        else:
+            col_normal = ""
+            col_dt_opt = ""
+            col_ci_opt = ""
+            col_ci_now = ""
+            col_ee_now = ""
+            col_ee_opt = ""
+
+        out = f"""
+Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start}{col_normal}
+Carbon intensity if job started now       = {col_ci_now}{self.carbonIntensityNow.value:.2f} gCO2eq/kWh{col_normal}
+Carbon intensity at optimal time          = {col_ci_opt}{self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh{col_normal}"""
 
         if self.emmissionEstimate:
             out += f"""
-Estimated emissions if job started now    = {self.emmissionEstimate.now}
-Estimated emissions at optimal time       = {self.emmissionEstimate.best} (- {self.emmissionEstimate.savings})"""
+Estimated emissions if job started now    = {col_ee_now}{self.emmissionEstimate.now}{col_normal}
+Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.best} (- {self.emmissionEstimate.savings}){col_normal}"""
 
-        out += "\n\nUse --format=json to get this in machine readable format"
+        logging.info("Use '--format=json' to get this in machine readable format")
         return out
 
     def to_json(self, dateformat: str = "", **kwargs) -> str:
@@ -219,6 +253,15 @@ Estimated emissions at optimal time       = {self.emmissionEstimate.best} (- {se
                 data[ci]["end"] = data[ci]["end"].strftime(dateformat)
 
         return json.dumps(data, **kwargs)
+
+
+def print_banner(disable_colour):
+    """Print an ASCII art banner with the CATS title, optionally in colour.
+    """
+    if disable_colour:
+        print(CATS_ASCII_BANNER_NO_COLOUR)
+    else:
+        print(CATS_ASCII_BANNER_COLOUR)
 
 
 def schedule_at(
@@ -250,6 +293,11 @@ def schedule_at(
 def main(arguments=None) -> int:
     parser = parse_arguments()
     args = parser.parse_args(arguments)
+    colour_output = args.no_colour or args.no_color
+
+    # Print CATS ASCII art banner, before any output from printing or logging
+    print_banner(colour_output)
+
     if args.command and not args.scheduler:
         print(
             "cats: To run a command with the -c or --command option, you must\n"
@@ -286,7 +334,8 @@ This is usually due to forecast limitations."""
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
     now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(now_avg, best_avg, location, "GBR")
+    output = CATSOutput(
+        now_avg, best_avg, location, "GBR", colour=not colour_output)
 
     ################################
     ## Calculate carbon footprint ##
