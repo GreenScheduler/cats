@@ -45,7 +45,9 @@ Use the ``--config`` option to specify a path to the configuration
 file, relative to the current directory.
 
 In case of a missing location command line argument, ``cats`` looks
-for a file named ``config.yaml`` or ``config.yml`` in the current directory.
+first in the ``CATS_CONFIG_FILE`` environment variable and if that
+is not set it looks for a file named ``config.yml``
+in the current directory.
 
 .. code-block:: shell
 
@@ -67,7 +69,16 @@ machine IP address:
    Carbon intensity if job started now       = 117.95 gCO2eq/kWh
    Carbon intensity at optimal time          = 60.93 gCO2eq/kWh
 
-   Use --format=json to get this in machine readable format
+Use --format=json to get this in machine readable format
+
+.. code-block::console
+
+   # location information is provided by the file
+   # specified in $CATS_CONFIG_FILE
+   # If not, it looks for ./config.yml
+   # otherwise 'cats' errors out.
+   export CATS_CONFIG_FILE=/path/to/config.yml
+   cats --duration 480
 
 
 Displaying carbon footprint estimates
