@@ -46,7 +46,7 @@ file, relative to the current directory.
 
 In case of a missing location command line argument, ``cats`` looks
 first in the ``CATS_CONFIG_FILE`` environment variable and if that
-is not set it looks for a file named ``config.yaml`` or ``config.yml``
+is not set it looks for a file named ``config.yml``
 in the current directory.
 
 .. code-block:: shell
@@ -75,9 +75,9 @@ Use --format=json to get this in machine readable format
 
    # location information is provided by the file
    # specified in $CATS_CONFIG_FILE
-   # If not, it looks for ./config.yaml
+   # If not, it looks for ./config.yml
    # otherwise 'cats' errors out.
-   export CATS_CONFIG_FILE=/path/to/config.yaml
+   export CATS_CONFIG_FILE=/path/to/config.yml
    cats --duration 480
 
 
