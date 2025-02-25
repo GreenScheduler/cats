@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 def plotplan(CI_forecast, output):
     """
-    Plot the carbon intensity forcast and optimised plan
+    Plot the carbon intensity forecast and optimised plan
     """
     # Just for now pull the CI forecast apart... probably belongs as method...
     values = []
@@ -29,7 +30,15 @@ def plotplan(CI_forecast, output):
     ax.fill_between(times, 0.0, values, alpha=0.2, color='b')
     ax.fill_between(now_times, 0.0, now_values, alpha=0.6,  color='r')
     ax.fill_between(opt_times, 0.0, opt_values, alpha=0.6, color='g')
+
+    ax.text(0.125, 1.075, f"Mean carbon intensity if job started now: {output.carbonIntensityNow.value:.2f} gCO2eq/kWh",
+             transform=ax.transAxes, color='red')
+    ax.text(0.125, 1.025, f"Mean carbon intensity at optimal time: {output.carbonIntensityOptimal.value:.2f} gCO2eq/kWh",
+             transform=ax.transAxes, color='green')
+
     ax.set_xlabel("Time (mm-dd hh)")
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
+    ax.xaxis.set_minor_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
     ax.set_ylabel("Forecast carbon intensity (gCO2eq/kWh)")
     ax.grid(True)
     ax.label_outer()
