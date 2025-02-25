@@ -196,7 +196,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--plot",
-        help="Create a plot of the forcast and optimised plan for the job",
+        help="Create a plot of the forecast and optimised plan for the job",
         action="store_true",
     )
 
@@ -236,7 +236,7 @@ class CATSOutput:
             col_ee_opt = ""
 
         out = f"""
-Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start}{col_normal}
+Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start:%Y-%m-%d %H:%M:%S}{col_normal}
 Carbon intensity if job started now       = {col_ci_now}{self.carbonIntensityNow.value:.2f} gCO2eq/kWh{col_normal}
 Carbon intensity at optimal time          = {col_ci_opt}{self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh{col_normal}"""
 
