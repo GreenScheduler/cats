@@ -33,7 +33,7 @@
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
   ]
-  dependencies = ["requests-cache>=1.0", "PyYAML>=6.0", "matplotlib>=3.0"]
+  dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
 
   [tool.setuptools.dynamic]
     version = {attr = "cats.__version__"}
@@ -42,6 +42,7 @@
     test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov"]
     types = ["mypy", "types-PyYAML", "types-redis", "types-requests", "types-ujson"]
     docs = ["sphinx==6.*", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton"]
+    plots = ["matplotlib>=3.0"]
 
   [project.urls]
     Home = "https://github.com/GreenScheduler/cats"

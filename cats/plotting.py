@@ -1,6 +1,8 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+except ImportError:
+    raise ImportError('To plot graphs you must import matplotlib, e.g. "pip install \'climate-aware-task-scheduler[plots]\'"')
 
 def plotplan(CI_forecast, output):
     """
