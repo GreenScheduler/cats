@@ -39,7 +39,7 @@
     version = {attr = "cats.__version__"}
 
   [project.optional-dependencies]
-    test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov"]
+    test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov", "matplotlib>=3.0"]
     types = ["mypy", "types-PyYAML", "types-redis", "types-requests", "types-ujson"]
     docs = ["sphinx==6.*", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton"]
     plots = ["matplotlib>=3.0"]
