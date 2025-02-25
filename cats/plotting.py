@@ -1,13 +1,20 @@
 try:
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
+    have_matplotlib = True
 except ImportError:
-    raise ImportError('To plot graphs you must import matplotlib, e.g. "pip install \'climate-aware-task-scheduler[plots]\'"')
+    have_matplotlib = False
+    
 
 def plotplan(CI_forecast, output):
     """
     Plot the carbon intensity forecast and optimised plan
     """
+    if not have_matplotlib:
+        print("To plot graphs you must import matplotlib")
+        print("e.g. \"pip install 'climate-aware-task-scheduler[plots]'\"")
+        return None
+    
     # Just for now pull the CI forecast apart... probably belongs as method...
     values = []
     times = []
