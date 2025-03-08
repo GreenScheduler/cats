@@ -3,8 +3,18 @@ import subprocess
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from cats import SCHEDULER_DATE_FORMAT, CATSOutput, main, schedule_at
+import pytest
+
+from cats import (
+    SCHEDULER_DATE_FORMAT,
+    CATSOutput,
+    main,
+    print_banner,
+    schedule_at,
+    schedule_sbatch,
+)
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
+from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.forecast import CarbonIntensityAverageEstimate
 
 API = API_interfaces["carbonintensity.org.uk"]
@@ -19,6 +29,52 @@ OUTPUT = CATSOutput(
     "OX1",
     "GBR",
 )
+
+
+@pytest.mark.parametrize("disable_colour", [False, True])
+def test_print_banner(disable_colour, capsys):
+    print_banner(disable_colour)
+    expected_output = (
+        CATS_ASCII_BANNER_NO_COLOUR if disable_colour else CATS_ASCII_BANNER_COLOUR
+    )
+    assert capsys.readouterr().out.strip() == expected_output.strip()
+
+
+def test_schedule_sbatch_success(fp):
+    fp.register_subprocess(
+        [
+            "sbatch",
+            "--begin",
+            OUTPUT.carbonIntensityOptimal.start.strftime(
+                SCHEDULER_DATE_FORMAT["sbatch"]
+            ),
+            "./script.sh",
+        ],
+        stdout=b"Submitted batch job 123456",
+    )
+    schedule_sbatch(OUTPUT, ["./script.sh"])
+
+
+def test_schedule_sbatch_failure():
+    assert schedule_sbatch(OUTPUT, ["./script.sh"])
+
+
+@pytest.mark.parametrize(
+    "exc,err",
+    [
+        (
+            FileNotFoundError,
+            "No sbatch command found in PATH, ensure slurm is configured correctly",
+        ),
+        (
+            subprocess.CalledProcessError(1, "sbatch"),
+            "Scheduling with sbatch failed with code 1, see output below:\nNone",
+        ),
+    ],
+)
+def test_schedule_sbatch_side_effects(exc, err):
+    with patch("subprocess.check_output", side_effect=exc):
+        assert schedule_sbatch(OUTPUT, ["./script.sh"]) == err
 
 
 def test_schedule_at_success(fp):
@@ -40,17 +96,19 @@ def test_schedule_at_success(fp):
     )
 
 
-def test_schedule_at_missing():
-    assert (
-        schedule_at(OUTPUT, ["ls"], at_command="at_imaginary")
-        == "No at command found in PATH, please install one"
-    )
-
-
-def test_schedule_at_failure():
-    assert schedule_at(OUTPUT, ["ls"], at_command="/usr/bin/false").startswith(
-        "Scheduling with at failed with code 1, see output below:"
-    )
+@pytest.mark.parametrize(
+    "exc,err",
+    [
+        (FileNotFoundError, "No at command found in PATH, please install one"),
+        (
+            subprocess.CalledProcessError(1, "at"),
+            "Scheduling with at failed with code 1, see output below:\nNone",
+        ),
+    ],
+)
+def test_schedule_at_side_effects(exc, err):
+    with patch("subprocess.check_output", side_effect=exc):
+        assert schedule_at(OUTPUT, ["ls"]) == err
 
 
 def raiseLocationError():
