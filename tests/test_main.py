@@ -59,6 +59,24 @@ def test_schedule_sbatch_failure():
     assert schedule_sbatch(OUTPUT, ["./script.sh"])
 
 
+@pytest.mark.parametrize(
+    "exc,err",
+    [
+        (
+            FileNotFoundError,
+            "No sbatch command found in PATH, ensure slurm is configured correctly",
+        ),
+        (
+            subprocess.CalledProcessError(1, "sbatch"),
+            "Scheduling with sbatch failed with code 1, see output below:\nNone",
+        ),
+    ],
+)
+def test_schedule_sbatch_side_effects(exc, err):
+    with patch("subprocess.check_output", side_effect=exc):
+        assert schedule_sbatch(OUTPUT, ["./script.sh"]) == err
+
+
 def test_schedule_at_success(fp):
     fp.register_subprocess(["ls"], stdout=b"foobar.txt")
     fp.register_subprocess(
