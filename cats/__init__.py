@@ -263,9 +263,7 @@ def print_banner(disable_colour):
         print(CATS_ASCII_BANNER_COLOUR)
 
 
-def schedule_at(
-    output: CATSOutput, args: list[str], at_command: str = "at"
-) -> Optional[str]:
+def schedule_at(output: CATSOutput, args: list[str]) -> Optional[str]:
     """Schedule job with optimal start time using at(1)
 
     :return: Error as a string, or None if successful
@@ -274,7 +272,7 @@ def schedule_at(
     try:
         subprocess.check_output(
             (
-                at_command,
+                "at",
                 "-t",
                 output.carbonIntensityOptimal.start.strftime(
                     SCHEDULER_DATE_FORMAT["at"]
