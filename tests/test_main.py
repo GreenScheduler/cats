@@ -78,17 +78,19 @@ def test_schedule_at_success(fp):
     )
 
 
-def test_schedule_at_missing():
-    assert (
-        schedule_at(OUTPUT, ["ls"], at_command="at_imaginary")
-        == "No at command found in PATH, please install one"
-    )
-
-
-def test_schedule_at_failure():
-    assert schedule_at(OUTPUT, ["ls"], at_command="/usr/bin/false").startswith(
-        "Scheduling with at failed with code 1, see output below:"
-    )
+@pytest.mark.parametrize(
+    "exc,err",
+    [
+        (FileNotFoundError, "No at command found in PATH, please install one"),
+        (
+            subprocess.CalledProcessError(1, "at"),
+            "Scheduling with at failed with code 1, see output below:\nNone",
+        ),
+    ],
+)
+def test_schedule_at_side_effects(exc, err):
+    with patch("subprocess.check_output", side_effect=exc):
+        assert schedule_at(OUTPUT, ["ls"]) == err
 
 
 def raiseLocationError():
