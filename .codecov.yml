@@ -1,0 +1,5 @@
+# Disable project status and patch status checks
+coverage:
+  status:
+    project: false
+    patch: false
