@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import json
 import logging
 import subprocess
@@ -12,9 +13,8 @@ from .carbonFootprint import Estimates, get_footprint_reduction_estimate
 from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
-from .forecast import CarbonIntensityAverageEstimate
-from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
+from .forecast import CarbonIntensityAverageEstimate, WindowedForecast
 
 __version__ = "1.0.0"
 
@@ -256,8 +256,7 @@ Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.
 
 
 def print_banner(disable_colour):
-    """Print an ASCII art banner with the CATS title, optionally in colour.
-    """
+    """Print an ASCII art banner with the CATS title, optionally in colour."""
     if disable_colour:
         print(CATS_ASCII_BANNER_NO_COLOUR)
     else:
@@ -333,9 +332,11 @@ This is usually due to forecast limitations."""
 
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
-    now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(
-        now_avg, best_avg, location, "GBR", colour=not colour_output)
+    wf = WindowedForecast(
+        CI_forecast, duration, start=datetime.datetime.now().astimezone()
+    )
+    now_avg, best_avg = wf[0], min(wf)
+    output = CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
 
     ################################
     ## Calculate carbon footprint ##
