@@ -17,13 +17,15 @@ from collections.abc import Mapping
 from typing import Any, Optional
 
 import requests
+import requests_cache
 import yaml
 
 from .CI_api_interface import API_interfaces, APIInterface
 from .constants import MEMORY_POWER_PER_GB
 
 __all__ = ["get_runtime_config"]
-
+# Patch requests to cache location API calls (and allow CI to still work)
+requests_cache.install_cache('cats_cache', use_temp=True)
 
 def get_runtime_config(
     args,
