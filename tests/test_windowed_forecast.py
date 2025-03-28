@@ -248,3 +248,31 @@ def test_average_intensity_with_offset_short_job(sample_data):
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / (len(v) - 1),
     )
     assert result == expected
+
+
+@pytest.mark.parametrize("duration", range(1, 2821))
+def test_across_all_durations_non_half_hour(duration, sample_data):
+    "Test across all supported durations"
+    utc = ZoneInfo("UTC")
+    start = datetime(2023, 5, 4, 12, 50, tzinfo=utc)
+    ws = WindowedForecast(sample_data, duration, start)
+    assert min(ws)
+
+
+@pytest.mark.parametrize("duration", range(2831, 2851))
+def test_across_durations_expect_failure_non_half_hour(duration, sample_data):
+    "Expected failures as we do not find a valid window beyond the last data point"
+    utc = ZoneInfo("UTC")
+    start = datetime(2023, 5, 4, 12, 50, tzinfo=utc)
+    with pytest.raises(ValueError, match=r"min\(\)"):
+        ws = WindowedForecast(sample_data, duration, start)
+        min(ws)
+
+
+@pytest.mark.parametrize("duration", range(1, 2851))
+def test_across_all_durations_at_half_hour(duration, sample_data):
+    "Tests showing optimisation for an extra window as start time is at exactly half hour"
+    utc = ZoneInfo("UTC")
+    start = datetime(2023, 5, 4, 12, 30, tzinfo=utc)
+    ws = WindowedForecast(sample_data, duration, start)
+    assert min(ws)
