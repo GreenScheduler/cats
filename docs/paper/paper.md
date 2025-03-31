@@ -4,6 +4,8 @@ tags:
   - Python
 authors:
   - name: Sadie L. Bartholomew
+    orcid: 0000-0002-6180-3603
+    affiliation: 3, 4
   - name: Lincoln Colling
   - name: Abhishek Dasgupta
   - name: Anthony J. Greenberg
@@ -35,6 +37,10 @@ affiliations:
    index: 1
  - name: CNRM, Université de Toulouse, Météo-France, CNRS, Toulouse, France
    index: 2
+ - name: National Centre for Atmospheric Science, Fairbairn House, 71-75 Clarendon Road, Leeds, LS2 9PH
+   index: 3
+ - name: Department of Meteorology, Brian Hoskins Building, University of Reading, Whiteknights campus, RG6 6ET
+   index: 4
 #- name: Independent Researcher, Country
 #  index: 3
 date: 31 March 2025
@@ -92,7 +98,7 @@ By itself, CATS is unlikely to make a significant difference in the climate cost
 
 # Acknowledgments
 
-SSI (any grant codes we need to include?)
-Anything else? SSI CW23 team? SSI staff?
+We are grateful to the staff of the Software Sustainability Institute (SSI) and the organizers of
+Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of a Hack Day. The SSI provided additional support for the development of CATS after the hack day, and was itself supported by AHRC, BBSRC, EPSRC, ESRC, MRC, NERC and STFC via grant EP/S021779/1.
 
 # References
