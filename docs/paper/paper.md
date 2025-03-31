@@ -9,6 +9,8 @@ authors:
   - name: Anthony J. Greenberg
   - name: Loïc Lannelongue
   - name: Thibault Lestang
+    orcid: 0000-0001-6770-2638
+    affiliation: 2
   - name: Carlos Martinez
   - name: Nicolas Payette
   - name: Colin Sauze
@@ -31,11 +33,11 @@ authors:
 affiliations:
  - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN UK
    index: 1
-#- name: Institution Name, Country
-#  index: 2
+ - name: CNRM, Université de Toulouse, Météo-France, CNRS, Toulouse, France
+   index: 2
 #- name: Independent Researcher, Country
 #  index: 3
-date: 29 November 2024
+date: 31 March 2025
 bibliography: paper.bib
 
 ---
