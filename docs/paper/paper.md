@@ -13,7 +13,9 @@ authors:
   - name: Thibault Lestang
     orcid: 0000-0001-6770-2638
     affiliation: 2
-  - name: Carlos Martinez
+  - name: Carlos Martinez-Ortiz
+    orcid: 0000-0001-5565-7577
+    affiliation: 6
   - name: Nicolas Payette
   - name: Colin Sauzé
     orcid: 0000-0001-5368-9217
@@ -35,18 +37,18 @@ authors:
 #   surname: Beethoven
 #   affiliation: 3
 affiliations:
- - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN UK
+ - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN, United Kingdom
    index: 1
  - name: CNRM, Université de Toulouse, Météo-France, CNRS, Toulouse, France
    index: 2
- - name: National Centre for Atmospheric Science, Fairbairn House, 71-75 Clarendon Road, Leeds, LS2 9PH
+ - name: National Centre for Atmospheric Science, Fairbairn House, 71-75 Clarendon Road, Leeds, LS2 9PH, United Kingdom
    index: 3
- - name: Department of Meteorology, Brian Hoskins Building, University of Reading, Whiteknights campus, RG6 6ET
+ - name: Department of Meteorology, Brian Hoskins Building, University of Reading, Whiteknights campus, RG6 6ET, United Kingdom
    index: 4
  - name: National Oceanography Centre, Joseph Proudman Building, 6 Brownlow Street, Liverpool, L3 5DA, United Kingdom
    index: 5
-#- name: Independent Researcher, Country
-#  index: 3
+ - name: Netherlands eScience Center, Science Park 402 (Matrix THREE), 1098 XH Amsterdam, Netherlands
+   index: 6
 date: 31 March 2025
 bibliography: paper.bib
 
