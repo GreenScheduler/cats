@@ -5,7 +5,7 @@ tags:
 authors:
   - name: Sadie L. Bartholomew
     orcid: 0000-0002-6180-3603
-    affiliation: 3, 4
+    affiliation: "3, 4"
   - name: Lincoln Colling
   - name: Abhishek Dasgupta
   - name: Anthony J. Greenberg
@@ -15,7 +15,9 @@ authors:
     affiliation: 2
   - name: Carlos Martinez
   - name: Nicolas Payette
-  - name: Colin Sauze
+  - name: Colin Sauzé
+    orcid: 0000-0001-5368-9217
+    affiliation: 5
   - name: Andrew M. Walker
     orcid: 0000-0003-3121-3255
     corresponding: true
@@ -41,6 +43,8 @@ affiliations:
    index: 3
  - name: Department of Meteorology, Brian Hoskins Building, University of Reading, Whiteknights campus, RG6 6ET
    index: 4
+ - name: National Oceanography Centre, Joseph Proudman Building, 6 Brownlow Street, Liverpool, L3 5DA, United Kingdom
+   index: 5
 #- name: Independent Researcher, Country
 #  index: 3
 date: 31 March 2025
