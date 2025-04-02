@@ -8,6 +8,8 @@ authors:
     affiliation: "3, 4"
   - name: Lincoln Colling
   - name: Abhishek Dasgupta
+    orcid: 0000-0003-4420-0656
+    affiliation: 7
   - name: Anthony J. Greenberg
   - name: Loïc Lannelongue
   - name: Thibault Lestang
@@ -49,6 +51,8 @@ affiliations:
    index: 5
  - name: Netherlands eScience Center, Science Park 402 (Matrix THREE), 1098 XH Amsterdam, Netherlands
    index: 6
+ - name: Oxford Research Software Engineering Group, Doctoral Training Centre, University of Oxford, 1-4 Keble Road, Oxford OX1 3NP
+   index: 7
 date: 31 March 2025
 bibliography: paper.bib
 
@@ -104,7 +108,7 @@ By itself, CATS is unlikely to make a significant difference in the climate cost
 
 # Acknowledgments
 
-We are grateful to the staff of the Software Sustainability Institute (SSI) and the organizers of
-Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of a Hack Day. The SSI provided additional support for the development of CATS after the hack day, and was itself supported by AHRC, BBSRC, EPSRC, ESRC, MRC, NERC and STFC via grant EP/S021779/1.
+We are grateful to the staff of the Software Sustainability Institute and the organizers of
+Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of the CW23 Hack Day. This work has been supported by the Software Sustainability Institute EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC (EP/S021779/1) and UKRI (AH/Z000114/1) grants.
 
 # References
