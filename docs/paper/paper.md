@@ -4,38 +4,44 @@ tags:
   - Python
 authors:
   - name: Sadie L. Bartholomew
+    orcid: 0000-0002-6180-3603
+    affiliation: "3, 4"
   - name: Lincoln Colling
   - name: Abhishek Dasgupta
+    orcid: 0000-0003-4420-0656
+    affiliation: 7
   - name: Anthony J. Greenberg
   - name: Loïc Lannelongue
   - name: Thibault Lestang
-  - name: Carlos Martinez
-  - name: Nicolas Payette
-  - name: Colin Sauze
+    orcid: 0000-0001-6770-2638
+    affiliation: 2
+  - name: Carlos Martinez-Ortiz
+    orcid: 0000-0001-5565-7577
+    affiliation: 6
+  - name: Colin Sauzé
+    orcid: 0000-0001-5368-9217
+    affiliation: 5
   - name: Andrew M. Walker
     orcid: 0000-0003-3121-3255
     corresponding: true
     affiliation: 1
   - name: Adam Ward
-#  - name: Author Without ORCID
-#    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-#    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-#  - name: Author with no affiliation
-#    corresponding: true # (This is how to denote the corresponding author)
-#    equal-contrib: true
-#   affiliation: 3
-# - given-names: Ludwig
-#   dropping-particle: van
-#   surname: Beethoven
-#   affiliation: 3
 affiliations:
- - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN UK
+ - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN, United Kingdom
    index: 1
-#- name: Institution Name, Country
-#  index: 2
-#- name: Independent Researcher, Country
-#  index: 3
-date: 29 November 2024
+ - name: CNRM, Université de Toulouse, Météo-France, CNRS, Toulouse, France
+   index: 2
+ - name: National Centre for Atmospheric Science, Fairbairn House, 71-75 Clarendon Road, Leeds, LS2 9PH, United Kingdom
+   index: 3
+ - name: Department of Meteorology, Brian Hoskins Building, University of Reading, Whiteknights campus, RG6 6ET, United Kingdom
+   index: 4
+ - name: National Oceanography Centre, Joseph Proudman Building, 6 Brownlow Street, Liverpool, L3 5DA, United Kingdom
+   index: 5
+ - name: Netherlands eScience Center, Science Park 402 (Matrix THREE), 1098 XH Amsterdam, Netherlands
+   index: 6
+ - name: Oxford Research Software Engineering Group, Doctoral Training Centre, University of Oxford, 1-4 Keble Road, Oxford OX1 3NP
+   index: 7
+date: 31 March 2025
 bibliography: paper.bib
 
 ---
@@ -90,7 +96,7 @@ By itself, CATS is unlikely to make a significant difference in the climate cost
 
 # Acknowledgments
 
-SSI (any grant codes we need to include?)
-Anything else? SSI CW23 team? SSI staff?
+We are grateful to the staff of the Software Sustainability Institute and the organizers of
+Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of the CW23 Hack Day, and to others who contributed to the development of CATS via bug reports, questions, and the other contributions that help open source software evolve. This work has been supported by the Software Sustainability Institute EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC (EP/S021779/1) and UKRI (AH/Z000114/1) grants.
 
 # References
