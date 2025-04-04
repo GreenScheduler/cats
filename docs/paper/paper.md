@@ -18,7 +18,6 @@ authors:
   - name: Carlos Martinez-Ortiz
     orcid: 0000-0001-5565-7577
     affiliation: 6
-  - name: Nicolas Payette
   - name: Colin Sauzé
     orcid: 0000-0001-5368-9217
     affiliation: 5
@@ -27,17 +26,6 @@ authors:
     corresponding: true
     affiliation: 1
   - name: Adam Ward
-#  - name: Author Without ORCID
-#    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-#    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-#  - name: Author with no affiliation
-#    corresponding: true # (This is how to denote the corresponding author)
-#    equal-contrib: true
-#   affiliation: 3
-# - given-names: Ludwig
-#   dropping-particle: van
-#   surname: Beethoven
-#   affiliation: 3
 affiliations:
  - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN, United Kingdom
    index: 1
@@ -109,6 +97,6 @@ By itself, CATS is unlikely to make a significant difference in the climate cost
 # Acknowledgments
 
 We are grateful to the staff of the Software Sustainability Institute and the organizers of
-Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of the CW23 Hack Day. This work has been supported by the Software Sustainability Institute EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC (EP/S021779/1) and UKRI (AH/Z000114/1) grants.
+Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of the CW23 Hack Day, and to others who contributed to the development of CATS via bug reports, questions, and the other contributions that help open source software evolve. This work has been supported by the Software Sustainability Institute EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC (EP/S021779/1) and UKRI (AH/Z000114/1) grants.
 
 # References
