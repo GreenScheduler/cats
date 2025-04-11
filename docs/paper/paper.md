@@ -12,6 +12,8 @@ authors:
     affiliation: 7
   - name: Anthony J. Greenberg
   - name: Loïc Lannelongue
+    orcid: 0000-0002-9135-1345
+    affiliation: 8,9,10
   - name: Thibault Lestang
     orcid: 0000-0001-6770-2638
     affiliation: 2
@@ -41,6 +43,12 @@ affiliations:
    index: 6
  - name: Oxford Research Software Engineering Group, Doctoral Training Centre, University of Oxford, 1-4 Keble Road, Oxford OX1 3NP
    index: 7
+ - name: British Heart Foundation Cardiovascular Epidemiology Unit, Department of Public Health and Primary Care, University of Cambridge, Cambridge, United Kingdom
+   index: 8
+ - name: Victor Phillip Dahdaleh Heart and Lung Research Institute, University of Cambridge, Cambridge UK
+   index: 9
+ - name: Health Data Research UK Cambridge, Wellcome Genome Campus and University of Cambridge, Cambridge, United Kingdom
+   index: 10
 date: 31 March 2025
 bibliography: paper.bib
 
