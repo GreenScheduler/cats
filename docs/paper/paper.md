@@ -51,8 +51,8 @@ affiliations:
    index: 9
  - name: Health Data Research UK Cambridge, Wellcome Genome Campus and University of Cambridge, Cambridge, United Kingdom
    index: 10
-- name: School of Psychology, University of Sussex, Brighton, United Kingdom
-  index: 11
+ - name: School of Psychology, University of Sussex, Brighton, United Kingdom
+   index: 11
 date: 31 March 2025
 bibliography: paper.bib
 
