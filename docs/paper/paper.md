@@ -31,6 +31,9 @@ authors:
     orcid: 0000-0003-3121-3255
     corresponding: true
     affiliation: 12
+  - name: Adam Stuart Ward
+    orcid: 0009-0008-3463-2694
+    affiliation: 13
 affiliations:
  - name: National Centre for Atmospheric Science, Fairbairn House, 71-75 Clarendon Road, Leeds, LS2 9PH, United Kingdom
    index: 1
@@ -38,13 +41,13 @@ affiliations:
    index: 2
  - name: School of Psychology, University of Sussex, Brighton, United Kingdom
    index: 3
- - name: Oxford Research Software Engineering Group, Doctoral Training Centre, University of Oxford, 1-4 Keble Road, Oxford OX1 3NP
+ - name: Oxford Research Software Engineering Group, Doctoral Training Centre, University of Oxford, 1-4 Keble Road, Oxford, OX1 3NP, United Kingdom
    index: 4
  - name: Bayesic Research, Ithaca, NY, USA
    index: 5
  - name: British Heart Foundation Cardiovascular Epidemiology Unit, Department of Public Health and Primary Care, University of Cambridge, Cambridge, United Kingdom
    index: 6
- - name: Victor Phillip Dahdaleh Heart and Lung Research Institute, University of Cambridge, Cambridge UK
+ - name: Victor Phillip Dahdaleh Heart and Lung Research Institute, University of Cambridge, Cambridge, United Kingdom
    index: 7
  - name: Health Data Research UK Cambridge, Wellcome Genome Campus and University of Cambridge, Cambridge, United Kingdom
    index: 8
@@ -56,6 +59,8 @@ affiliations:
    index: 11
  - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN, United Kingdom
    index: 12
+ - name: National Oceanography Centre, European Way, Southampton, SO14 3ZH, United Kingdom
+   index: 13
 date: 14 April 2025
 bibliography: paper.bib
 
