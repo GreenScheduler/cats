@@ -7,6 +7,8 @@ authors:
     orcid: 0000-0002-6180-3603
     affiliation: "3, 4"
   - name: Lincoln Colling
+    orcid: 0000-0002-3572-7758
+    affiliation: 11
   - name: Abhishek Dasgupta
     orcid: 0000-0003-4420-0656
     affiliation: 7
@@ -49,6 +51,8 @@ affiliations:
    index: 9
  - name: Health Data Research UK Cambridge, Wellcome Genome Campus and University of Cambridge, Cambridge, United Kingdom
    index: 10
+- name: School of Psychology, University of Sussex, Brighton, United Kingdom
+  index: 11
 date: 31 March 2025
 bibliography: paper.bib
 
