@@ -98,6 +98,6 @@ While by itself, CATS is unlikely to drastically reduce the carbon footprint of 
 # Acknowledgments
 
 We are grateful to the staff of the Software Sustainability Institute and the organizers of
-Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of the CW23 Hack Day, and to others who contributed to the development via bug reports, questions, and the other contributions that help open source software evolve. This work has been supported by the Software Sustainability Institute EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC (EP/S021779/1) and UKRI (AH/Z000114/1) grants.
+Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of the CW23 Hack Day, and to others who contributed to the development via bug reports, questions, and the other contributions that help open source software evolve. The author list is in alphabetical order. This work has been supported by the Software Sustainability Institute EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC (EP/S021779/1) and UKRI (AH/Z000114/1) grants.
 
 # References
