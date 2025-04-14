@@ -4,38 +4,59 @@ tags:
   - Python
 authors:
   - name: Sadie L. Bartholomew
+    orcid: 0000-0002-6180-3603
+    affiliation: "1, 2"
   - name: Lincoln Colling
+    orcid: 0000-0002-3572-7758
+    affiliation: 3
   - name: Abhishek Dasgupta
+    orcid: 0000-0003-4420-0656
+    affiliation: 4
   - name: Anthony J. Greenberg
+    orcid: 0000-0003-3296-5811
+    affiliation: 5
   - name: Loïc Lannelongue
+    orcid: 0000-0002-9135-1345
+    affiliation: "6,7,8"
   - name: Thibault Lestang
-  - name: Carlos Martinez
-  - name: Nicolas Payette
-  - name: Colin Sauze
+    orcid: 0000-0001-6770-2638
+    affiliation: 9
+  - name: Carlos Martinez-Ortiz
+    orcid: 0000-0001-5565-7577
+    affiliation: 10
+  - name: Colin Sauzé
+    orcid: 0000-0001-5368-9217
+    affiliation: 11
   - name: Andrew M. Walker
     orcid: 0000-0003-3121-3255
     corresponding: true
-    affiliation: 1
-  - name: Adam Ward
-#  - name: Author Without ORCID
-#    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-#    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-#  - name: Author with no affiliation
-#    corresponding: true # (This is how to denote the corresponding author)
-#    equal-contrib: true
-#   affiliation: 3
-# - given-names: Ludwig
-#   dropping-particle: van
-#   surname: Beethoven
-#   affiliation: 3
+    affiliation: 12
 affiliations:
- - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN UK
+ - name: National Centre for Atmospheric Science, Fairbairn House, 71-75 Clarendon Road, Leeds, LS2 9PH, United Kingdom
    index: 1
-#- name: Institution Name, Country
-#  index: 2
-#- name: Independent Researcher, Country
-#  index: 3
-date: 29 November 2024
+ - name: Department of Meteorology, Brian Hoskins Building, University of Reading, Whiteknights campus, RG6 6ET, United Kingdom
+   index: 2
+ - name: School of Psychology, University of Sussex, Brighton, United Kingdom
+   index: 3
+ - name: Oxford Research Software Engineering Group, Doctoral Training Centre, University of Oxford, 1-4 Keble Road, Oxford OX1 3NP
+   index: 4
+ - name: Bayesic Research, Ithaca, NY, USA
+   index: 5
+ - name: British Heart Foundation Cardiovascular Epidemiology Unit, Department of Public Health and Primary Care, University of Cambridge, Cambridge, United Kingdom
+   index: 6
+ - name: Victor Phillip Dahdaleh Heart and Lung Research Institute, University of Cambridge, Cambridge UK
+   index: 7
+ - name: Health Data Research UK Cambridge, Wellcome Genome Campus and University of Cambridge, Cambridge, United Kingdom
+   index: 8
+ - name: CNRM, Université de Toulouse, Météo-France, CNRS, Toulouse, France
+   index: 9
+ - name: Netherlands eScience Center, Science Park 402 (Matrix THREE), 1098 XH Amsterdam, Netherlands
+   index: 10
+ - name: National Oceanography Centre, Joseph Proudman Building, 6 Brownlow Street, Liverpool, L3 5DA, United Kingdom
+   index: 11
+ - name: Department of Earth Sciences, University of Oxford, South Parks Road, Oxford, OX1 3AN, United Kingdom
+   index: 12
+date: 14 April 2025
 bibliography: paper.bib
 
 ---
@@ -90,7 +111,7 @@ By itself, CATS is unlikely to make a significant difference in the climate cost
 
 # Acknowledgments
 
-SSI (any grant codes we need to include?)
-Anything else? SSI CW23 team? SSI staff?
+We are grateful to the staff of the Software Sustainability Institute and the organizers of
+Collaborations Workshop 2023 (CW23), who's efforts allowed us to enjoy the process of beginning the development of CATS as part of the CW23 Hack Day, and to others who contributed to the development of CATS via bug reports, questions, and the other contributions that help open source software evolve. This work has been supported by the Software Sustainability Institute EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC (EP/S021779/1) and UKRI (AH/Z000114/1) grants.
 
 # References
