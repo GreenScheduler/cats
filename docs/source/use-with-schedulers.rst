@@ -19,6 +19,16 @@ duration, in the 'OX1' postcode that would look like:
 
    $ cats -d 5 --loc OX1 --scheduler at --command 'ls'
 
+Using CATS with the ``sbatch`` scheduler
+----------------------------------------
+
+CATS provides a wrapper around ``sbatch`` to enable deferring job execution
+till the optimal start time:
+
+.. code-block:: console
+
+   $ cats -d <job_duration> --loc <postcode> --scheduler sbatch --command ./script.sh
+
 
 Demonstration
 ^^^^^^^^^^^^^

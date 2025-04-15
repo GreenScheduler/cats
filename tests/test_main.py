@@ -3,8 +3,18 @@ import subprocess
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
-from cats import SCHEDULER_DATE_FORMAT, CATSOutput, main, schedule_at
+import pytest
+
+from cats import (
+    SCHEDULER_DATE_FORMAT,
+    CATSOutput,
+    main,
+    print_banner,
+    schedule_at,
+    schedule_sbatch,
+)
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
+from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.forecast import CarbonIntensityAverageEstimate
 
 API = API_interfaces["carbonintensity.org.uk"]
@@ -19,6 +29,34 @@ OUTPUT = CATSOutput(
     "OX1",
     "GBR",
 )
+
+
+@pytest.mark.parametrize("disable_colour", [False, True])
+def test_print_banner(disable_colour, capsys):
+    print_banner(disable_colour)
+    expected_output = (
+        CATS_ASCII_BANNER_NO_COLOUR if disable_colour else CATS_ASCII_BANNER_COLOUR
+    )
+    assert capsys.readouterr().out.strip() == expected_output.strip()
+
+
+def test_schedule_sbatch_success(fp):
+    fp.register_subprocess(
+        [
+            "sbatch",
+            "--begin",
+            OUTPUT.carbonIntensityOptimal.start.strftime(
+                SCHEDULER_DATE_FORMAT["sbatch"]
+            ),
+            "./script.sh",
+        ],
+        stdout=b"Submitted batch job 123456",
+    )
+    schedule_sbatch(OUTPUT, ["./script.sh"])
+
+
+def test_schedule_sbatch_failure():
+    assert schedule_sbatch(OUTPUT, ["./script.sh"])
 
 
 def test_schedule_at_success(fp):
