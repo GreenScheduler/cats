@@ -293,7 +293,7 @@ def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
     :return: Error as a string, or None if successful
     """
     try:
-        subprocess.check_output(
+        sbatch_output = subprocess.check_output(
             [
                 "sbatch",
                 "--begin",
@@ -303,6 +303,7 @@ def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
                 *args,
             ]
         )
+        print(sbatch_output)
         return None
     except FileNotFoundError:
         return "No sbatch command found in PATH, ensure slurm is configured correctly"
