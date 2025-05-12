@@ -303,7 +303,7 @@ def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
                 *args,
             ]
         )
-        print(sbatch_output)
+        print(sbatch_output.decode("utf-8"))
         return None
     except FileNotFoundError:
         return "No sbatch command found in PATH, ensure slurm is configured correctly"
