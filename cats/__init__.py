@@ -1,4 +1,5 @@
 import dataclasses
+import datetime
 import json
 import logging
 import subprocess
@@ -12,16 +13,15 @@ from .carbonFootprint import Estimates, get_footprint_reduction_estimate
 from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
-from .forecast import CarbonIntensityAverageEstimate
-from .optimise_starttime import get_avg_estimates  # noqa: F401
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .plotting import plotplan
+from .forecast import CarbonIntensityAverageEstimate, WindowedForecast
 
 __version__ = "1.0.0"
 
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
-SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M"}
+SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M", "sbatch": "%Y-%m-%dT%H:%M"}
 
 
 def indent_lines(lines, spaces):
@@ -118,8 +118,8 @@ def parse_arguments():
         "-s",
         "--scheduler",
         type=str,
-        help="Pass command using `-c` to scheduler. Currently, the only supported scheduler is at",
-        choices=["at"],
+        help="Pass command using `-c` to scheduler.",
+        choices=["at", "sbatch"],
     )
     parser.add_argument(
         "-a",
@@ -264,17 +264,14 @@ Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.
 
 
 def print_banner(disable_colour):
-    """Print an ASCII art banner with the CATS title, optionally in colour.
-    """
+    """Print an ASCII art banner with the CATS title, optionally in colour."""
     if disable_colour:
         print(CATS_ASCII_BANNER_NO_COLOUR)
     else:
         print(CATS_ASCII_BANNER_COLOUR)
 
 
-def schedule_at(
-    output: CATSOutput, args: list[str], at_command: str = "at"
-) -> Optional[str]:
+def schedule_at(output: CATSOutput, args: list[str]) -> Optional[str]:
     """Schedule job with optimal start time using at(1)
 
     :return: Error as a string, or None if successful
@@ -283,7 +280,7 @@ def schedule_at(
     try:
         subprocess.check_output(
             (
-                at_command,
+                "at",
                 "-t",
                 output.carbonIntensityOptimal.start.strftime(
                     SCHEDULER_DATE_FORMAT["at"]
@@ -298,6 +295,30 @@ def schedule_at(
         return f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}"
 
 
+def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
+    """Schedule job with optimal start time using sbatch(1)
+
+    :return: Error as a string, or None if successful
+    """
+    try:
+        sbatch_output = subprocess.check_output(
+            [
+                "sbatch",
+                "--begin",
+                output.carbonIntensityOptimal.start.strftime(
+                    SCHEDULER_DATE_FORMAT["sbatch"]
+                ),
+                *args,
+            ]
+        )
+        print(sbatch_output.decode("utf-8"))
+        return None
+    except FileNotFoundError:
+        return "No sbatch command found in PATH, ensure slurm is configured correctly"
+    except subprocess.CalledProcessError as e:  # pragma: no cover
+        return f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}"
+
+
 def main(arguments=None) -> int:
     parser = parse_arguments()
     args = parser.parse_args(arguments)
@@ -308,7 +329,7 @@ def main(arguments=None) -> int:
 
     if args.command and not args.scheduler:
         print(
-            "cats: To run a command with the -c or --command option, you must\n"
+            "cats: To run a command or sbatch script with the -c or --command option, you must\n"
             "      specify the scheduler with the -s or --scheduler option"
         )
         return 1
@@ -341,9 +362,11 @@ This is usually due to forecast limitations."""
 
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
-    now_avg, best_avg = get_avg_estimates(CI_forecast, duration=duration)
-    output = CATSOutput(
-        now_avg, best_avg, location, "GBR", colour=not colour_output)
+    wf = WindowedForecast(
+        CI_forecast, duration, start=datetime.datetime.now().astimezone()
+    )
+    now_avg, best_avg = wf[0], min(wf)
+    output = CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
 
     ################################
     ## Calculate carbon footprint ##
@@ -370,8 +393,14 @@ This is usually due to forecast limitations."""
         print(output)
     if args.plot:
         plotplan(CI_forecast, output)
-    if args.command and args.scheduler == "at":
-        if err := schedule_at(output, args.command.split()):
+    if args.command:
+        if args.scheduler == "at":
+            err = schedule_at(output, args.command.split())
+        elif args.scheduler == "sbatch":
+            err = schedule_sbatch(output, args.command.split())
+        else:  # pragma: no cover - we already check for valid scheduler in parse_arguments
+            err = f"Scheduler {args.scheduler} not in supported schedulers: {SCHEDULER_DATE_FORMAT.keys()}"
+        if err:
             print(err)
             return 1
     return 0

@@ -46,10 +46,3 @@ Modules
 
 .. automodule:: cats.forecast
     :members:
-
-
-``cats.optimise_starttime``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: cats.optimise_starttime
-    :members:

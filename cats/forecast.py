@@ -67,6 +67,7 @@ class WindowedForecast:
             for i, d in enumerate(data):
                 if d.datetime + self.data_stepsize >= t:
                     return i + 1
+            raise ValueError("No index found for closest data point past job end time")
 
         self.ndata = bisect_left(self.data, self.end)  # window size
 
@@ -147,4 +148,4 @@ class WindowedForecast:
             yield self.__getitem__(index)
 
     def __len__(self):
-        return len(self.data) - self.ndata + 1
+        return len(self.data) - self.ndata

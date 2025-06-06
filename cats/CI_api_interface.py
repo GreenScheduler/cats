@@ -85,6 +85,11 @@ API_interfaces = {
     "carbonintensity.org.uk": APIInterface(
         get_request_url=ciuk_request_url,
         parse_response_data=ciuk_parse_response_data,
-        max_duration=2850,  # 48h - 30min so that carbon intensity is defined over the last interval
+        # Set max duration to 47h as API start time is the nearest half hour
+        # before the start time. For a start time of 14:29, the API will
+        # return data starting at 14:00 and ending at 13:30 two days from now
+        # (47.5h). Keeping max duration to 47.5 hours is not suitable, as the
+        # code will try to interpolate past the last time frame available.
+        max_duration=2820,
     ),
 }
