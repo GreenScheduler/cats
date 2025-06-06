@@ -85,14 +85,16 @@ def config_from_file(configpath="") -> Mapping[str, Any]:
             try:
                 with open(cfile, "r") as f:
                     return yaml.safe_load(f)
-                logging.info("Using config.yml found in CATS_CONFIG_FILE\n")
+                logging.info(f"Using {cfile} found in CATS_CONFIG_FILE\n")
             except FileNotFoundError:
                 logging.warning("CATS_CONFIG_FILE config file not found")
         # if no path provided and no env variable, look for `config.yml` in current directory
+        config_file_names = ["cats_config.yml", "cats_config.yaml", "config.yml"]
+        cfile = next((x for x in config_file_names if os.path.isfile(x)), "config.yml")
         try:
-            with open("config.yml", "r") as f:
+            with open(cfile, "r") as f:
                 return yaml.safe_load(f)
-            logging.info("Using config.yml found in current directory\n")
+            logging.info(f"Using {cfile} found in current directory\n")
         except FileNotFoundError:
             logging.warning("config file not found")
             return {}

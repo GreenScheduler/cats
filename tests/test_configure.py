@@ -30,8 +30,15 @@ def change_dir(p):
 
 
 @pytest.fixture
-def local_config_file(tmp_path_factory):
-    p = tmp_path_factory.mktemp("temp") / "config.yml"
+def local_config_file(request, tmp_path_factory):
+    # This fixture allows tests that use it to pass in 
+    # a file name as a fixt_data mark. Default to config.yml
+    marker = request.node.get_closest_marker("fixt_data")
+    if marker is None:
+        filename = "config.yml"
+    else:
+        filename = marker.args[0]
+    p = tmp_path_factory.mktemp("temp") / filename
     with open(p, "w") as stream:
         yaml.dump(CATS_CONFIG, stream)
     return p.parent
@@ -44,7 +51,22 @@ def test_config_from_file():
         config_from_file()
 
 
-def test_config_from_file_default(local_config_file):
+@pytest.mark.fixt_data("cats_config.yml")
+def test_config_from_file_default_cats(local_config_file):
+    with change_dir(local_config_file):
+        configmapping = config_from_file()
+    assert configmapping == CATS_CONFIG
+
+
+@pytest.mark.fixt_data("cats_config.yaml")
+def test_config_from_file_default_catsyaml(local_config_file):
+    with change_dir(local_config_file):
+        configmapping = config_from_file()
+    assert configmapping == CATS_CONFIG
+
+
+@pytest.mark.fixt_data("config.yml")
+def test_config_from_file_default_old(local_config_file):
     with change_dir(local_config_file):
         configmapping = config_from_file()
     assert configmapping == CATS_CONFIG
