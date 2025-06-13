@@ -24,8 +24,8 @@ now_start = (datetime.now() + timedelta(minutes=1)).replace(second=0)
 now_end = now_start + timedelta(minutes=5)
 
 OUTPUT = CATSOutput(
-    CarbonIntensityAverageEstimate(20, now_start, now_end),
-    CarbonIntensityAverageEstimate(20, now_start, now_end),
+    CarbonIntensityAverageEstimate(20, now_start, now_end, 0.0, 0.0),
+    CarbonIntensityAverageEstimate(20, now_start, now_end, 0.0, 0.0),
     "OX1",
     "GBR",
 )

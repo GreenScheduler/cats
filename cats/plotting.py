@@ -22,6 +22,12 @@ def plotplan(CI_forecast, output):
     now_times = []
     opt_values = []
     opt_times = []
+    # For our now and optimal series, start with the starting data (interpolated)
+    opt_times.append(output.carbonIntensityOptimal.start)
+    opt_values.append(output.carbonIntensityOptimal.start_value)
+    now_times.append(output.carbonIntensityNow.start)
+    now_values.append(output.carbonIntensityNow.start_value)
+    # Build the three time series of point from the API
     for point in CI_forecast:
         values.append(point.value)
         times.append(point.datetime)
@@ -33,6 +39,11 @@ def plotplan(CI_forecast, output):
             point.datetime <= output.carbonIntensityNow.end):
             now_values.append(point.value)
             now_times.append(point.datetime)
+    # For our now and optimal series, end with the end data (interpolated)
+    opt_times.append(output.carbonIntensityOptimal.end)
+    opt_values.append(output.carbonIntensityOptimal.end_value)
+    now_times.append(output.carbonIntensityNow.end)
+    now_values.append(output.carbonIntensityNow.end_value)
 
     # Make the plot (should probably take fig and ax as opt args...)
     fig, ax = plt.subplots()
