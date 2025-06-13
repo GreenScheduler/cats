@@ -87,6 +87,8 @@ def test_minimise_average(sample_data):
         start=datetime.fromisoformat("2023-05-05T12:00+00:00"),
         end=datetime.fromisoformat("2023-05-05T15:00+00:00"),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
+        start_value=v[0],
+        end_value=v[-1]
     )
     assert result == expected
 
@@ -104,6 +106,8 @@ def test_maximum_duration(sample_data):
         start=datetime.fromisoformat("2023-05-04T12:30+00:00"),
         end=datetime.fromisoformat("2023-05-06T12:00+00:00"),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
+        start_value=v[0],
+        end_value=v[-1]
     )
     assert result == expected
 
@@ -127,6 +131,8 @@ def test_minimise_average_bst(sample_data):
         start=datetime.fromisoformat("2023-05-05T11:00-01:00"),
         end=datetime.fromisoformat("2023-05-05T14:00-01:00"),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
+        start_value=v[0],
+        end_value=v[-1]
     )
     assert result == expected
     assert result.start.tzinfo == expected.start.tzinfo
@@ -145,6 +151,8 @@ def test_average_intensity_now(sample_data):
         start=sample_data[0].datetime,
         end=sample_data[window_size].datetime,
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
+        start_value=v[0],
+        end_value=v[-1]
     )
     assert result == expected
 
@@ -177,6 +185,8 @@ def test_average_intensity_with_offset():
             0.5 * (interp1 + 50) * 15 + 0.5 * (50 + 60) * 30 + 0.5 * (60 + interp2) * 25
         )
         / duration,
+        start_value=45,
+        end_value=30.833333333333332
     )
     assert result == expected
 
@@ -217,6 +227,8 @@ def test_average_intensity_with_offset_long_job(sample_data):
             + 0.5 * (v[7] + v[8]) * 2
         )
         / duration,
+        start_value=v[0],
+        end_value=v[-1]
     )
     assert result == expected
     assert result.start.tzinfo == expected.start.tzinfo
@@ -246,6 +258,8 @@ def test_average_intensity_with_offset_short_job(sample_data):
         start=job_start + 2 * data_timestep,
         end=job_start + 2 * data_timestep + timedelta(minutes=duration),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / (len(v) - 1),
+        start_value=v[0],
+        end_value=v[-1]
     )
     assert result == expected
 
