@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar
+from typing import Optional
 from datetime import datetime, timedelta
 
 
@@ -28,6 +29,8 @@ class CarbonIntensityAverageEstimate:
     value: float
     start: datetime  # Start of the time-integration window
     end: datetime  # End of the time-integration window
+    start_value: float # CI point estimate at start time
+    end_value: float # CI point estimate at end time
 
 
 class WindowedForecast:
@@ -121,6 +124,8 @@ class WindowedForecast:
             start=window_start,
             end=window_end,
             value=sum(acc) / duration.total_seconds(),
+            start_value=lbound.value,
+            end_value=rbound.value,
         )
 
     @staticmethod
