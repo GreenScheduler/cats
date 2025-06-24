@@ -81,7 +81,7 @@ At its core CATS is an open-source (MIT licence) Python package (tested with Pyt
 
 The user provides CATS with the duration of the proposed computation on the command line. They may also provide the location, the command to run and information about the scheduler. CATS then accesses a prediction of the carbon intensity of the relevant power distribution network and computes the start time that minimises the carbon intensity over the duration of the computation. An illustration of this calculation is provided in Figure 1. Once the carbon intensity minimisation has been completed, CATS can optionally submit the computation to a queueing system or make a more detailed report on the climate impact of the proposed computation.
 
-![illustration of the carbon intensity time series for (blue) with the predicted energy use for running a twelve hour calculation now (red) or at a time that minimises the integrated carbon intensity (green).\label{fig:schedule}](fig1.png)
+![illustration of the carbon intensity time series for (blue) with the predicted energy use for running a 8.3 hour calculation in Glasgow now (red) or at a time that minimises the integrated carbon intensity (green).\label{fig:schedule}](fig1.png)
 
 Providing further information about the carbon cost of the proposed computation improves the educational impact of CATS. This can be optionally enabled if information about the compute hardware is available. This calculation follows that used by the Green Algorithms project [@Lannelongue21], which also provides some easy to understand “equivalent” statements to put these numbers in context. 
 
