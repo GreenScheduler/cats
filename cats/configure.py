@@ -76,7 +76,7 @@ def config_from_file(configpath="") -> Mapping[str, Any]:
     if configpath:
         # if path to config file provided, it is used
         with open(configpath, "r") as f:
-            return yaml.safe_load(f)
+            conf_dict = yaml.safe_load(f)
         logging.info(f"Using provided config file: {configpath}\n")
     else:
         # if no path provided, try to use config environment variable
@@ -84,18 +84,26 @@ def config_from_file(configpath="") -> Mapping[str, Any]:
         if cfile is not None:
             try:
                 with open(cfile, "r") as f:
-                    return yaml.safe_load(f)
-                logging.info("Using config.yml found in CATS_CONFIG_FILE\n")
+                    conf_dict = yaml.safe_load(f)
+                logging.info(f"Using {cfile} found in CATS_CONFIG_FILE\n")
             except FileNotFoundError:
                 logging.warning("CATS_CONFIG_FILE config file not found")
-        # if no path provided and no env variable, look for `config.yml` in current directory
-        try:
-            with open("config.yml", "r") as f:
-                return yaml.safe_load(f)
-            logging.info("Using config.yml found in current directory\n")
-        except FileNotFoundError:
-            logging.warning("config file not found")
-            return {}
+        else:
+            # if no path provided and no env variable, look for a file in current directory
+            # we support several file names but warn for deprecated names
+            config_file_names = ["cats_config.yml", "cats_config.yaml", "config.yaml"]
+            cfile = next((x for x in config_file_names if os.path.isfile(x)), "config.yml")
+            try:
+                with open(cfile, "r") as f:
+                    conf_dict = yaml.safe_load(f)
+                logging.info(f"Using {cfile} found in current directory\n")
+                if cfile in ["config.yaml", "config.yml"]:
+                    logging.warning(f"Use of {cfile} is deprecated. We suggest renaming to 'cats_config.yml'\n")
+            except FileNotFoundError:
+                logging.warning("config file not found")
+                conf_dict = {}
+
+    return conf_dict
 
 
 def CI_API_from_config_or_args(args, config) -> APIInterface:
