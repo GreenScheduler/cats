@@ -14,6 +14,7 @@ from .CI_api_interface import InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
+from .plotting import plotplan
 from .forecast import CarbonIntensityAverageEstimate, WindowedForecast
 
 __version__ = "1.0.2"
@@ -193,6 +194,13 @@ def parse_arguments():
         action="store_true",
         help="Disable all terminal output colouring (alias to --no-colour)",
     )
+    parser.add_argument(
+        "--plot",
+        help="Create a plot of the forecast and optimised plan for the job. "
+        "This needs matplotlib to be installed, e.g. install with "
+        "\"pip install 'climate-aware-task-scheduler[plots]'\"",
+        action="store_true",
+    )
 
     return parser
 
@@ -230,7 +238,7 @@ class CATSOutput:
             col_ee_opt = ""
 
         out = f"""
-Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start}{col_normal}
+Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start:%Y-%m-%d %H:%M:%S}{col_normal}
 Carbon intensity if job started now       = {col_ci_now}{self.carbonIntensityNow.value:.2f} gCO2eq/kWh{col_normal}
 Carbon intensity at optimal time          = {col_ci_opt}{self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh{col_normal}"""
 
@@ -383,6 +391,8 @@ This is usually due to forecast limitations."""
         print(output.to_json(dateformat, sort_keys=True, indent=2))
     else:
         print(output)
+    if args.plot:
+        plotplan(CI_forecast, output)
     if args.command:
         if args.scheduler == "at":
             err = schedule_at(output, args.command.split())
