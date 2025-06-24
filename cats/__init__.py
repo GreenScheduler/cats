@@ -196,8 +196,8 @@ def parse_arguments():
     )
     parser.add_argument(
         "--plot",
-        help="Create a plot of the forecast and optimised plan for the job."
-        "This needs matplotlib to be installed, e.g. install with"
+        help="Create a plot of the forecast and optimised plan for the job. "
+        "This needs matplotlib to be installed, e.g. install with "
         "\"pip install 'climate-aware-task-scheduler[plots]'\"",
         action="store_true",
     )
