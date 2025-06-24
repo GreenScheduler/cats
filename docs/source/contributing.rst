@@ -10,11 +10,9 @@ First off, thanks for taking the time to contribute!
 All types of contributions are encouraged and valued. See the below for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. All contributors are expected to abide by our code of conduct (see CODE_OF_CONDUCT.md in the repository). 
 
 .. NOTE::
-  And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
-  * Star the project
-  * Write about it
-  * Refer this project in your project's readme
-  * Mention the project at local meetups and tell your friends/colleagues
+  And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about.
+  These include staring the project, writing about the project, referring to this project in your project's readme,
+  mentioning the project at local meetups, and telling your friends/colleagues.
 
 
 I Have a Question
@@ -98,7 +96,7 @@ Before Submitting an Enhancement
 How Do I Submit a Good Enhancement Suggestion?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Enhancement suggestions are tracked as [GitHub issues](https://github.com/GreenScheduler/cats/issues).
+Enhancement suggestions are tracked as GitHub issues (https://github.com/GreenScheduler/cats/issues).
 
 * Use a **clear and descriptive title** for the issue to identify the suggestion.
 * Provide a **step-by-step description of the suggested enhancement** in as many details as possible.
