@@ -1,13 +1,13 @@
 <!-- omit in toc -->
 # Contributing to cats
 
-First off, thanks for taking the time to contribute! ❤️
+First off, thanks for taking the time to contribute!
 
-All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. 🎉
+All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. All contributors are expected to abide by our [code of conduct](./CODE_OF_CONDUCT.md). 
 
 > And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
 > - Star the project
-> - Tweet about it
+> - Write about it
 > - Refer this project in your project's readme
 > - Mention the project at local meetups and tell your friends/colleagues
 
@@ -37,8 +37,9 @@ If you then still feel the need to ask a question and need clarification, we rec
 - Open an [Issue](https://github.com/GreenScheduler/cats/issues/new).
 - Provide as much context as you can about what you're running into.
 - Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
+- We use labels on GitHub to manage issues. Please add the "question" label to your issue.
 
-We will then take care of the issue as soon as possible.
+We will then take care of the issue as soon as possible. 
 
 <!--
 You might want to create a separate issue tag for questions and include it in this description. People should then tag their issues accordingly.
@@ -65,24 +66,23 @@ Depending on how large the project is, you may want to outsource the questioning
 <!-- omit in toc -->
 #### Before Submitting a Bug Report
 
-A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as fast as possible.
+A good bug report shouldn't leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as easily as possible.
 
 - Make sure that you are using the latest version.
 - Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions (Make sure that you have read the [documentation](https://cats.readthedocs.io/). If you are looking for support, you might want to check [this section](#i-have-a-question)).
 - To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the [bug tracker](https://github.com/GreenScheduler/cats/issues?q=label%3Abug).
 - Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.
 - Collect information about the bug:
-  - Stack trace (Traceback)
   - OS, Platform and Version (Windows, Linux, macOS, x86, ARM)
-  - Version of the interpreter, compiler, SDK, runtime environment, package manager, depending on what seems relevant.
+  - Version of python and your python environment, package manager, and how you installed CATS.
   - Possibly your input and the output
   - Can you reliably reproduce the issue? And can you also reproduce it with older versions?
 
 <!-- omit in toc -->
 #### How Do I Submit a Good Bug Report?
 
-> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to <>.
-<!-- You may add a PGP key to allow the messages to be sent encrypted as well. -->
+> You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to Andrew Walker (andrew.walker@earth.ox.ac.uk) and/or
+Loïc Lannelongue (ll582@medschl.cam.ac.uk) .
 
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
 
@@ -96,8 +96,6 @@ Once it's filed:
 - The project team will label the issue accordingly.
 - A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
 - If the team is able to reproduce the issue, it will be marked `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will be left to be [implemented by someone](#your-first-code-contribution).
-
-<!-- You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
 
 ### Suggesting Enhancements
