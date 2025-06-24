@@ -103,7 +103,7 @@ def config_from_file(configpath="") -> Mapping[str, Any]:
                 logging.warning("config file not found")
                 conf_dict = {}
 
-        return conf_dict
+    return conf_dict
 
 
 def CI_API_from_config_or_args(args, config) -> APIInterface:
