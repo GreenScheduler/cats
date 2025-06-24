@@ -72,6 +72,13 @@ def test_config_from_file_default_old(local_config_file):
     assert configmapping == CATS_CONFIG
 
 
+@pytest.mark.fixt_data("config.yaml")
+def test_config_from_file_default_configyaml(local_config_file):
+    with change_dir(local_config_file):
+        configmapping = config_from_file()
+    assert configmapping == CATS_CONFIG
+
+
 def test_config_from_env(local_config_file):
     os.environ["CATS_CONFIG_FILE"] = str(local_config_file / "config.yml")
     configmapping = config_from_file()
