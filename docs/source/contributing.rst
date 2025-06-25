@@ -150,7 +150,7 @@ the pull request.
 Making a new release
 ^^^^^^^^^^^^^^^^^^^^
 
-Those of us with commit access to the main CATS repository on GitHub are able to generate a new release and publish this to PyPi. This
+Those of us with commit access to the main CATS repository on GitHub are able to generate a new release and publish this to PyPI. This
 should be discussed ahead of time (via a PR changing the version string, see 1 below) and once broad agreement is in place a release can be created as follows:
 
  1. Merge a pull request onto main that updates the CATS version number ``__version__`` in ``__init__.py`` and adds any release notes / key changes to the documentation. We use a "major.minor.patch" semantic versioning scheme; for bug fixes etc. bump the patch number, for significant new features bump the minor version number, for changes that break previous behavior update the major version number.
