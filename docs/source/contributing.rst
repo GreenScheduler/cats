@@ -144,8 +144,8 @@ the prerequisites and runs all tests::
   python3 -m mypy cats
   python3 -m pytest
 
-Updated documentation is automatically generated for PRs and will be available from a link within
-the pull request. 
+A new build incorporating any updates to the documentation is automatically generated for each PR
+and will become available from a link within the pull request. 
 
 Making a new release
 ^^^^^^^^^^^^^^^^^^^^
