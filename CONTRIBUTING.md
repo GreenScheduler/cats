@@ -123,6 +123,9 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/GreenS
 
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
+## Contributing code or documentation
+Information on how to contribute code or documentation to CATS can be found in the [main documentation](https://cats.readthedocs.io/) 
+
 <!-- omit in toc -->
 ## Attribution
 This guide is based on the [contributing.md](https://contributing.md/generator)!
