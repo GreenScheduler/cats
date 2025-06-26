@@ -17,7 +17,7 @@ from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .plotting import plotplan
 from .forecast import CarbonIntensityAverageEstimate, WindowedForecast
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
