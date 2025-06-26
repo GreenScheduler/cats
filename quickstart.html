@@ -1,0 +1,240 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickstart &mdash; CATS 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+      <link rel="stylesheet" type="text/css" href="_static/fonts.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon-32x32.png"/>
+      <script src="_static/jquery.js"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script src="_static/doctools.js"></script>
+      <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/clipboard.min.js"></script>
+      <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Use with Schedulers" href="use-with-schedulers.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CATS
+              <img src="_static/cats_dalle_img_200x200px_for_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-a-configuration-file">Using a configuration file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#displaying-carbon-footprint-estimates">Displaying carbon footprint estimates</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use-with-schedulers.html">Use with Schedulers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">Command-line (CLI) reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CATS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quickstart</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quickstart">
+<span id="id1"></span><h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading"></a></h1>
+<section id="basic-usage">
+<h2>Basic usage<a class="headerlink" href="#basic-usage" title="Permalink to this heading"></a></h2>
+<p>You can run CATS with:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text"><em>A basic command to run CATS when a job duration and postcode
+are provided.</em></span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cats<span class="w"> </span>--duration<span class="w"> </span><span class="m">480</span><span class="w"> </span>--location<span class="w"> </span><span class="s2">&quot;EH8&quot;</span>
+</pre></div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--location</span></code> option is optional, and can be pulled from a
+configuration file (see <a class="reference internal" href="#configuration-file"><span class="std std-ref">Using a configuration file</span></a>), or inferred using
+the server’s IP address.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--duration</span></code> option indicates the expected job duration in
+minutes.</p>
+<p>The scheduler then calls a function that estimates the best time to start
+the job given predicted carbon intensity over the next 48 hours. The
+workflow is the same as for other popular schedulers. Switching to CATS
+should be transparent to cluster users.</p>
+<p>It will display the time to start the job on standard out and optionally
+some information about the carbon intensity on standard error.</p>
+</section>
+<section id="using-a-configuration-file">
+<span id="configuration-file"></span><h2>Using a configuration file<a class="headerlink" href="#using-a-configuration-file" title="Permalink to this heading"></a></h2>
+<p>Information about location can be provided by a configuration file
+instead of a command line arguments to the <code class="docutils literal notranslate"><span class="pre">cats</span></code> command.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">location</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;EH8&quot;</span>
+</pre></div>
+</div>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">--config</span></code> option to specify a path to the configuration
+file, relative to the current directory.</p>
+<p>In case of a missing location command line argument, <code class="docutils literal notranslate"><span class="pre">cats</span></code> looks
+first in the <code class="docutils literal notranslate"><span class="pre">CATS_CONFIG_FILE</span></code> environment variable and if that
+is not set it looks for a file named <code class="docutils literal notranslate"><span class="pre">config.yml</span></code>
+in the current directory.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1">#  Override duration value at the command line</span>
+cats<span class="w"> </span>--config<span class="w"> </span>/path/to/config.y<span class="o">(</span>a<span class="o">)</span>ml<span class="w"> </span>--location<span class="w"> </span><span class="s2">&quot;OX1&quot;</span>
+</pre></div>
+</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">--duration</span></code> information is not provided via the option, and
+location information is not provided in the YAML configuration file
+specified or detected, CATS will try to estimate location from the
+machine IP address:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cats<span class="w"> </span>--duration<span class="w"> </span><span class="m">480</span>
+<span class="go">WARNING:root:config file not found</span>
+<span class="go">WARNING:root:Unspecified carbon intensity forecast service, using carbonintensity.org.uk</span>
+<span class="go">WARNING:root:location not provided. Estimating location from IP address: RG2.</span>
+<span class="go">Best job start time 2024-08-22 07:30:49.800951+01:00</span>
+<span class="go">Carbon intensity if job started now       = 117.95 gCO2eq/kWh</span>
+<span class="go">Carbon intensity at optimal time          = 60.93 gCO2eq/kWh</span>
+</pre></div>
+</div>
+<p>Use –format=json to get this in machine readable format</p>
+</section>
+<section id="displaying-carbon-footprint-estimates">
+<h2>Displaying carbon footprint estimates<a class="headerlink" href="#displaying-carbon-footprint-estimates" title="Permalink to this heading"></a></h2>
+<p>CATS is able to provide an estimate for the carbon footprint reduction
+resulting from delaying your job. To enable the footprint estimation,
+you must provide the <code class="docutils literal notranslate"><span class="pre">--footprint</span></code> option, the memory consumption in GB
+and a hardware profile:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>cats<span class="w"> </span>--duration<span class="w"> </span><span class="m">480</span><span class="w"> </span>--location<span class="w"> </span><span class="s2">&quot;EH8&quot;</span><span class="w"> </span>--footprint<span class="w"> </span>--memory<span class="w"> </span><span class="m">8</span><span class="w"> </span>--profile<span class="w"> </span>&lt;my_profile&gt;
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--profile</span></code> option specifies information power consumption and
+quantity of hardware the job using. This information is provided by
+adding a section <code class="docutils literal notranslate"><span class="pre">profiles</span></code> to the <a class="reference internal" href="#configuration-file"><span class="std std-ref">cats YAML configuration
+file</span></a>.</p>
+<p>You can define an arbitrary number of profiles as subsection of the
+top-level <code class="docutils literal notranslate"><span class="pre">profiles</span></code> section:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text"><em>An example provision of machine information by YAML file
+to enable estimation of the carbon footprint reduction.</em></span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">profiles</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_cpu_only_profile</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Xeon</span><span class="nv"> </span><span class="s">Gold</span><span class="nv"> </span><span class="s">6142&quot;</span>
+<span class="w">      </span><span class="nt">power</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9.4</span><span class="w"> </span><span class="c1"># in W, per core</span>
+<span class="w">      </span><span class="nt">nunits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">my_gpu_profile</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">gpu</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NVIDIA</span><span class="nv"> </span><span class="s">A100-SXM-80GB</span><span class="nv"> </span><span class="s">GPUs&quot;</span>
+<span class="w">      </span><span class="nt">power</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+<span class="w">      </span><span class="nt">nunits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AMD</span><span class="nv"> </span><span class="s">EPYC</span><span class="nv"> </span><span class="s">7763&quot;</span>
+<span class="w">      </span><span class="nt">power</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.4</span>
+<span class="w">      </span><span class="nt">nunits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+</div>
+<p>The name of the profile section is arbitrary, but each profile section
+<em>must</em> contain one <code class="docutils literal notranslate"><span class="pre">cpu</span></code> section, or one <code class="docutils literal notranslate"><span class="pre">gpu</span></code> section, or both.
+Each hardware type (<code class="docutils literal notranslate"><span class="pre">cpu</span></code> or <code class="docutils literal notranslate"><span class="pre">gpu</span></code>) section <em>must</em> contain the
+<code class="docutils literal notranslate"><span class="pre">power</span></code> (in Watts, for one unit) and <code class="docutils literal notranslate"><span class="pre">nunits</span></code> sections. The <code class="docutils literal notranslate"><span class="pre">model</span></code> section is optional,
+meant for documentation.</p>
+<p>When running <code class="docutils literal notranslate"><span class="pre">cats</span></code>, you can specify which profile to use for carbon
+footprint estimation with the <code class="docutils literal notranslate"><span class="pre">--profile</span></code> option:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>cats<span class="w"> </span>--duration<span class="w"> </span><span class="m">480</span><span class="w"> </span>--location<span class="w"> </span><span class="s2">&quot;EH8&quot;</span><span class="w"> </span>--footprint<span class="w"> </span>--memory<span class="w"> </span><span class="m">6</span>.7<span class="w"> </span>--profile<span class="w"> </span>my_gpu_profile
+</pre></div>
+</div>
+<p>The default number of units specified for a profile can be overidden
+at the command line:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>cats<span class="w"> </span>--duration<span class="w"> </span><span class="m">480</span><span class="w"> </span>--location<span class="w"> </span><span class="s2">&quot;EH8&quot;</span><span class="w"> </span>--footprint<span class="w"> </span>--memory<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--profile<span class="w"> </span>my_gpu_profile<span class="w"> </span>--gpu<span class="w"> </span><span class="m">4</span><span class="w"> </span>--cpu<span class="w"> </span><span class="m">1</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--profile</span></code> option is optional. If not provided, <code class="docutils literal notranslate"><span class="pre">cats</span></code> uses the
+first profile defined in the configuration file as the default
+profile.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="use-with-schedulers.html" class="btn btn-neutral float-right" title="Use with Schedulers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

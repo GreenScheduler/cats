@@ -1,0 +1,251 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command-line (CLI) reference &mdash; CATS 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+      <link rel="stylesheet" type="text/css" href="_static/fonts.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon-32x32.png"/>
+      <script src="_static/jquery.js"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script src="_static/doctools.js"></script>
+      <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/clipboard.min.js"></script>
+      <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api-reference.html" />
+    <link rel="prev" title="Use with Schedulers" href="use-with-schedulers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CATS
+              <img src="_static/cats_dalle_img_200x200px_for_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use-with-schedulers.html">Use with Schedulers</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command-line (CLI) reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cats-parse_arguments-named-arguments">Named Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CATS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Command-line (CLI) reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cli-reference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="command-line-cli-reference">
+<span id="cli-reference"></span><h1>Command-line (CLI) reference<a class="headerlink" href="#command-line-cli-reference" title="Permalink to this heading"></a></h1>
+<p><blockquote>
+<div><p>Climate-Aware Task Scheduler (version 1.1.0)</p>
+<p>The Climate-Aware Task Scheduler (cats) command line program helps you run
+your calculations in a way that minimises their impact on the climate by
+delaying computation until a time when the ammount of CO2 produced to
+generate the power you will use is predicted to be minimised.</p>
+<p>By default, the command simply returns information about when the
+calculation should be undertaken and compares the carbon intensity
+(gCO2/kWh) of running the calculation now with the carbon intensity at that
+time in the future. To undertake this calculation, cats needs to know the
+predicted duration of the calculation (which you must supply, see <cite>-d</cite>) and
+your location, either inferred from your IP address, or passed using <cite>-l</cite>.
+If additional information about the power consumption of your computer is
+available and passed to CATS via the <cite>–config</cite> option, the predicted CO2
+usage will be reported.</p>
+<p>To make use of this information, you will need to couple cats with a task
+scheduler of some kind. The command to schedule is specified with the <cite>-c</cite>
+or <cite>–command</cite> parameter, and the scheduler can be selected using the
+<cite>–scheduler</cite> option.</p>
+<dl class="simple">
+<dt>Example:</dt><dd><p>cats -d 1 –loc RG1 –scheduler=at –command=’ls’</p>
+</dd>
+</dl>
+</div></blockquote>
+</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">cats</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="o">-</span><span class="n">d</span> <span class="n">DURATION</span> <span class="p">[</span><span class="o">-</span><span class="n">s</span> <span class="p">{</span><span class="n">at</span><span class="p">,</span><span class="n">sbatch</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">a</span> <span class="n">API</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">c</span> <span class="n">COMMAND</span><span class="p">]</span>
+            <span class="p">[</span><span class="o">--</span><span class="n">dateformat</span> <span class="n">DATEFORMAT</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">l</span> <span class="n">LOCATION</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">config</span> <span class="n">CONFIG</span><span class="p">]</span>
+            <span class="p">[</span><span class="o">--</span><span class="n">profile</span> <span class="n">PROFILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="nb">format</span> <span class="p">{</span><span class="n">json</span><span class="p">}]</span> <span class="p">[</span><span class="o">-</span><span class="n">f</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">cpu</span> <span class="n">CPU</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">gpu</span> <span class="n">GPU</span><span class="p">]</span>
+            <span class="p">[</span><span class="o">--</span><span class="n">memory</span> <span class="n">MEMORY</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">color</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">plot</span><span class="p">]</span>
+</pre></div>
+</div>
+<section id="cats-parse_arguments-named-arguments">
+<h2>Named Arguments<a class="headerlink" href="#cats-parse_arguments-named-arguments" title="Permalink to this heading"></a></h2>
+<dl class="option-list">
+<dt><kbd>-d, --duration</kbd></dt>
+<dd><p>[required] Expected duration of the job in minutes.</p>
+</dd>
+<dt><kbd>-s, --scheduler</kbd></dt>
+<dd><p>Possible choices: at, sbatch</p>
+<p>Pass command using <cite>-c</cite> to scheduler.</p>
+</dd>
+<dt><kbd>-a, --api</kbd></dt>
+<dd><p>API to use to obtain carbon intensity forecasts. Overrides <cite>config.yml</cite>. For now, only choice is <cite>carbonintensity.org.uk</cite> (hence UK only forecasts). Default: <cite>carbonintensity.org.uk</cite>.</p>
+</dd>
+<dt><kbd>-c, --command</kbd></dt>
+<dd><p>Command to schedule, requires –scheduler to be set</p>
+</dd>
+<dt><kbd>--dateformat</kbd></dt>
+<dd><p>Output date format in strftime(3) format or one of the supported schedulers (‘at’).</p>
+</dd>
+<dt><kbd>-l, --location</kbd></dt>
+<dd><p>Location of the computing facility. For the UK, first half of a postcode (e.g. <cite>M15</cite>), for other APIs, see documentation for exact format. Overrides <cite>config.yml</cite>. Default: if absent, location based in IP address is used.</p>
+</dd>
+<dt><kbd>--config</kbd></dt>
+<dd><p>Path to a configuration file. The file is required to obtain carbon footprint estimates. Default: <cite>config.yml</cite> in current directory.Template found at <a class="reference external" href="https://github.com/GreenScheduler/cats/blob/main/config.yml">https://github.com/GreenScheduler/cats/blob/main/config.yml</a>.</p>
+</dd>
+<dt><kbd>--profile</kbd></dt>
+<dd><p>Hardware profile, specified in configuration file</p>
+</dd>
+<dt><kbd>--format</kbd></dt>
+<dd><p>Possible choices: json</p>
+<p>Format to output optimal start time and carbon emmissionestimate savings in. Currently only JSON is supported.</p>
+</dd>
+<dt><kbd>-f, --footprint</kbd></dt>
+<dd><p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt><kbd>--cpu</kbd></dt>
+<dd><p>Number of CPUs used by the job</p>
+</dd>
+<dt><kbd>--gpu</kbd></dt>
+<dd><p>Number of GPUs used by the job</p>
+</dd>
+<dt><kbd>--memory</kbd></dt>
+<dd><p>Amount of memory used by the job, in GB</p>
+</dd>
+<dt><kbd>-n, --no-colour</kbd></dt>
+<dd><p>Disable all terminal output colouring</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt><kbd>--no-color</kbd></dt>
+<dd><p>Disable all terminal output colouring (alias to –no-colour)</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt><kbd>--plot</kbd></dt>
+<dd><p>Create a plot of the forecast and optimised plan for the job. This needs matplotlib to be installed, e.g. install with “pip install ‘climate-aware-task-scheduler[plots]’”</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</section>
+<p><blockquote>
+<div><p>CATS can be used to report information on the best time to run a calculation
+and the amount of CO2. Information about a 90 minute calculation in central
+Oxford can be found by running:</p>
+<blockquote>
+<div><p>cats -d 90 –loc OX1</p>
+</div></blockquote>
+<p>The <cite>at</cite> scheduler is available from the command line on most Linux and
+MacOS computers, and can be the easest way to use cats to minimise the
+carbon intensity of calculations on smaller computers. For example, the
+above calculation can be scheduled by running:</p>
+<blockquote>
+<div><p>cats -d 90 –loc OX1 -s at -c ‘mycommand’</p>
+</div></blockquote>
+<p>To report carbon footprint, pass the <cite>–config</cite> option to select a
+configuration file and the <cite>–profile</cite> option to select a profile.
+The configuration file is documented in the Quickstart section of the online
+documentation. An example config file is given below:</p>
+</div></blockquote>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">profiles</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my_cpu_only_profile</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Xeon</span><span class="nv"> </span><span class="s">Gold</span><span class="nv"> </span><span class="s">6142&quot;</span>
+<span class="w">      </span><span class="nt">power</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">9.4</span><span class="w"> </span><span class="c1"># in W, per core</span>
+<span class="w">      </span><span class="nt">nunits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">my_gpu_profile</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">gpu</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;NVIDIA</span><span class="nv"> </span><span class="s">A100-SXM-80GB</span><span class="nv"> </span><span class="s">GPUs&quot;</span>
+<span class="w">      </span><span class="nt">power</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">300</span>
+<span class="w">      </span><span class="nt">nunits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">cpu</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AMD</span><span class="nv"> </span><span class="s">EPYC</span><span class="nv"> </span><span class="s">7763&quot;</span>
+<span class="w">      </span><span class="nt">power</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.4</span>
+<span class="w">      </span><span class="nt">nunits</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</pre></div>
+</div>
+</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="use-with-schedulers.html" class="btn btn-neutral float-left" title="Use with Schedulers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api-reference.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
