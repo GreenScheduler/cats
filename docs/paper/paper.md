@@ -33,7 +33,7 @@ authors:
     affiliation: 12
   - name: Adam Stuart Ward
     orcid: 0009-0008-3463-2694
-    affiliation: 13
+    affiliation: 11
 affiliations:
  - name: National Centre for Atmospheric Science, United Kingdom
    index: 1
@@ -55,12 +55,10 @@ affiliations:
    index: 9
  - name: Netherlands eScience Center, Netherlands
    index: 10
- - name: National Oceanography Centre, Liverpool, United Kingdom
+ - name: National Oceanography Centre, United Kingdom
    index: 11
  - name: Department of Earth Sciences, University of Oxford, United Kingdom
    index: 12
- - name: National Oceanography Centre, Southampton, United Kingdom
-   index: 13
 date: 8 July 2025
 bibliography: paper.bib
 
