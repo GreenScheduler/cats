@@ -8,6 +8,8 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 
 *Currently CATS only works in the UK. If you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know.*
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.08251/status.svg)](https://doi.org/10.21105/joss.08251)
+
 ## Features
 
 - Estimates the carbon intensity of the electricity grid in real-time
