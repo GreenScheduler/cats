@@ -46,3 +46,40 @@ def test_127_bug_report():
 
     assert now_avg == expected_best
     assert best_avg == expected_best
+
+
+def test_32_bug_report():
+    """
+    Regression test for the bug report in issue 32
+    As a test we have 96 data points (every 30 mins)
+    with values falling from 116 g CO2e/kWh to 20
+    g CO2e/kWh. We should start at the end of the period.
+    """
+    # Reported input data
+    d = datetime(year=2025, month=8, day=13, hour=10)
+    data = [
+        CarbonIntensityPointEstimate(
+        datetime=d + timedelta(minutes=idt*30),
+        value=(96-idt) + 20,
+    )
+    for idt in range(97)
+    ]
+
+    # Reported job data
+    duration = 30  # in minutes
+    job_start = datetime.fromisoformat("2025-08-13T10:00")
+
+    result = WindowedForecast(data, duration, start=job_start)
+
+    best_avg = min(result)
+
+    interp1 = 21.0
+    interp2 = 20.0
+    expected_best = CarbonIntensityAverageEstimate(
+        start=datetime(2025, 8, 15, 9, 30),
+        end=datetime(2025, 8, 15, 10, 00),
+        value=20.5,
+        start_value= interp1, 
+        end_value= interp2 
+    )
+    assert best_avg == expected_best
