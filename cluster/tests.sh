@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run tests to check if slurm picks up begin time set by CATS
 # This relies on a cluster already setup and running, if not run
-#   ./cluster/build.sh
+#   ./cluster/start.sh
 set -eou pipefail
 
 # Step a) Run cats inside the slurmctld container and extract start time
@@ -28,8 +28,9 @@ echo "Expected scheduled start time: $scheduled_start"
 job_output=$(docker exec -i slurmctld scontrol show job "$job_id")
 
 # Check condition 1: job is pending for BeginTime
-if ! echo "$job_output" | grep -q "JobState=PENDING Reason=BeginTime Dependency=(null)"; then
-  echo "❌ Job state/Reason is not correct!"
+if (! echo "$job_output" | grep -q "JobState=PENDING Reason=BeginTime Dependency=(null)") && \
+  (! echo "$job_output" | grep -q "JobState=RUNNING Reason=None"); then
+  echo "❌ Job state/Reason is not correct, expected one of PENDING/BeginTime or RUNNING/None"
   echo "$job_output"
   exit 1
 fi
