@@ -44,10 +44,12 @@ realtime grid carbon intensity data in other countries, please
 Background
 ----------
 
-It was created as part of the
+CATS is described in a paper published in the Journal 
+of Open Source Software (`doi:10.21105/joss.08251 <https://doi.org/10.21105/joss.08251>`_)
+and was created as part of the
 `Software Sustainability Institute’s <SSIsite_>`_
 `Collaborations Workshop 2023 <CW23page_>`_
-`Hack Day <CW23HackDaypage_>`_.
+`Hack Day <CW23HackDaypage_>`_. 
 
 
 Features
