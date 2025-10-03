@@ -51,7 +51,7 @@
     Home = "https://github.com/GreenScheduler/cats"
 
   [project.scripts]
-    cats = "cats:main"
+    cats = "cats.cli:main"
 
   [tool.ruff.lint]
     # Pyflakes (`F`), subset of the pycodestyle (`E`) and unsorted imports (`I001`)
