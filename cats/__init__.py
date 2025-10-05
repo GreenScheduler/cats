@@ -15,7 +15,10 @@ from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .plotting import plotplan
-from .forecast import CarbonIntensityAverageEstimate, WindowedForecast
+from .forecast import (
+    CarbonIntensityAverageEstimate,
+    ConstrainedWindowedForecast,
+)
 
 __version__ = "1.1.0"
 
@@ -26,6 +29,78 @@ SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M", "sbatch": "%Y-%m-%dT%H:%M"}
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
+
+
+def parse_time_constraint(
+    time_str: str, timezone_info=None
+) -> Optional[datetime.datetime]:
+    """
+    Parse a time constraint string into a datetime object.
+
+    :param time_str: Time string in various formats (HH:MM, YYYY-MM-DDTHH:MM, etc.)
+    :param timezone_info: Default timezone if not specified in the string
+    :return: Parsed datetime object
+    :raises ValueError: If the time string cannot be parsed
+    """
+    if not time_str:
+        return None
+
+    # If timezone_info is not provided, use system local timezone
+    if timezone_info is None:
+        timezone_info = datetime.datetime.now().astimezone().tzinfo
+
+    # Try to parse as full ISO format first
+    try:
+        if "T" in time_str:
+            # Full datetime string
+            if time_str.endswith("Z"):
+                time_str = time_str[:-1] + "+00:00"
+            elif time_str[-6] not in ["+", "-"] and time_str[-3] != ":":
+                # No timezone info, add default
+                dt = datetime.datetime.fromisoformat(time_str)
+                return dt.replace(tzinfo=timezone_info)
+            return datetime.datetime.fromisoformat(time_str)
+        else:
+            # Time only (HH:MM or HH:MM:SS)
+            time_part = datetime.time.fromisoformat(time_str)
+            today = datetime.datetime.now().date()
+            return datetime.datetime.combine(today, time_part, tzinfo=timezone_info)
+    except ValueError as e:
+        raise ValueError(f"Unable to parse time constraint '{time_str}': {e}")
+
+
+def validate_window_constraints(
+    start_window: Optional[str], end_window: Optional[str], window_minutes: int
+) -> tuple[Optional[datetime.datetime], Optional[datetime.datetime], int]:
+    """
+    Validate and parse window constraints.
+
+    :param start_window: Start window constraint string
+    :param end_window: End window constraint string
+    :param window_minutes: Maximum window duration in minutes
+    :return: Tuple of (start_datetime, end_datetime, validated_window_minutes)
+    :raises ValueError: If constraints are invalid
+    """
+    # Validate window minutes
+    if window_minutes < 1 or window_minutes > 2880:
+        raise ValueError("Window must be between 1 and 2880 minutes (48 hours)")
+
+    start_datetime = None
+    end_datetime = None
+
+    # Parse time constraints if provided
+    if start_window and start_window.strip():
+        start_datetime = parse_time_constraint(start_window)
+
+    if end_window and end_window.strip():
+        end_datetime = parse_time_constraint(end_window)
+
+    # Validate that start is before end if both are provided
+    if start_datetime and end_datetime:
+        if start_datetime >= end_datetime:
+            raise ValueError("Start window must be before end window")
+
+    return start_datetime, end_datetime, window_minutes
 
 
 def parse_arguments():
@@ -201,6 +276,27 @@ def parse_arguments():
         "\"pip install 'climate-aware-task-scheduler[plots]'\"",
         action="store_true",
     )
+    parser.add_argument(
+        "--window",
+        type=positive_integer,
+        help="Maximum time window to search for optimal start time, in minutes. "
+        "Must be between 1 and 2880 (48 hours). Default: 2880 minutes (48 hours).",
+        default=2880,
+    )
+    parser.add_argument(
+        "--start-window",
+        type=str,
+        help="Earliest time the job is allowed to start, in ISO format (e.g., '2024-01-15T09:00'). "
+        "If only time is provided (e.g., '09:00'), today's date is assumed. "
+        "Timezone info is optional and defaults to system timezone.",
+    )
+    parser.add_argument(
+        "--end-window",
+        type=str,
+        help="Latest time the job is allowed to start, in ISO format (e.g., '2024-01-15T17:00'). "
+        "If only time is provided (e.g., '17:00'), today's date is assumed. "
+        "Timezone info is optional and defaults to system timezone.",
+    )
 
     return parser
 
@@ -324,9 +420,6 @@ def main(arguments=None) -> int:
     args = parser.parse_args(arguments)
     colour_output = args.no_colour or args.no_color
 
-    # Print CATS ASCII art banner, before any output from printing or logging
-    print_banner(colour_output)
-
     if args.command and not args.scheduler:
         print(
             "cats: To run a command or sbatch script with the -c or --command option, you must\n"
@@ -335,11 +428,27 @@ def main(arguments=None) -> int:
         return 1
 
     CI_API_interface, location, duration, jobinfo, PUE = get_runtime_config(args)
-    if duration > CI_API_interface.max_duration:
-        print(
-            f"""API allows a maximum job duration of {CI_API_interface.max_duration} minutes.
-This is usually due to forecast limitations."""
+
+    # Validate and parse window constraints
+    try:
+        start_constraint, end_constraint, max_window = validate_window_constraints(
+            args.start_window, args.end_window, args.window
         )
+    except ValueError as e:
+        print(f"Error in window constraints: {e}")
+        return 1
+    # Check against both API limit and user-specified window
+    effective_max_duration = min(CI_API_interface.max_duration, max_window)
+    if duration > effective_max_duration:
+        if max_window < CI_API_interface.max_duration:
+            print(
+                f"""Job duration ({duration} minutes) exceeds specified window ({max_window} minutes)."""
+            )
+        else:
+            print(
+                f"""API allows a maximum job duration of {CI_API_interface.max_duration} minutes.
+This is usually due to forecast limitations."""
+            )
         return 1
 
     ########################
@@ -362,8 +471,21 @@ This is usually due to forecast limitations."""
 
     # Find best possible average carbon intensity, along
     # with corresponding job start time.
-    wf = WindowedForecast(
-        CI_forecast, duration, start=datetime.datetime.now().astimezone()
+    search_start = datetime.datetime.now().astimezone()
+
+    # Apply start window constraint if provided
+    if start_constraint:
+        # Ensure start constraint is in the same timezone as search_start
+        if start_constraint.tzinfo != search_start.tzinfo:
+            start_constraint = start_constraint.astimezone(search_start.tzinfo)
+        search_start = max(search_start, start_constraint)
+
+    wf = ConstrainedWindowedForecast(
+        CI_forecast,
+        duration,
+        start=search_start,
+        max_window_minutes=max_window,
+        end_constraint=end_constraint,
     )
     now_avg, best_avg = wf[0], min(wf)
     output = CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
@@ -390,6 +512,8 @@ This is usually due to forecast limitations."""
             dateformat = args.dateformat or ""
         print(output.to_json(dateformat, sort_keys=True, indent=2))
     else:
+        # Print CATS ASCII art banner, before any output from printing or logging
+        print_banner(colour_output)
         print(output)
     if args.plot:
         plotplan(CI_forecast, output)

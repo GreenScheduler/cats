@@ -29,8 +29,8 @@ class CarbonIntensityAverageEstimate:
     value: float
     start: datetime  # Start of the time-integration window
     end: datetime  # End of the time-integration window
-    start_value: float # CI point estimate at start time
-    end_value: float # CI point estimate at end time
+    start_value: float  # CI point estimate at start time
+    end_value: float  # CI point estimate at end time
 
 
 class WindowedForecast:
@@ -154,3 +154,115 @@ class WindowedForecast:
 
     def __len__(self):
         return len(self.data) - self.ndata
+
+
+class ConstrainedWindowedForecast:
+    """
+    A wrapper around WindowedForecast that applies time window constraints.
+
+    This class filters the available forecast windows based on:
+    - Maximum window duration (cutoff time)
+    - End time constraint (latest allowed start time)
+    """
+
+    def __init__(
+        self,
+        data: list[CarbonIntensityPointEstimate],
+        duration: int,  # in minutes
+        start: datetime,
+        max_window_minutes: int = 2880,
+        end_constraint: Optional[datetime] = None,
+    ):
+        self.max_window_minutes = max_window_minutes
+        self.end_constraint = end_constraint
+        self.duration = duration
+
+        # Filter data based on constraints
+        filtered_data = self._filter_data_by_constraints(
+            data, start, duration, max_window_minutes, end_constraint
+        )
+
+        # Create the underlying WindowedForecast with filtered data
+        self._wf = WindowedForecast(filtered_data, duration, start)
+
+    def _filter_data_by_constraints(
+        self,
+        data: list[CarbonIntensityPointEstimate],
+        start: datetime,
+        duration: int,
+        max_window_minutes: int,
+        end_constraint: Optional[datetime],
+    ) -> list[CarbonIntensityPointEstimate]:
+        """Filter forecast data based on time constraints."""
+
+        # Calculate the maximum time we need data for
+        search_window_end = start + timedelta(minutes=max_window_minutes)
+
+        if end_constraint:
+            # Ensure timezone compatibility
+            if end_constraint.tzinfo != start.tzinfo:
+                end_constraint = end_constraint.astimezone(start.tzinfo)
+            # Jobs must start before end_constraint
+            search_window_end = min(search_window_end, end_constraint)
+
+        # We need data points to cover jobs starting up to search_window_end
+        # plus the duration of those jobs
+        max_data_time = search_window_end + timedelta(minutes=duration)
+
+        # Filter data to respect the constraints
+        filtered_data = []
+        for d in data:
+            if d.datetime <= max_data_time:
+                filtered_data.append(d)
+            else:
+                break
+
+        if len(filtered_data) < 2:
+            raise ValueError(
+                "Insufficient forecast data for the specified time window constraints. "
+                f"Try increasing --window or adjusting --end-window."
+            )
+
+        return filtered_data
+
+    def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
+        """Get forecast window at index, but only if it respects constraints."""
+        if index >= len(self):
+            raise IndexError("Window index out of range")
+        return self._wf[index]
+
+    def __iter__(self):
+        """Iterate over valid forecast windows."""
+        for index in range(len(self)):
+            yield self[index]
+
+    def __len__(self):
+        """Return number of valid forecast windows respecting all constraints."""
+        base_length = len(self._wf)
+
+        if base_length <= 0:
+            return 0
+
+        max_valid_index = base_length - 1
+
+        # Check max window constraint
+        if self.max_window_minutes < 2880:  # Only if different from default
+            data_stepsize_minutes = self._wf.data_stepsize.total_seconds() / 60
+            max_index_by_window = int(self.max_window_minutes / data_stepsize_minutes)
+            max_valid_index = min(max_valid_index, max_index_by_window)
+
+        # Check end constraint
+        if self.end_constraint:
+            if self.end_constraint.tzinfo != self._wf.start.tzinfo:
+                end_constraint = self.end_constraint.astimezone(self._wf.start.tzinfo)
+            else:
+                end_constraint = self.end_constraint
+
+            # Find the maximum index where job start time is before end_constraint
+            for i in range(min(base_length, max_valid_index + 1)):
+                window_start = self._wf.start + i * self._wf.data_stepsize
+                if window_start >= end_constraint:
+                    max_valid_index = i - 1
+                    break
+
+        return max(0, max_valid_index + 1)
