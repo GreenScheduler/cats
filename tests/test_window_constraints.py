@@ -109,14 +109,14 @@ class TestValidateWindowConstraints:
     def test_validate_window_too_small_raises_error(self):
         """Test that window < 1 raises ValueError."""
         with pytest.raises(
-            ValueError, match="Window must be between 1 and 2880 minutes"
+            ValueError, match="Window must be between 1 and 2820 minutes"
         ):
             validate_window_constraints("", "", 0)
 
     def test_validate_window_too_large_raises_error(self):
-        """Test that window > 2880 raises ValueError."""
+        """Test that window > 2820 raises ValueError."""
         with pytest.raises(
-            ValueError, match="Window must be between 1 and 2880 minutes"
+            ValueError, match="Window must be between 1 and 2820 minutes"
         ):
             validate_window_constraints("", "", 2881)
 
@@ -127,8 +127,8 @@ class TestValidateWindowConstraints:
         assert window == 1
 
         # Test maximum
-        start_dt, end_dt, window = validate_window_constraints("", "", 2880)
-        assert window == 2880
+        start_dt, end_dt, window = validate_window_constraints("", "", 2820)
+        assert window == 2820
 
     def test_validate_start_before_end_constraint(self):
         """Test that start must be before end."""

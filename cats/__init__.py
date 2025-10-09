@@ -82,8 +82,8 @@ def validate_window_constraints(
     :raises ValueError: If constraints are invalid
     """
     # Validate window minutes
-    if window_minutes < 1 or window_minutes > 2880:
-        raise ValueError("Window must be between 1 and 2880 minutes (48 hours)")
+    if window_minutes < 1 or window_minutes > 2820:
+        raise ValueError("Window must be between 1 and 2820 minutes (47 hours)")
 
     start_datetime = None
     end_datetime = None
@@ -280,8 +280,8 @@ def parse_arguments():
         "--window",
         type=positive_integer,
         help="Maximum time window to search for optimal start time, in minutes. "
-        "Must be between 1 and 2880 (48 hours). Default: 2880 minutes (48 hours).",
-        default=2880,
+        "Must be between 1 and 2820 (47 hours). Default: 2820 minutes (47 hours).",
+        default=2820,
     )
     parser.add_argument(
         "--start-window",

@@ -170,7 +170,7 @@ class ConstrainedWindowedForecast:
         data: list[CarbonIntensityPointEstimate],
         duration: int,  # in minutes
         start: datetime,
-        max_window_minutes: int = 2880,
+        max_window_minutes: int = 2820,
         end_constraint: Optional[datetime] = None,
     ):
         self.max_window_minutes = max_window_minutes
@@ -246,7 +246,7 @@ class ConstrainedWindowedForecast:
         max_valid_index = base_length - 1
 
         # Check max window constraint
-        if self.max_window_minutes < 2880:  # Only if different from default
+        if self.max_window_minutes < 2820:  # Only if different from default
             data_stepsize_minutes = self._wf.data_stepsize.total_seconds() / 60
             max_index_by_window = int(self.max_window_minutes / data_stepsize_minutes)
             max_valid_index = min(max_valid_index, max_index_by_window)
