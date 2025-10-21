@@ -17,7 +17,7 @@ from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .plotting import plotplan
 from .forecast import (
     CarbonIntensityAverageEstimate,
-    ConstrainedWindowedForecast,
+    WindowedForecast,
 )
 
 __version__ = "1.1.0"
@@ -480,7 +480,7 @@ This is usually due to forecast limitations."""
             start_constraint = start_constraint.astimezone(search_start.tzinfo)
         search_start = max(search_start, start_constraint)
 
-    wf = ConstrainedWindowedForecast(
+    wf = WindowedForecast(
         CI_forecast,
         duration,
         start=search_start,

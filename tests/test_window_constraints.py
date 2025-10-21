@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 from cats import main, parse_time_constraint, validate_window_constraints
 from cats.forecast import (
     CarbonIntensityPointEstimate,
-    ConstrainedWindowedForecast,
+    WindowedForecast,
 )
 
 
@@ -186,7 +186,7 @@ class TestConstrainedWindowedForecast:
         duration = 180  # 3 hours
         start = sample_data[0].datetime
 
-        cwf = ConstrainedWindowedForecast(sample_data, duration, start)
+        cwf = WindowedForecast(sample_data, duration, start)
 
         # Should have valid length
         assert len(cwf) > 0
@@ -207,10 +207,10 @@ class TestConstrainedWindowedForecast:
         start = sample_data[0].datetime
 
         # Full window
-        cwf_full = ConstrainedWindowedForecast(sample_data, duration, start)
+        cwf_full = WindowedForecast(sample_data, duration, start)
 
         # Constrained window
-        cwf_constrained = ConstrainedWindowedForecast(
+        cwf_constrained = WindowedForecast(
             sample_data,
             duration,
             start,
@@ -228,7 +228,7 @@ class TestConstrainedWindowedForecast:
         start = sample_data[0].datetime
         end_constraint = start + timedelta(hours=6)  # Jobs must start within 6 hours
 
-        cwf = ConstrainedWindowedForecast(
+        cwf = WindowedForecast(
             sample_data, duration, start, end_constraint=end_constraint
         )
 
@@ -245,7 +245,7 @@ class TestConstrainedWindowedForecast:
         max_window = 300  # 5 hours
         end_constraint = start + timedelta(hours=4)  # Must start within 4 hours
 
-        cwf = ConstrainedWindowedForecast(
+        cwf = WindowedForecast(
             sample_data,
             duration,
             start,
@@ -272,7 +272,7 @@ class TestConstrainedWindowedForecast:
         ]
 
         with pytest.raises(ValueError, match="Insufficient forecast data"):
-            _ = ConstrainedWindowedForecast(
+            _ = WindowedForecast(
                 minimal_data, 60, minimal_data[0].datetime, max_window_minutes=30
             )
 
@@ -287,7 +287,7 @@ class TestConstrainedWindowedForecast:
         bst = timezone(timedelta(hours=1))
         end_constraint = (start + timedelta(hours=6)).astimezone(bst)
 
-        cwf = ConstrainedWindowedForecast(
+        cwf = WindowedForecast(
             sample_data, duration, start, end_constraint=end_constraint
         )
 
@@ -301,9 +301,7 @@ class TestConstrainedWindowedForecast:
         duration = 60
         start = sample_data[0].datetime
 
-        cwf = ConstrainedWindowedForecast(
-            sample_data, duration, start, max_window_minutes=120
-        )
+        cwf = WindowedForecast(sample_data, duration, start, max_window_minutes=120)
 
         with pytest.raises(IndexError, match="Window index out of range"):
             cwf[len(cwf)]
@@ -315,9 +313,7 @@ class TestConstrainedWindowedForecast:
         duration = 60
         start = sample_data[0].datetime
 
-        cwf = ConstrainedWindowedForecast(
-            sample_data, duration, start, max_window_minutes=240
-        )
+        cwf = WindowedForecast(sample_data, duration, start, max_window_minutes=240)
 
         # Test that we can iterate and get consistent results
         windows = list(cwf)
@@ -498,9 +494,7 @@ class TestEdgeCases:
         start = sample_data[0].datetime
 
         # 1 hour window
-        cwf = ConstrainedWindowedForecast(
-            sample_data, duration, start, max_window_minutes=60
-        )
+        cwf = WindowedForecast(sample_data, duration, start, max_window_minutes=60)
 
         # Should still have at least one option
         assert len(cwf) > 0
@@ -517,7 +511,7 @@ class TestEdgeCases:
         with pytest.raises(
             ValueError, match="No index found for closest data point past job end time"
         ):
-            _ = ConstrainedWindowedForecast(
+            _ = WindowedForecast(
                 sample_data, duration, start, end_constraint=end_constraint
             )
 
@@ -528,7 +522,7 @@ class TestEdgeCases:
         duration = 120  # 2 hours
         start = sample_data[0].datetime
 
-        cwf = ConstrainedWindowedForecast(
+        cwf = WindowedForecast(
             sample_data, duration, start, max_window_minutes=duration
         )
 
