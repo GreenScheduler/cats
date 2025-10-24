@@ -70,37 +70,27 @@ def parse_time_constraint(
 
 
 def validate_window_constraints(
-    start_window: Optional[str], end_window: Optional[str], window_minutes: int
+    start_window: Optional[datetime.datetime],
+    end_window: Optional[datetime.datetime],
+    window_minutes: int,
 ) -> tuple[Optional[datetime.datetime], Optional[datetime.datetime], int]:
     """
-    Validate and parse window constraints.
+    Validate window constraints.
 
-    :param start_window: Start window constraint string
-    :param end_window: End window constraint string
+    :param start_window: Start window constraint datetime
+    :param end_window: End window constraint datetime
     :param window_minutes: Maximum window duration in minutes
     :return: Tuple of (start_datetime, end_datetime, validated_window_minutes)
     :raises ValueError: If constraints are invalid
     """
-    # Validate window minutes
     if window_minutes < 1 or window_minutes > 2820:
         raise ValueError("Window must be between 1 and 2820 minutes (47 hours)")
 
-    start_datetime = None
-    end_datetime = None
-
-    # Parse time constraints if provided
-    if start_window and start_window.strip():
-        start_datetime = parse_time_constraint(start_window)
-
-    if end_window and end_window.strip():
-        end_datetime = parse_time_constraint(end_window)
-
-    # Validate that start is before end if both are provided
-    if start_datetime and end_datetime:
-        if start_datetime >= end_datetime:
+    if start_window and end_window:
+        if start_window >= end_window:
             raise ValueError("Start window must be before end window")
 
-    return start_datetime, end_datetime, window_minutes
+    return start_window, end_window, window_minutes
 
 
 def parse_arguments():
@@ -285,14 +275,14 @@ def parse_arguments():
     )
     parser.add_argument(
         "--start-window",
-        type=str,
+        type=parse_time_constraint,
         help="Earliest time the job is allowed to start, in ISO format (e.g., '2024-01-15T09:00'). "
         "If only time is provided (e.g., '09:00'), today's date is assumed. "
         "Timezone info is optional and defaults to system timezone.",
     )
     parser.add_argument(
         "--end-window",
-        type=str,
+        type=parse_time_constraint,
         help="Latest time the job is allowed to start, in ISO format (e.g., '2024-01-15T17:00'). "
         "If only time is provided (e.g., '17:00'), today's date is assumed. "
         "Timezone info is optional and defaults to system timezone.",

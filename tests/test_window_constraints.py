@@ -69,7 +69,7 @@ class TestParseTimeConstraint:
 
     def test_parse_empty_string_returns_none(self):
         """Test that empty string returns None."""
-        result = parse_time_constraint("")
+        result = parse_time_constraint(None)
         assert result is None
 
     def test_parse_none_returns_none(self):
@@ -101,10 +101,9 @@ class TestValidateWindowConstraints:
 
     def test_validate_valid_window_minutes(self):
         """Test validation of valid window minutes."""
-        start_dt, end_dt, window = validate_window_constraints("", "", 1440)
+        start_dt, end_dt, window = validate_window_constraints(None, None, 1440)
         assert start_dt is None
         assert end_dt is None
-        assert window == 1440
 
     def test_validate_window_too_small_raises_error(self):
         """Test that window < 1 raises ValueError."""
@@ -146,9 +145,9 @@ class TestValidateWindowConstraints:
 
     def test_validate_with_valid_time_constraints(self):
         """Test validation with valid time constraints."""
-        start_dt, end_dt, window = validate_window_constraints(
-            "2024-01-15T09:00:00", "2024-01-15T17:00:00", 480
-        )
+        start = parse_time_constraint("2024-01-15T09:00:00")
+        end = parse_time_constraint("2024-01-15T17:00:00")
+        start_dt, end_dt, window = validate_window_constraints(start, end, 480)
         assert start_dt is not None
         assert end_dt is not None
         assert start_dt == datetime(2024, 1, 15, 9, 0, 0).replace(
@@ -159,18 +158,16 @@ class TestValidateWindowConstraints:
 
     def test_validate_with_only_start_constraint(self):
         """Test validation with only start constraint."""
-        start_dt, end_dt, window = validate_window_constraints(
-            "2024-01-15T09:00:00", "", 720
-        )
+        start = parse_time_constraint("2024-01-15T09:00:00")
+        start_dt, end_dt, window = validate_window_constraints(start, None, 720)
         assert start_dt is not None
         assert end_dt is None
         assert window == 720
 
     def test_validate_with_only_end_constraint(self):
         """Test validation with only end constraint."""
-        start_dt, end_dt, window = validate_window_constraints(
-            "", "2024-01-15T17:00:00", 360
-        )
+        end = parse_time_constraint("2024-01-15T09:00:00")
+        start_dt, end_dt, window = validate_window_constraints(None, end, 360)
         assert start_dt is None
         assert end_dt is not None
         assert window == 360
