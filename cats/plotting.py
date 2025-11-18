@@ -48,12 +48,29 @@ def plotplan(CI_forecast, output):
     # Make the plot (should probably take fig and ax as opt args...)
     fig, ax = plt.subplots()
 
+    # Filling under curves for the forecast, run now time and optimal run time
     ax.fill_between(times, 0.0, values, alpha=0.2, color='b', label="Forecast")
+    # If job started now (red with hatch, black hatch lines for contrast)
     ax.fill_between(
-        now_times, 0.0, now_values, alpha=0.6,  color='r', label="If job started now")
-    ax.fill_between(
-        opt_times, 0.0, opt_values, alpha=0.6, color='g', label="Optimal job window")
+        now_times, 0.0, now_values,
+        alpha=0.6,
+        color='r',
+        label="If job started now",
+        hatch="///",
+        edgecolor='k',
+        linewidth=0.0
+    )
 
+    # Optimal job window (green with hatch, black hatch lines for contrast)
+    ax.fill_between(
+        opt_times, 0.0, opt_values,
+        alpha=0.6,
+        color='g',
+        label="Optimal job window",
+        hatch="\\\\\\",
+        edgecolor='k',
+        linewidth=0.0
+    )
     ax.text(0.125, 1.075, f"Mean carbon intensity if job started now: {output.carbonIntensityNow.value:.2f} gCO2eq/kWh",
              transform=ax.transAxes, color='red')
     ax.text(0.125, 1.025, f"Mean carbon intensity at optimal time: {output.carbonIntensityOptimal.value:.2f} gCO2eq/kWh",
