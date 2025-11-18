@@ -76,7 +76,7 @@ def plotplan(CI_forecast, output):
     ax.text(0.125, 1.025, f"Mean carbon intensity at optimal time: {output.carbonIntensityOptimal.value:.2f} gCO2eq/kWh",
              transform=ax.transAxes, color='green')
 
-    ax.set_xlabel("Time (dd-mm-yy hh)")
+    ax.set_xlabel("Time (dd-mm-yy hh:mm)")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
     ax.set_ylabel("Forecast carbon intensity (gCO2eq/kWh)")
