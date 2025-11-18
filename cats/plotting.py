@@ -47,9 +47,12 @@ def plotplan(CI_forecast, output):
 
     # Make the plot (should probably take fig and ax as opt args...)
     fig, ax = plt.subplots()
-    ax.fill_between(times, 0.0, values, alpha=0.2, color='b')
-    ax.fill_between(now_times, 0.0, now_values, alpha=0.6,  color='r')
-    ax.fill_between(opt_times, 0.0, opt_values, alpha=0.6, color='g')
+
+    ax.fill_between(times, 0.0, values, alpha=0.2, color='b', label="Forecast")
+    ax.fill_between(
+        now_times, 0.0, now_values, alpha=0.6,  color='r', label="If job started now")
+    ax.fill_between(
+        opt_times, 0.0, opt_values, alpha=0.6, color='g', label="Optimal job window")
 
     ax.text(0.125, 1.075, f"Mean carbon intensity if job started now: {output.carbonIntensityNow.value:.2f} gCO2eq/kWh",
              transform=ax.transAxes, color='red')
@@ -60,8 +63,13 @@ def plotplan(CI_forecast, output):
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
     ax.set_ylabel("Forecast carbon intensity (gCO2eq/kWh)")
-    ax.grid(True)
     ax.label_outer()
+
+    ax.grid(True)
+    ax.legend()
+
     fig.autofmt_xdate()
+
     plt.show()
+
     return None
