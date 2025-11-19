@@ -116,6 +116,13 @@ def plotplan(CI_forecast, output):
         color=optimal_colour,
     )
 
+    # Include subtle markers at each data point, in case it helps to
+    # distinguish forecast points from the trend (esp. useful if there)
+    # is a similar trend across/for 1 hour or more i.e. 3+ data points
+    ax.scatter(times, values, color=forecast_colour, s=8, alpha=0.2)
+    ax.scatter(now_times, now_values, color=now_colour, s=8, alpha=0.2)
+    ax.scatter(opt_times, opt_values, color=optimal_colour, s=8, alpha=0.2)
+
     ax.set_xlabel("Time (dd-mm-yy hh:mm)")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
