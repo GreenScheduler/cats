@@ -71,7 +71,6 @@ def plotplan(CI_forecast, output):
         color=forecast_colour,
         edgecolor=forecast_colour,
         label="Forecast",
-        linewidth=2.0,
     )
     # Show 'now' window in red with black hatch lines for contrast
     ax.fill_between(
@@ -83,7 +82,6 @@ def plotplan(CI_forecast, output):
         label="If job started now",
         hatch="///",
         edgecolor="k",
-        linewidth=1.0,
     )
     # Show 'optimal' window in green with hatch lines in opposite direction
     # but also in black: for any overlapping regions on the two windows, this
@@ -97,7 +95,6 @@ def plotplan(CI_forecast, output):
         label="Optimal job window",
         hatch="\\\\\\",
         edgecolor="k",
-        linewidth=1.0,
     )
 
     # Add text to highlight values and for 'now' and 'optimal' job run times
@@ -119,9 +116,9 @@ def plotplan(CI_forecast, output):
     # Include subtle markers at each data point, in case it helps to
     # distinguish forecast points from the trend (esp. useful if there)
     # is a similar trend across/for 1 hour or more i.e. 3+ data points
-    ax.scatter(times, values, color=forecast_colour, s=8, alpha=0.2)
-    ax.scatter(now_times, now_values, color=now_colour, s=8, alpha=0.2)
-    ax.scatter(opt_times, opt_values, color=optimal_colour, s=8, alpha=0.2)
+    ax.scatter(times, values, color=forecast_colour, s=8, alpha=0.3)
+    ax.scatter(now_times, now_values, color=now_colour, s=8, alpha=0.3)
+    ax.scatter(opt_times, opt_values, color=optimal_colour, s=8, alpha=0.3)
 
     ax.set_xlabel("Time (dd-mm-yy hh:mm)")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
