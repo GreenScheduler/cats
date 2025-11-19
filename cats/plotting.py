@@ -1,6 +1,7 @@
 try:
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
+    from matplotlib.patches import Rectangle
 
     have_matplotlib = True
 except ImportError:
@@ -96,6 +97,27 @@ def plotplan(CI_forecast, output):
         hatch="\\\\\\",
         edgecolor="k",
     )
+
+    # In case the 'now' and 'optimal' windows overlap, is nice to show just
+    # how that looks on legend, namely crosshatch in an (ugly) khaki colour
+    # that represents the mixture of the transparent red and green. To do
+    # this, use matplotlib's patches to create a proxy object i.e. patch:
+    overlap_patch = Rectangle(
+        # Arbitrary huge number to ensure dummy patch is outside plot area
+        (1e10, 1e10),
+        1,
+        1,
+        facecolor="#6f8d4a",  # exact mix colour from image colour picker tool
+        edgecolor="k",
+        hatch="////\\\\\\\\",
+        label="Overlap area (now + optimal)",
+        transform=ax.transAxes,  # << use axes coords instead of data coords
+    )
+    ax.add_patch(overlap_patch)
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(overlap_patch)
+    labels.append(overlap_patch.get_label())
+    ax.legend(handles=handles, labels=labels)
 
     # Add text to highlight values and for 'now' and 'optimal' job run times
     ax.text(
