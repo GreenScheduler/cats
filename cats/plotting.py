@@ -14,7 +14,7 @@ def plotplan(CI_forecast, output):
     if not have_matplotlib:
         print("To plot graphs you must import matplotlib")
         print("e.g. \"pip install 'climate-aware-task-scheduler[plots]'\"")
-        return None
+        return
 
     # Just for now pull the CI forecast apart... probably belongs as method...
     values = []
