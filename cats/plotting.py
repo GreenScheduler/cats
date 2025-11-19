@@ -89,5 +89,3 @@ def plotplan(CI_forecast, output):
     ax.set_ylim(bottom=0)  # start y-axis at 0, negative CI not possible!
 
     plt.show()
-
-    return None
