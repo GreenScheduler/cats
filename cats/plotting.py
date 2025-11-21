@@ -119,6 +119,8 @@ def plotplan(CI_forecast, output):
     labels.append(overlap_patch.get_label())
     ax.legend(handles=handles, labels=labels)
 
+    now_value = output.carbonIntensityNow.value
+    optimal_value = output.carbonIntensityOptimal.value
     # To avoid having to check if a user has (La)TeX available, to format the
     # units, use matploltib built-in lightweight TeX parser 'Mathtext' via
     # '$' symbols. Allows subscript on 2, etc. Needs a raw string to work.
@@ -136,7 +138,7 @@ def plotplan(CI_forecast, output):
     ax.text(
         0.45,
         1.0,
-        f"...if job started now: {output.carbonIntensityNow.value:.2f}",
+        f"...if job started now: {now_value:.2f}",
         ha="right",
         va="bottom",
         color=now_colour,
@@ -147,7 +149,7 @@ def plotplan(CI_forecast, output):
     ax.text(
         0.5,
         1.0,
-        f"|",
+        r"$\to$",
         ha="center",
         va="bottom",
         color="black",
@@ -157,12 +159,23 @@ def plotplan(CI_forecast, output):
     ax.text(
         0.55,
         1.0,
-        f"...at optimal time: {output.carbonIntensityOptimal.value:.2f}",
+        f"...at optimal time: {optimal_value:.2f}",
         ha="left",
         va="bottom",
         color=optimal_colour,
         fontsize=14,
         transform=ax.transAxes,
+    )
+
+    # For a nice illustration of CI saved, plot the lines corresponding to
+    # the mean value for the 'now' and 'optimal' cases:
+    plt.axhline(
+        y=now_value, color=now_colour, linestyle="--", alpha=0.4,
+        label="Mean if started now",
+    )
+    plt.axhline(
+        y=optimal_value, color=optimal_colour, linestyle="--", alpha=0.4,
+        label="Mean for optimal window"
     )
 
     # Include subtle markers at each data point, in case it helps to
