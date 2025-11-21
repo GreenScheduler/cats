@@ -119,20 +119,50 @@ def plotplan(CI_forecast, output):
     labels.append(overlap_patch.get_label())
     ax.legend(handles=handles, labels=labels)
 
-    # Add text to highlight values and for 'now' and 'optimal' job run times
+    # To avoid having to check if a user has (La)TeX available, to format the
+    # units, use matploltib built-in lightweight TeX parser 'Mathtext' via
+    # '$' symbols. Allows subscript on 2, etc. Needs a raw string to work.
+    units = r"$\mathrm{g\,CO_{2}\,eq\;kWh^{-1}}$"
+
     ax.text(
-        0.125,
-        1.075,
-        f"Mean carbon intensity if job started now: {output.carbonIntensityNow.value:.2f} gCO2eq/kWh",
+        0.5,
+        1.05,
+        f"Projected carbon intensity ({units}) mean...",
+        ha="center",
+        va="bottom",
+        fontsize=14,
         transform=ax.transAxes,
-        color=now_colour,
     )
     ax.text(
-        0.125,
-        1.025,
-        f"Mean carbon intensity at optimal time: {output.carbonIntensityOptimal.value:.2f} gCO2eq/kWh",
+        0.45,
+        1.0,
+        f"...if job started now: {output.carbonIntensityNow.value:.2f}",
+        ha="right",
+        va="bottom",
+        color=now_colour,
+        fontsize=14,
         transform=ax.transAxes,
+    )
+    # Separator to divide the two described figures ('now' and 'optimal')
+    ax.text(
+        0.5,
+        1.0,
+        f"|",
+        ha="center",
+        va="bottom",
+        color="black",
+        fontsize=14,
+        transform=ax.transAxes,
+    )
+    ax.text(
+        0.55,
+        1.0,
+        f"...at optimal time: {output.carbonIntensityOptimal.value:.2f}",
+        ha="left",
+        va="bottom",
         color=optimal_colour,
+        fontsize=14,
+        transform=ax.transAxes,
     )
 
     # Include subtle markers at each data point, in case it helps to
@@ -145,7 +175,7 @@ def plotplan(CI_forecast, output):
     ax.set_xlabel("Time (dd-mm-yy hh:mm)")
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
-    ax.set_ylabel("Forecast carbon intensity (gCO2eq/kWh)")
+    ax.set_ylabel(rf"Forecast carbon intensity ({units})")
     ax.label_outer()
 
     ax.grid(True)
