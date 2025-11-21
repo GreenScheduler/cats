@@ -24,11 +24,13 @@ def plotplan(CI_forecast, output):
     now_times = []
     opt_values = []
     opt_times = []
+
     # For our now and optimal series, start with the starting data (interpolated)
     opt_times.append(output.carbonIntensityOptimal.start)
     opt_values.append(output.carbonIntensityOptimal.start_value)
     now_times.append(output.carbonIntensityNow.start)
     now_values.append(output.carbonIntensityNow.start_value)
+
     # Build the three time series of point from the API
     for point in CI_forecast:
         values.append(point.value)
@@ -45,11 +47,22 @@ def plotplan(CI_forecast, output):
         ):
             now_values.append(point.value)
             now_times.append(point.datetime)
+
     # For our now and optimal series, end with the end data (interpolated)
     opt_times.append(output.carbonIntensityOptimal.end)
     opt_values.append(output.carbonIntensityOptimal.end_value)
     now_times.append(output.carbonIntensityNow.end)
     now_values.append(output.carbonIntensityNow.end_value)
+
+    # Determine if there is any window overlap, since then we add an extra
+    # element to the legend to make clear how the overlap region looks but
+    # otherwise we can leave it out. There will be an overlap if the end of
+    # the 'now' time is more than the start of the optimal time since the
+    # optimal is only ever time shifted forwards.
+    windows_overlap = (
+        output.carbonIntensityNow.end >
+        output.carbonIntensityOptimal.start
+    )
 
     # Make the plot (should probably take fig and ax as opt args...)
 
@@ -101,23 +114,24 @@ def plotplan(CI_forecast, output):
     # In case the 'now' and 'optimal' windows overlap, is nice to show just
     # how that looks on legend, namely crosshatch in an (ugly) khaki colour
     # that represents the mixture of the transparent red and green. To do
-    # this, use matplotlib's patches to create a proxy object i.e. patch:
-    overlap_patch = Rectangle(
-        # Arbitrary huge number to ensure dummy patch is outside plot area
-        (1e10, 1e10),
-        1,
-        1,
-        facecolor="#6f8d4a",  # exact mix colour from image colour picker tool
-        edgecolor="k",
-        hatch="////\\\\\\\\",
-        label="Overlap area (now + optimal)",
-        transform=ax.transAxes,  # << use axes coords instead of data coords
-    )
-    ax.add_patch(overlap_patch)
-    handles, labels = ax.get_legend_handles_labels()
-    handles.append(overlap_patch)
-    labels.append(overlap_patch.get_label())
-    ax.legend(handles=handles, labels=labels)
+    # this, use matplotlib's patches to create a proxy object i.e. patch.
+    if windows_overlap:
+        overlap_patch = Rectangle(
+            # Arbitrary huge number to ensure dummy patch is outside plot area
+            (1e10, 1e10),
+            1,
+            1,
+            facecolor="#6f8d4a",  # mix colour from image colour picker tool
+            edgecolor="k",
+            hatch="////\\\\\\\\",
+            label="Overlap area (now + optimal)",
+            transform=ax.transAxes,  # << use axes coords instead of data coords
+        )
+        ax.add_patch(overlap_patch)
+        handles, labels = ax.get_legend_handles_labels()
+        handles.append(overlap_patch)
+        labels.append(overlap_patch.get_label())
+        ax.legend(handles=handles, labels=labels)
 
     now_value = output.carbonIntensityNow.value
     optimal_value = output.carbonIntensityOptimal.value
