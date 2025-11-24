@@ -1,0 +1,40 @@
+from datetime import datetime, timezone
+
+import requests_cache
+from requests.exceptions import ConnectionError
+from .forecast import CarbonIntensityPointEstimate
+
+
+def get_CI_forecast(
+    location: str, CI_API_interface
+) -> list[CarbonIntensityPointEstimate]:
+    """
+    Get carbon intensity from an API
+
+    Given the location and an API interface, return a list of predictions of the
+    future carbon intensity.
+
+    param location: [str] Depends on country. UK postcode (just the first section), e.g. M15.
+    returns: a list of CarbonIntensityPointEstimate
+    """
+
+    # Setup a session for the API call. This uses a global HTTP cache
+    # with the URL as the key. Failed attempts are not cached.
+    session = requests_cache.CachedSession("cats_cache", use_temp=True)
+
+    # get the carbon intensity api data
+    request_url = CI_API_interface.get_request_url(datetime.now(timezone.utc), location)
+    try:
+        r = session.get(request_url)  
+        data = r.json()
+        return CI_API_interface.parse_response_data(data)
+    except ConnectionError:
+        print(f"Unable to connect to the API {request_url} at the moment. Please try again. If the issue is persistent it may be that the API is unavailable for some reason so investigate whether that may be the case.")
+        return []
+
+
+if __name__ == "__main__":  # pragma: no cover
+    from .CI_api_interface import API_interfaces
+
+    # test example using Manchester as a location
+    data_tuples = get_CI_forecast("M15", API_interfaces["carbonintensity.org.uk"])

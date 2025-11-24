@@ -1,0 +1,58 @@
+[build-system]
+  requires = ['setuptools>=61.0.0']
+  build-backend = 'setuptools.build_meta'
+
+[tool.setuptools]
+  packages = ["cats"]
+  package-data.cats = ["config.yml"]
+
+[project]
+  name = "climate-aware-task-scheduler"
+  dynamic = ["version"]
+  description = "Climate aware task scheduler"
+  authors = [
+    { name = "Colin Sauze" },
+    { name = "Andrew Walker"},
+    { name = "Loïc Lannelongue" },
+    { name = "Thibault Lestang" },
+    { name = "Tony Greenberg" },
+    { name = "Lincoln Colling" },
+    { name = "Adam Ward" },
+    { name = "Abhishek Dasgupta" },
+    { name = "Carlos Martinez" },
+    { name = "Sadie Bartholomew" }
+  ]
+  license = { file = "LICENSE" }
+  requires-python = ">=3.9"
+  readme = "README.md"
+  classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+  ]
+  dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
+
+  [tool.setuptools.dynamic]
+    version = {attr = "cats.__version__"}
+
+  [tool.pytest.ini_options]
+    markers = ["fixt_data: data for fixtures"]
+
+  [project.optional-dependencies]
+    test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov", "matplotlib>=3.0"]
+    types = ["mypy", "types-PyYAML", "types-redis", "types-requests", "types-ujson"]
+    docs = ["sphinx==6.*", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton"]
+    plots = ["matplotlib>=3.0"]
+
+  [project.urls]
+    Home = "https://github.com/GreenScheduler/cats"
+
+  [project.scripts]
+    cats = "cats:main"
+
+  [tool.ruff.lint]
+    # Pyflakes (`F`), subset of the pycodestyle (`E`) and unsorted imports (`I001`)
+    select = ["E4", "E7", "E9", "F", "I001"]

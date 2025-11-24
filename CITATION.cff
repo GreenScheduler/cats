@@ -1,0 +1,84 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Bartholomew
+  given-names: Sadie L.
+  orcid: "https://orcid.org/0000-0002-6180-3603"
+- family-names: Colling
+  given-names: Lincoln
+  orcid: "https://orcid.org/0000-0002-3572-7758"
+- family-names: Dasgupta
+  given-names: Abhishek
+  orcid: "https://orcid.org/0000-0003-4420-0656"
+- family-names: Greenberg
+  given-names: Anthony J.
+  orcid: "https://orcid.org/0000-0003-3296-5811"
+- family-names: Lannelongue
+  given-names: Loïc
+  orcid: "https://orcid.org/0000-0002-9135-1345"
+- family-names: Lestang
+  given-names: Thibault
+  orcid: "https://orcid.org/0000-0001-6770-2638"
+- family-names: Martinez-Ortiz
+  given-names: Carlos
+  orcid: "https://orcid.org/0000-0001-5565-7577"
+- family-names: Sauzé
+  given-names: Colin
+  orcid: "https://orcid.org/0000-0001-5368-9217"
+- family-names: Walker
+  given-names: Andrew M.
+  orcid: "https://orcid.org/0000-0003-3121-3255"
+- family-names: Ward
+  given-names: Adam Stuart
+  orcid: "https://orcid.org/0009-0008-3463-2694"
+contact:
+- family-names: Walker
+  given-names: Andrew M.
+  orcid: "https://orcid.org/0000-0003-3121-3255"
+doi: 10.5281/zenodo.15753041
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Bartholomew
+    given-names: Sadie L.
+    orcid: "https://orcid.org/0000-0002-6180-3603"
+  - family-names: Colling
+    given-names: Lincoln
+    orcid: "https://orcid.org/0000-0002-3572-7758"
+  - family-names: Dasgupta
+    given-names: Abhishek
+    orcid: "https://orcid.org/0000-0003-4420-0656"
+  - family-names: Greenberg
+    given-names: Anthony J.
+    orcid: "https://orcid.org/0000-0003-3296-5811"
+  - family-names: Lannelongue
+    given-names: Loïc
+    orcid: "https://orcid.org/0000-0002-9135-1345"
+  - family-names: Lestang
+    given-names: Thibault
+    orcid: "https://orcid.org/0000-0001-6770-2638"
+  - family-names: Martinez-Ortiz
+    given-names: Carlos
+    orcid: "https://orcid.org/0000-0001-5565-7577"
+  - family-names: Sauzé
+    given-names: Colin
+    orcid: "https://orcid.org/0000-0001-5368-9217"
+  - family-names: Walker
+    given-names: Andrew M.
+    orcid: "https://orcid.org/0000-0003-3121-3255"
+  - family-names: Ward
+    given-names: Adam Stuart
+    orcid: "https://orcid.org/0009-0008-3463-2694"
+  date-published: 2025-07-08
+  doi: 10.21105/joss.08251
+  issn: 2475-9066
+  issue: 111
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 8251
+  title: "CATS: The Climate Aware Task Scheduler"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.08251"
+  volume: 10
+title: "CATS: The Climate Aware Task Scheduler"

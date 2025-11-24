@@ -1,0 +1,15 @@
+profiles:
+  my_cpu_only_profile:
+    cpu:
+      model: "Xeon Gold 6142"
+      power: 9.4 # in W, per core
+      nunits: 2
+  my_gpu_profile:
+    gpu:
+      model: "NVIDIA A100-SXM-80GB GPUs"
+      power: 300
+      nunits: 2
+    cpu:
+      model: "AMD EPYC 7763"
+      power: 4.4
+      nunits: 1
