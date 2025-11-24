@@ -74,7 +74,10 @@ def plotplan(CI_forecast, output):
     now_colour = "tab:red"
     optimal_colour = "tab:green"
 
-    fig, ax = plt.subplots()
+    # Supply a figsize a bit different o the default (6.4, 4.8) to make the
+    # plot a little bit more square else the x-axis label gets a bit cut off
+    # due to long datetime labels
+    fig, ax = plt.subplots(figsize=(7.0, 5.5))
 
     # Filling under curves for the forecast, run now time and optimal run time
     ax.fill_between(
@@ -225,7 +228,7 @@ def plotplan(CI_forecast, output):
             # Note \text{} required around '-' symbol else it is
             # interpreted as a minus sign and becomes so long with spacing
             # around that it pushes the x axis label off the figure below
-            date_bold = dt.strftime(r"\mathbf{%d\text{-}%m\text{-}%y}")
+            date_bold = dt.strftime(r"\mathbf{%y\text{-}%m\text{-}%d}")
             time_part = dt.strftime("%H:%M")
             return f"${date_bold}\ {time_part}$"
 
@@ -235,7 +238,7 @@ def plotplan(CI_forecast, output):
 
     # The x axis label needs some padding at the figure foot else it gets a
     # bit cut off due to the length of some datetime x labels
-    ax.set_xlabel("Time (yy-mm-dd hh:mm)")
+    ax.set_xlabel(r"Time ($\mathbf{yy\text{-}mm\text{-}dd}$ hh:mm)")
     ax.xaxis.set_major_formatter(FuncFormatter(tick_formatting))
     ax.xaxis.set_minor_formatter(mdates.DateFormatter("%y-%m-%d %H:%M"))
     ax.set_ylabel(rf"Forecast carbon intensity ({units})")
