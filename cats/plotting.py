@@ -2,6 +2,7 @@ try:
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     from matplotlib.patches import Rectangle
+    from matplotlib.ticker import FuncFormatter
 
     have_matplotlib = True
 except ImportError:
@@ -60,8 +61,7 @@ def plotplan(CI_forecast, output):
     # the 'now' time is more than the start of the optimal time since the
     # optimal is only ever time shifted forwards.
     windows_overlap = (
-        output.carbonIntensityNow.end >
-        output.carbonIntensityOptimal.start
+        output.carbonIntensityNow.end > output.carbonIntensityOptimal.start
     )
 
     # Make the plot (should probably take fig and ax as opt args...)
@@ -184,12 +184,18 @@ def plotplan(CI_forecast, output):
     # For a nice illustration of CI saved, plot the lines corresponding to
     # the mean value for the 'now' and 'optimal' cases:
     plt.axhline(
-        y=now_value, color=now_colour, linestyle="--", alpha=0.4,
+        y=now_value,
+        color=now_colour,
+        linestyle="--",
+        alpha=0.4,
         label="Mean if started now",
     )
     plt.axhline(
-        y=optimal_value, color=optimal_colour, linestyle="--", alpha=0.4,
-        label="Mean for optimal window"
+        y=optimal_value,
+        color=optimal_colour,
+        linestyle="--",
+        alpha=0.4,
+        label="Mean for optimal window",
     )
 
     # Include subtle markers at each data point, in case it helps to
@@ -199,9 +205,39 @@ def plotplan(CI_forecast, output):
     ax.scatter(now_times, now_values, color=now_colour, s=8, alpha=0.3)
     ax.scatter(opt_times, opt_values, color=optimal_colour, s=8, alpha=0.3)
 
-    ax.set_xlabel("Time (dd-mm-yy hh:mm)")
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
-    ax.xaxis.set_minor_formatter(mdates.DateFormatter("%d-%m-%y %H:%M"))
+    def tick_formatting(x, pos):
+        """Format datetimes so the x-axis labels become more readable.
+
+        Namely, only show the full 'yy-mm-dd hh:mm' format date at the start
+        of a day i.e. at hh:mm = 00:00, doing so in bold to provide emphasis.
+        Otherwise show an ellipsis and then the hh:mm component only. This
+        makes it much quicker for a reader to parse the date and time
+        axis span and partitioning.
+        """
+        dt = mdates.num2date(x)
+
+        # Would otherwise always full date at the first tick, as well as
+        # at every point we get to a new day i.e. 00:00 (every four major
+        # ticks), but then the date runs off the figure area to the left. So
+        # it should be clear enough with two full dates plotted - which will
+        # be the case always since we have a 48 hour window
+        if dt.hour == 0 and dt.minute == 0:
+            # Note \text{} required around '-' symbol else it is
+            # interpreted as a minus sign and becomes so long with spacing
+            # around that it pushes the x axis label off the figure below
+            date_bold = dt.strftime(r"\mathbf{%d\text{-}%m\text{-}%y}")
+            time_part = dt.strftime("%H:%M")
+            return f"${date_bold}\ {time_part}$"
+
+        # All other ticks → ellipsis + time
+        time_part = dt.strftime("%H:%M")
+        return f"$\ldots\ {time_part}$"
+
+    # The x axis label needs some padding at the figure foot else it gets a
+    # bit cut off due to the length of some datetime x labels
+    ax.set_xlabel("Time (yy-mm-dd hh:mm)")
+    ax.xaxis.set_major_formatter(FuncFormatter(tick_formatting))
+    ax.xaxis.set_minor_formatter(mdates.DateFormatter("%y-%m-%d %H:%M"))
     ax.set_ylabel(rf"Forecast carbon intensity ({units})")
     ax.label_outer()
 
@@ -211,4 +247,5 @@ def plotplan(CI_forecast, output):
     fig.autofmt_xdate()
     ax.set_ylim(bottom=0)  # start y-axis at 0, negative CI not possible!
 
+    plt.subplots_adjust(bottom=0.20)
     plt.show()
