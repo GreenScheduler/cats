@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing &mdash; CATS 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+      <link rel="stylesheet" type="text/css" href="_static/fonts.css" />
+
+  
+    <link rel="shortcut icon" href="_static/favicon-32x32.png"/>
+      <script src="_static/jquery.js"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+      <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+      <script src="_static/doctools.js"></script>
+      <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/clipboard.min.js"></script>
+      <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="API Reference" href="api-reference.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            CATS
+              <img src="_static/cats_dalle_img_200x200px_for_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use-with-schedulers.html">Use with Schedulers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli-reference.html">Command-line (CLI) reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-reference.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#i-have-a-question">I Have a Question</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#i-want-to-contribute">I Want To Contribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reporting-bugs">Reporting Bugs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#before-submitting-a-bug-report">Before Submitting a Bug Report</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-do-i-submit-a-good-bug-report">How Do I Submit a Good Bug Report?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#suggesting-enhancements">Suggesting Enhancements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#before-submitting-an-enhancement">Before Submitting an Enhancement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-do-i-submit-a-good-enhancement-suggestion">How Do I Submit a Good Enhancement Suggestion?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing-code-or-documentation">Contributing code or documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adding-a-feature-making-a-change">Adding a feature / making a change</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#making-a-new-release">Making a new release</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#attribution">Attribution</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CATS</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>Contributing<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<p>First off, thanks for taking the time to contribute!</p>
+<p>All types of contributions are encouraged and valued. See the below for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. All contributors are expected to abide by our code of conduct (see CODE_OF_CONDUCT.md in the repository).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>And if you like the project, but just don’t have time to contribute, that’s fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about.
+These include staring the project, writing about the project, referring to this project in your project’s readme,
+mentioning the project at local meetups, and telling your friends/colleagues.</p>
+</div>
+<section id="i-have-a-question">
+<h2>I Have a Question<a class="headerlink" href="#i-have-a-question" title="Permalink to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to ask a question, we assume that you have read the available documentation (at <a class="reference external" href="https://cats.readthedocs.io/">https://cats.readthedocs.io/</a>).</p>
+</div>
+<p>Before you ask a question, it is best to search for existing issues (see <a class="reference external" href="https://github.com/GreenScheduler/cats/issues">https://github.com/GreenScheduler/cats/issues</a>) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue. It is also advisable to search the internet for answers first.</p>
+<p>If you then still feel the need to ask a question and need clarification, we recommend the following:</p>
+<ul class="simple">
+<li><p>Open an issue (<a class="reference external" href="https://github.com/GreenScheduler/cats/issues/new">https://github.com/GreenScheduler/cats/issues/new</a>).</p></li>
+<li><p>Provide as much context as you can about what you’re running into.</p></li>
+<li><p>Provide project and platform versions (python version etc), depending on what seems relevant.</p></li>
+<li><p>We use labels on GitHub to manage issues. Please add the “question” label to your issue.</p></li>
+</ul>
+<p>We will then take care of the issue as soon as possible.</p>
+</section>
+<section id="i-want-to-contribute">
+<h2>I Want To Contribute<a class="headerlink" href="#i-want-to-contribute" title="Permalink to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When contributing to this project, you must agree that you have authored 100% of the content, that you have the necessary rights to the content and that the content you contribute may be provided under the project licence.</p>
+</div>
+</section>
+<section id="reporting-bugs">
+<h2>Reporting Bugs<a class="headerlink" href="#reporting-bugs" title="Permalink to this heading"></a></h2>
+<section id="before-submitting-a-bug-report">
+<h3>Before Submitting a Bug Report<a class="headerlink" href="#before-submitting-a-bug-report" title="Permalink to this heading"></a></h3>
+<p>A good bug report shouldn’t leave others needing to chase you up for more information. Therefore, we ask you to investigate carefully, collect information and describe the issue in detail in your report. Please complete the following steps in advance to help us fix any potential bug as easily as possible.</p>
+<ul class="simple">
+<li><p>Make sure that you are using the latest version.</p></li>
+<li><p>Determine if your bug is really a bug and not an error on your side e.g. using incompatible environment components/versions. Make sure that you have read the documentation at <a class="reference external" href="https://cats.readthedocs.io/">https://cats.readthedocs.io/</a>). If you are looking for support, you might want to check the section above.</p></li>
+<li><p>To see if other users have experienced (and potentially already solved) the same issue you are having, check if there is not already a bug report existing for your bug or error in the bug tracker (see <a class="reference external" href="https://github.com/GreenScheduler/cats/issues?q=label%3Abug">https://github.com/GreenScheduler/cats/issues?q=label%3Abug</a>).</p></li>
+<li><p>Also make sure to search the internet (including Stack Overflow) to see if users outside of the GitHub community have discussed the issue.</p></li>
+<li><p>Collect information about the bug:</p>
+<ul>
+<li><p>OS, Platform and Version (Windows, Linux, macOS, x86, ARM)</p></li>
+<li><p>Version of python and your python environment, package manager, and how you installed CATS.</p></li>
+<li><p>Possibly your input and the output</p></li>
+<li><p>Can you reliably reproduce the issue? And can you also reproduce it with older versions?</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="how-do-i-submit-a-good-bug-report">
+<h3>How Do I Submit a Good Bug Report?<a class="headerlink" href="#how-do-i-submit-a-good-bug-report" title="Permalink to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You must never report security related issues, vulnerabilities or bugs including sensitive information to the issue tracker, or elsewhere in public. Instead sensitive bugs must be sent by email to Andrew Walker (<a class="reference external" href="mailto:andrew&#46;walker&#37;&#52;&#48;earth&#46;ox&#46;ac&#46;uk">andrew<span>&#46;</span>walker<span>&#64;</span>earth<span>&#46;</span>ox<span>&#46;</span>ac<span>&#46;</span>uk</a>) and/or
+Loïc Lannelongue (<a class="reference external" href="mailto:ll582&#37;&#52;&#48;medschl&#46;cam&#46;ac&#46;uk">ll582<span>&#64;</span>medschl<span>&#46;</span>cam<span>&#46;</span>ac<span>&#46;</span>uk</a>) .</p>
+</div>
+<p>We use GitHub issues to track bugs and errors. If you run into an issue with the project:</p>
+<ul class="simple">
+<li><p>Open an Issue at <a class="reference external" href="https://github.com/GreenScheduler/cats/issues/new">https://github.com/GreenScheduler/cats/issues/new</a>. (Since we can’t be sure at this point whether it is a bug or not, we ask you not to talk about a bug yet and not to label the issue.)</p></li>
+<li><p>Explain the behavior you would expect and the actual behavior.</p></li>
+<li><p>Please provide as much context as possible and describe the <em>reproduction steps</em> that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.</p></li>
+<li><p>Provide the information you collected in the previous section.</p></li>
+</ul>
+<p>Once it’s filed:</p>
+<ul class="simple">
+<li><p>The project team will label the issue accordingly.</p></li>
+<li><p>A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as <cite>needs-repro</cite>. Bugs with the <cite>needs-repro</cite> tag will not be addressed until they are reproduced.</p></li>
+<li><p>If the team is able to reproduce the issue, it will be marked <cite>needs-fix</cite>, as well as possibly other tags (such as <cite>critical</cite>), and the issue will be left to be [implemented by someone](#your-first-code-contribution).</p></li>
+</ul>
+</section>
+</section>
+<section id="suggesting-enhancements">
+<h2>Suggesting Enhancements<a class="headerlink" href="#suggesting-enhancements" title="Permalink to this heading"></a></h2>
+<p>This section guides you through submitting an enhancement suggestion for cats, <strong>including completely new features and minor improvements to existing functionality</strong>. Following these guidelines will help maintainers and the community to understand your suggestion and find related suggestions.</p>
+<section id="before-submitting-an-enhancement">
+<h3>Before Submitting an Enhancement<a class="headerlink" href="#before-submitting-an-enhancement" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Make sure that you are using the latest version.</p></li>
+<li><p>Read the documentation at <a class="reference external" href="https://cats.readthedocs.io/">https://cats.readthedocs.io/</a> carefully and find out if the functionality is already covered, maybe by an individual configuration.</p></li>
+<li><p>Search <a class="reference external" href="https://github.com/GreenScheduler/cats/issues">https://github.com/GreenScheduler/cats/issues</a> to see if the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.</p></li>
+<li><p>Find out whether your idea fits with the scope and aims of the project. It’s up to you to make a strong case to convince the project’s developers of the merits of this feature. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset. If you’re just targeting a minority of users, consider writing an add-on/plugin library.</p></li>
+</ul>
+</section>
+<section id="how-do-i-submit-a-good-enhancement-suggestion">
+<h3>How Do I Submit a Good Enhancement Suggestion?<a class="headerlink" href="#how-do-i-submit-a-good-enhancement-suggestion" title="Permalink to this heading"></a></h3>
+<p>Enhancement suggestions are tracked as GitHub issues (<a class="reference external" href="https://github.com/GreenScheduler/cats/issues">https://github.com/GreenScheduler/cats/issues</a>).</p>
+<ul class="simple">
+<li><p>Use a <strong>clear and descriptive title</strong> for the issue to identify the suggestion.</p></li>
+<li><p>Provide a <strong>step-by-step description of the suggested enhancement</strong> in as many details as possible.</p></li>
+<li><p><strong>Describe the current behavior</strong> and <strong>explain which behavior you expected to see instead</strong> and why. At this point you can also tell which alternatives do not work for you.</p></li>
+<li><p><strong>Explain why this enhancement would be useful</strong> to most cats users. You may also want to point out the other projects that solved it better and which could serve as inspiration.</p></li>
+</ul>
+</section>
+</section>
+<section id="contributing-code-or-documentation">
+<h2>Contributing code or documentation<a class="headerlink" href="#contributing-code-or-documentation" title="Permalink to this heading"></a></h2>
+<p>We also welcome contributions in the form of improvements to the code or documentation. Information to help make this process as smooth as possible is below.</p>
+<section id="adding-a-feature-making-a-change">
+<h3>Adding a feature / making a change<a class="headerlink" href="#adding-a-feature-making-a-change" title="Permalink to this heading"></a></h3>
+<p>Ideally, all significant changes would be discussed in an issue as outlined above before
+time is spent writing code (see asking questions, reporting bugs, and suggesting enhancements),
+but however changes are made we would like them to be fed into the CATS code via a pull
+request against the <code class="docutils literal notranslate"><span class="pre">main</span></code> branch on github. These pull requests should
+outline the reason for the change,
+reference any previous discussion, and note any significant issues that may need
+further consideration. A maintainer with write access to the main
+CATS repository who has not been directly involved in
+writing the new code or documentation will need to review the pull request prior to merging.</p>
+<p>We do not have a formal style guide, but code changes and additions should seek to follow the style
+established by the existing CATS codebase. CATS has a fairly comprehensive test suite that runs
+automatically against all pull requests and new code should either come with new tests or with an
+explanation about why tests for the new code are not included. Please indicate where changes to
+behavior have been made (especially where this means changes to the tests have also been needed).
+CATS includes documentation which should be updated by the pull requests making changes to the
+code (although documentation only pull requests are welcome). Some of this documentation is
+automatically generated (from doc strings and help text for command line tools) so please make
+sure that this internal documentation is up to date.</p>
+<p>Testing can also be undertaken in an isolated environment prior to making a pull request and this
+can make code development significantly easer. We run tests using <code class="docutils literal notranslate"><span class="pre">flake8</span></code> for basic linting,
+<code class="docutils literal notranslate"><span class="pre">pytest</span></code> for the majority of unit and integration tests, and <code class="docutils literal notranslate"><span class="pre">mypy</span></code> to check type annotations
+and for the static analysis this permits. In a checked out copy of the source, the following installs
+the prerequisites and runs all tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s1">&#39;.[test]&#39;</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">flake8</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="s1">&#39;.[types]&#39;</span>
+<span class="n">flake8</span> <span class="o">.</span> <span class="o">--</span><span class="n">count</span> <span class="o">--</span><span class="n">select</span><span class="o">=</span><span class="n">E9</span><span class="p">,</span><span class="n">F63</span><span class="p">,</span><span class="n">F7</span><span class="p">,</span><span class="n">F82</span> <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">source</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">mypy</span> <span class="n">cats</span>
+<span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span>
+</pre></div>
+</div>
+<p>A new build incorporating any updates to the documentation is automatically generated for each PR
+and will become available from a link within the pull request.</p>
+</section>
+<section id="making-a-new-release">
+<h3>Making a new release<a class="headerlink" href="#making-a-new-release" title="Permalink to this heading"></a></h3>
+<p>Those of us with commit access to the main CATS repository on GitHub are able to generate a new release and publish this to PyPI. This
+should be discussed ahead of time (via a PR changing the version string, see 1 below) and once broad agreement is in place a release can be created as follows:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Merge a pull request onto main that updates the CATS version number <code class="docutils literal notranslate"><span class="pre">__version__</span></code> in <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> and adds any release notes / key changes to the documentation. We use a “major.minor.patch” semantic versioning scheme; for bug fixes etc. bump the patch number, for significant new features bump the minor version number, for changes that break previous behavior update the major version number.</p></li>
+<li><p>Check that all tests have passed after the merge and that the “latest” documentation at read the docs is updated.</p></li>
+<li><p>Create a release via the GitHub web interface. This involves creating a new tag (“v1.2.3” for version “1.2.3”), giving the release a name (just “1.2.3”), and adding short release notes using markdown as needed. Make sure this is “set as the latest release”.</p></li>
+<li><p>After a short time you should be able to check that the new release exists on PyPI and is documented in the stable docs on read the docs.</p></li>
+</ol>
+</div></blockquote>
+</section>
+</section>
+<section id="attribution">
+<h2>Attribution<a class="headerlink" href="#attribution" title="Permalink to this heading"></a></h2>
+<p>This guide is based on <a class="reference external" href="https://contributing.md/generator">https://contributing.md/generator</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api-reference.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Colin Sauze, Andrew Walker, Loïc Lannelongue, Thibault Lestang, Tony Greenberg, Lincoln Colling, Adam Ward, Abhishek Dasgupta, Carlos Martinez and Sadie Bartholomew.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
