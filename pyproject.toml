@@ -23,7 +23,7 @@
     { name = "Sadie Bartholomew" }
   ]
   license = { file = "LICENSE" }
-  requires-python = ">=3.9"
+  requires-python = ">=3.10"
   readme = "README.md"
   classifiers = [
     "License :: OSI Approved :: MIT License",
