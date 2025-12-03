@@ -7,7 +7,7 @@ CATS is a **C**limate-**A**ware **T**ask **S**cheduler. It schedules cluster job
 The Climate-Aware Task Scheduler is a lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment. This tool uses real-time carbon intensity data from the National Grid ESO via their API to estimate the carbon intensity of the electricity grid, and schedules tasks at times when the estimated carbon intensity is lowest. This helps to reduce the carbon emissions associated with running computationally intensive tasks, making it an ideal solution for environmentally conscious developers.
 
 *Demo showing CATS scheduling a 30 minute job using the `at` scheduler*
-![CATS animated usage example](cats.gif)
+![CATS animated usage example](docs/source/_static/cats.gif)
 
 > [!NOTE]
 > Currently CATS only works in the UK. If you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know.
@@ -29,14 +29,14 @@ at the `RG1` postcode and show visually the carbon intensity curve and optimal w
 the `--plot` argument:
 
 ```bash
-cats --duration 100 --location "RG2" --plot
+cats --duration 180 --location "RG1" --plot
 ```
 
 which produced (when run at ~18:20 on 2025-12-03, for context) a forecast minimum of
 `174.26 gCO2eq/kWh` at `2025-12-04 03:54:34` as reported in the STDOUT and
 illustrated by the resulting plot of:
 
-![CATS command run plot example output for RG1 and 3 hour job](example_plot_output_rg1_180mins.png)
+![CATS command run plot example output for RG1 and 3 hour job](docs/source/_static/example_plot_output_rg1_180mins.png)
 
 ## Installation
 
