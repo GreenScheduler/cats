@@ -22,6 +22,22 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 - Lightweight and easy to integrate into existing workflows
 - Supports Python 3.9+
 
+## Brief example with plot to illustrate
+
+To find the minimal carbon intensity window for a 3 hour (`180` minute duration) job running
+at the `RG1` postcode and show visually the carbon intensity curve and optimal window with
+the `--plot` argument:
+
+```bash
+cats --duration 100 --location "RG2" --plot
+```
+
+which produced (when run at ~18:20 on 2025-12-03, for context) a forecast minimum of
+`174.26 gCO2eq/kWh` at `2025-12-04 03:54:34` as reported in the STDOUT and
+illustrated by the resulting plot of:
+
+![CATS command run plot example output for RG1 and 3 hour job](example_plot_output_rg1_180mins.png)
+
 ## Installation
 
 Install via `pip` as follows:
