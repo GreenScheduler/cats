@@ -28,12 +28,25 @@ To find the minimal carbon intensity window for a 3 hour (`180` minute duration)
 at the `RG1` postcode and show visually the carbon intensity curve and optimal window with
 the `--plot` argument:
 
-```bash
-cats --duration 180 --location "RG1" --plot
+```console
+$ cats --duration 180 --location "RG1" --plot
+...
+
+The.____ ..... __ .... ________ . ______...
+.. /  __)...../  \....(__    __).)  ____)....
+..|  /......./    \......|  |...(  (___........
+..| |limate./  ()  \ware.|  |ask.\___  \cheduler
+..|  \__...|   __   |....|  |....____)  )....
+...\    )..|  (..)  |....|  |...(      (..
+
+
+Best job start time                       = 2026-01-22 10:10:31
+Carbon intensity if job started now       = 217.41 gCO2eq/kWh
+Carbon intensity at optimal time          = 118.65 gCO2eq/kWh
 ```
 
-which produced (when run at ~18:20 on 2025-12-03, for context) a forecast minimum of
-`174.26 gCO2eq/kWh` at `2025-12-04 03:54:34` as reported in the STDOUT and
+which produced at the time run (`Tue 20 Jan 15:40:21 GMT 2026`) a forecast minimum of
+`118.65 gCO2eq/kWh` for job start time `2026-01-22 10:10:31` as reported in the STDOUT above and
 illustrated by the resulting plot of:
 
 ![CATS command run plot example output for RG1 and 3 hour job](docs/source/_static/example_plot_output_rg1_180mins.png)
