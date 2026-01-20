@@ -13,8 +13,7 @@ You can run CATS with:
               are provided.*
 
    $ cats --duration 480 --location "EH8"
-   WARNING:root:config file not found
-   WARNING:root:Unspecified carbon intensity forecast service, using carbonintensity.org.uk
+   ...
 
    The.____ ..... __ .... ________ . ______...
    .. /  __)...../  \....(__    __).)  ____)....
@@ -56,8 +55,7 @@ compared to at the optimal time. For example:
               minimisation for the optimal window.*
 
    $ cats --duration 180 --location "RG1" --plot
-   WARNING:root:config file not found
-   WARNING:root:Unspecified carbon intensity forecast service, using carbonintensity.org.uk
+   ...
 
    The.____ ..... __ .... ________ . ______...
    .. /  __)...../  \....(__    __).)  ____)....
