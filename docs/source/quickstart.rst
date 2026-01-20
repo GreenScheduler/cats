@@ -13,6 +13,20 @@ You can run CATS with:
               are provided.*
 
    $ cats --duration 480 --location "EH8"
+   WARNING:root:config file not found
+   WARNING:root:Unspecified carbon intensity forecast service, using carbonintensity.org.uk
+
+   The.____ ..... __ .... ________ . ______...
+   .. /  __)...../  \....(__    __).)  ____)....
+   ..|  /......./    \......|  |...(  (___........
+   ..| |limate./  ()  \ware.|  |ask.\___  \cheduler
+   ..|  \__...|   __   |....|  |....____)  )....
+   ...\    )..|  (..)  |....|  |...(      (..
+
+
+   Best job start time                       = 2026-01-22 01:43:27
+   Carbon intensity if job started now       = 43.23 gCO2eq/kWh
+   Carbon intensity at optimal time          = 1.66 gCO2eq/kWh
 
 The ``--location`` option is optional, and can be pulled from a
 configuration file (see :ref:`configuration-file`), or inferred using
@@ -42,8 +56,25 @@ compared to at the optimal time. For example:
               minimisation for the optimal window.*
 
    $ cats --duration 180 --location "RG1" --plot
+   WARNING:root:config file not found
+   WARNING:root:Unspecified carbon intensity forecast service, using carbonintensity.org.uk
 
-The optimal window is where the area under the curve is minimised.
+   The.____ ..... __ .... ________ . ______...
+   .. /  __)...../  \....(__    __).)  ____)....
+   ..|  /......./    \......|  |...(  (___........
+   ..| |limate./  ()  \ware.|  |ask.\___  \cheduler
+   ..|  \__...|   __   |....|  |....____)  )....
+   ...\    )..|  (..)  |....|  |...(      (..
+
+
+   Best job start time                       = 2026-01-22 10:10:31
+   Carbon intensity if job started now       = 217.41 gCO2eq/kWh
+   Carbon intensity at optimal time          = 118.65 gCO2eq/kWh
+
+![CATS command run plot example output for RG1 and 3 hour job](docs/source/_static/example_plot_output_rg1_180mins.png)
+
+The optimal window is where the area under the curve is minimised, as
+highlighted in the plot ('Optimal job window').
 
 .. _configuration-file:
 
