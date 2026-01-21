@@ -69,7 +69,10 @@ compared to at the optimal time. For example:
    Carbon intensity if job started now       = 217.41 gCO2eq/kWh
    Carbon intensity at optimal time          = 118.65 gCO2eq/kWh
 
-![CATS command run plot example output for RG1 and 3 hour job](docs/source/_static/example_plot_output_rg1_180mins.png)
+.. image:: _static/example_plot_output_rg1_180mins.png
+  :width: 400
+  :alt: CATS command run plot example output for RG1 and 3 hour job. The graph shows the forcast carbon intensity, a red region representing running the job now and a green region of lower intensity representing running the job in the future.
+  :align: center
 
 The optimal window is where the area under the curve is minimised, as
 highlighted in the plot ('Optimal job window').
