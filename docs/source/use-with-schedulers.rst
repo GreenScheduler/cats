@@ -33,7 +33,7 @@ till the optimal start time:
 Demonstration
 ^^^^^^^^^^^^^
 
-.. image:: ../../cats.gif
+.. image:: _static/cats.gif
   :width: 400
   :alt: A video demonstration of CATS being used standalone and with ``at``.
   :align: center
