@@ -87,4 +87,3 @@ to be estimated along with the implied CO$_2$ cost if it were to be run now, or 
 were to be delayed to minimise the carbon intensity. In addition, this information can be included 
 in graphical output.
 
-.. bibliography::
