@@ -4,11 +4,11 @@ Approach and Implementation
 ===========================
 
 There are several approaches that have been proposed and/or implemented to reduce the carbon footprint 
-of computing. These include interventions in procurement to maximise the useful life of computer 
+of computing. These include interventions in procurement to maximize the useful life of computer 
 hardware and thus reduce the embodied carbon cost; exercises in code modification to reduce the 
 carbon cost of a particular calculation, mostly by shortening the runtime or reducing resource needs; 
 modifying default settings to reduce carbon use [e.g. the clock frequency on ARCHER2, the UK national 
-supercomputer, is now lower by default, @Jackson23]; and attempts to improve data centre efficiency. 
+supercomputer, is now lower by default, @Jackson23]; :cite:t:`Jackson23` and attempts to improve data centre efficiency. 
 However, many of these can be difficult for individual researchers to implement. One 
 easier-to-implement approach is to make use of lower carbon intensive electricity to power the 
 computation. This can be achieved either by relocating the computer to a part of the world where 
@@ -86,3 +86,5 @@ the grid carbon intensity and job duration, allows the total power consumption o
 to be estimated along with the implied CO$_2$ cost if it were to be run now, or if the start time 
 were to be delayed to minimise the carbon intensity. In addition, this information can be included 
 in graphical output.
+
+.. bibliography::
