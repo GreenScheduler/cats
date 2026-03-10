@@ -7,17 +7,17 @@ There are several approaches that have been proposed and/or implemented to reduc
 of computing. These include interventions in procurement to maximize the useful life of computer 
 hardware and thus reduce the embodied carbon cost; exercises in code modification to reduce the 
 carbon cost of a particular calculation, mostly by shortening the runtime or reducing resource needs; 
-modifying default settings to reduce carbon use :cite:p:`{e.g. the clock frequency on ARCHER2, the UK national 
-supercomputer, is now lower by default}Jackson23` and attempts to improve data centre efficiency. 
+modifying default settings to reduce carbon use and attempts to improve data centre efficiency. For example, the clock frequency on ARCHER2, the UK national 
+supercomputer, is now lower by default :cite:p:`Jackson23`. 
 However, many of these can be difficult for individual researchers to implement. One 
 easier-to-implement approach is to make use of lower carbon intensive electricity to power the 
 computation. This can be achieved either by relocating the computer to a part of the world where 
-electricity is generated using renewable means :cite:p:`{e.g. the University of York in the UK have located 
-the latest institutional computing resource in Sweden}Norsecode`, or by time shifting the computation 
-such that it runs when the power supplied by the local electricity grid is dominated by renewable 
+electricity is generated using renewable means. For example, the University of York in the UK have located 
+the latest institutional computing resource in Sweden :cite:p:`Norsecode`. Another approach is
+ time shifting the computation such that it runs when the power supplied by the local electricity grid is dominated by renewable 
 generation such as on windy or sunny days rather than periods where legacy fossil fuel generation 
 dominates. The potential impact of minimally-invasive time-shifting approaches has been shown to 
-result in significantly reduced carbon footprints :cite:p:`{27% in one AI benchmark}Dodge2022`. In a country 
+result in significantly reduced carbon footprints, by up to 27% in one AI benchmark :cite:p:`Dodge2022`. In a country 
 like the UK, these reductions can reach over 60% by shifting workload by a day or two :cite:p:`ElectricityMaps`. 
 CATS helps researchers timeshift their own computation such that it is scheduled when the forecast 
 carbon intensity of the power grid is minimised.
@@ -44,7 +44,7 @@ At the moment, CATS is available for the UK through the National Grid's API whic
 postcode-specific 48 hour forecasts broken down into 30 minute periods. This granular data contains 
 regional distribution networks making use of a parameterised model of the power distribution system 
 in Great Britain, weather forecasts and historical generation data. A brief overview of the forecast 
-methodology can be found in :cite:p:`Bruce21a;Bruce21b` and the forecast, in the form of estimated carbon 
+methodology can be found in :cite:t:`Bruce21a` and :cite:t:`Bruce21b` and the forecast, in the form of estimated carbon 
 intensity at the end of each half hour period, is available via a web API 
 (https://carbonintensity.org.uk/). CATS caches requests for this data to avoid repeated requests 
 within the thirty minute time frame of a single forecast. We have designed CATS in a modular way to 
