@@ -19,9 +19,7 @@ from .forecast import (
     CarbonIntensityAverageEstimate,
     WindowedForecast,
 )
-
-__version__ = "1.1.0"
-_user_agent = {'User-agent:': f'CATS/{__version__} +https://cats.readthedocs.io/'}
+from .version import version as __version__
 
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function

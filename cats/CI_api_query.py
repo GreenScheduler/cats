@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import requests_cache
 
 from .forecast import CarbonIntensityPointEstimate
-from . import _user_agent
+from .version import user_agent
 
 def get_CI_forecast(
     location: str, CI_API_interface
@@ -25,7 +25,7 @@ def get_CI_forecast(
     # get the carbon intensity api data
     r = session.get(
         CI_API_interface.get_request_url(datetime.now(timezone.utc), location),
-        headers = _user_agent
+        headers = user_agent
     )
     data = r.json()
 
