@@ -21,6 +21,7 @@ from .forecast import (
 )
 
 __version__ = "1.1.0"
+_user_agent = {'User-agent:': f'CATS/{__version__} +https://cats.readthedocs.io/'}
 
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
