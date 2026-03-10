@@ -22,6 +22,7 @@ import yaml
 
 from .CI_api_interface import API_interfaces, APIInterface
 from .constants import MEMORY_POWER_PER_GB
+from .version import user_agent
 
 __all__ = ["get_runtime_config"]
 # Patch requests to cache location API calls (and allow CI to still work)
@@ -133,7 +134,7 @@ def get_location_from_config_or_args(args, config) -> str:
         logging.info(f"Using location from config file: {location}")
         return location
 
-    r = requests.get("https://ipapi.co/json/")
+    r = requests.get("https://ipapi.co/json/", headers = user_agent)
     if r.status_code != 200:
         logging.error(
             "Could not get location from ipapi.co.\n"

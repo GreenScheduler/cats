@@ -36,7 +36,7 @@
   dependencies = ["requests-cache>=1.0", "PyYAML>=6.0"]
 
   [tool.setuptools.dynamic]
-    version = {attr = "cats.__version__"}
+    version = {attr = "cats.version.version"}
 
   [tool.pytest.ini_options]
     markers = ["fixt_data: data for fixtures"]

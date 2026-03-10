@@ -17,6 +17,7 @@ cluster jobs to minimize predicted carbon intensity of running the process.
    use-with-schedulers.rst
    cli-reference.rst
    api-reference.rst
+   user-agent.rst
    contributing.rst
 
 

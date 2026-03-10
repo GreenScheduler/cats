@@ -17,6 +17,12 @@ Modules
 .. automodule:: cats
     :members:
 
+``cats.version``
+^^^^^^^^^^^^^^^^^
+
+.. automodule:: cats.version
+    :members:
+
 ``cats.configure``
 ^^^^^^^^^^^^^^^^^^
 
