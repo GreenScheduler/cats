@@ -117,7 +117,7 @@ provide this footprint information CATS must be configured with information abou
 file. Different profiles can allow for different classes of computation (for example, one that 
 only uses the CPU, or one that uses the CPU and an attached GPU). This information, together with 
 the grid carbon intensity and job duration, allows the total power consumption of the computation 
-to be estimated along with the implied CO\ :sub:`2`` cost if it were to be run now, or if the start time 
+to be estimated along with the implied CO\ :sub:`2` cost if it were to be run now, or if the start time 
 were to be delayed to minimise the carbon intensity. In addition, this information can be included 
 in graphical output.
 
