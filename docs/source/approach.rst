@@ -3,6 +3,13 @@
 Approach and Implementation
 ===========================
 
+The approach and implementation of CATS is described in a short paper published in the Journal 
+of Open Source Software (`doi:10.21105/joss.08251 <https://doi.org/10.21105/joss.08251>`_). Here
+we describe how CATS works and fits into other approaches to green scheduling in more detail.
+
+Background
+----------
+
 There are several approaches that have been proposed and/or implemented to reduce the carbon footprint 
 of computing. These include interventions in procurement to maximize the useful life of computer 
 hardware and thus reduce the embodied carbon cost; exercises in code modification to reduce the 
@@ -14,13 +21,16 @@ easier-to-implement approach is to make use of lower carbon intensive electricit
 computation. This can be achieved either by relocating the computer to a part of the world where 
 electricity is generated using renewable means. For example, the University of York in the UK have located 
 the latest institutional computing resource in Sweden :cite:p:`Norsecode`. Another approach is
- time shifting the computation such that it runs when the power supplied by the local electricity grid is dominated by renewable 
+time shifting the computation such that it runs when the power supplied by the local electricity grid is dominated by renewable 
 generation such as on windy or sunny days rather than periods where legacy fossil fuel generation 
 dominates. The potential impact of minimally-invasive time-shifting approaches has been shown to 
 result in significantly reduced carbon footprints, by up to 27% in one AI benchmark :cite:p:`Dodge2022`. In a country 
 like the UK, these reductions can reach over 60% by shifting workload by a day or two :cite:p:`ElectricityMaps`. 
 CATS helps researchers timeshift their own computation such that it is scheduled when the forecast 
 carbon intensity of the power grid is minimised.
+
+The CATS software
+-----------------
 
 At its core CATS is an open-source (MIT licence) Python package (tested with Python 3.9-3.12) that 
 combines data on the forecast carbon intensity of the local electricity supply with information about 
@@ -31,7 +41,7 @@ format (that the user can then use with their infrastructure) or in a way that c
 schedulers to set the calculation start time. CATS is available via the Python Package Index (PyPI) 
 and can be installed along with its handful of dependencies into a Python environment with pip. 
 Development takes place on GitHub (https://github.com/GreenScheduler/cats) and documentation is
- available (https://greenscheduler.github.io/cats/).
+available (https://greenscheduler.github.io/cats/).
 
 At a minimum, the user must provide CATS with the duration of the proposed computation on the command 
 line and CATS also requires information about the location where the computation is to happen. This 
@@ -70,9 +80,16 @@ at the optimal time through delayed start activated with the `at` CLI. The optio
 for `at` on different systems are mutually incompatible, so CATS restricts itself to the POSIX 
 compatible time format. CATS also supports job submission to other queuing systems such as slurm.
 
-![illustration of the carbon intensity time series for (blue) with the predicted energy use for 
-running a twelve hour calculation now (red) or at a time that minimises the integrated carbon 
-intensity (green).\label{fig:schedule}](fig1.png)
+.. figure:: _static/example_plot_output_rg1_180mins.png
+  :width: 400
+  :alt: CATS command run plot example output for RG1 and 3 hour job. 
+  The graph shows the forcast carbon intensity, a red region representing running the job now and 
+  a green region of lower intensity representing running the job in the future.
+  :align: center
+
+  Illustration of the carbon intensity time series for (blue) with the predicted energy use for 
+  running a twelve hour calculation now (red) or at a time that minimizes the integrated carbon 
+  intensity (green).
 
 Providing further information about the carbon cost of the proposed computation improves the 
 educational impact of CATS. This can be enabled with the `--footprint` command-line option. 
