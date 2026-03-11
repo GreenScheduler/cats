@@ -83,12 +83,12 @@ compatible time format. CATS also supports job submission to other queuing syste
 .. figure:: _static/example_plot_output_rg1_180mins.png
   :width: 400
   :alt: CATS command run plot example output for RG1 and 3 hour job. 
-  The graph shows the forcast carbon intensity, a red region representing running the job now and 
-  a green region of lower intensity representing running the job in the future.
+     The graph shows the forcast carbon intensity, a red region representing running the job now and 
+     a green region of lower intensity representing running the job in the future.
   :align: center
 
   Illustration of the carbon intensity time series for (blue) with the predicted energy use for 
-  running a twelve hour calculation now (red) or at a time that minimizes the integrated carbon 
+  running a three hour calculation now (red) or at a time that minimizes the integrated carbon 
   intensity (green).
 
 Providing further information about the carbon cost of the proposed computation improves the 
