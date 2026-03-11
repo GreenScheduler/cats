@@ -129,7 +129,6 @@ def parse_arguments():
     )
     example_text = f"""
     Examples
-    ********
 
     CATS can be used to report information on the best time to run a calculation
     and the amount of CO2. Information about a 90 minute calculation in central
