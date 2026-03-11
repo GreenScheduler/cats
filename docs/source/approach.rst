@@ -40,8 +40,6 @@ Shell (CATS is tested on Linux and MacOS) and the best start time can be provide
 format (that the user can then use with their infrastructure) or in a way that can be passed on to job 
 schedulers to set the calculation start time. CATS is available via the Python Package Index (PyPI) 
 and can be installed along with its handful of dependencies into a Python environment with pip. 
-Development takes place on GitHub (https://github.com/GreenScheduler/cats) and documentation is
-available (https://greenscheduler.github.io/cats/).
 
 At a minimum, the user must provide CATS with the duration of the proposed computation on the command 
 line and CATS also requires information about the location where the computation is to happen. This 
@@ -49,6 +47,25 @@ can be provided on the command line, via a configuration file, or from geolocati
 and is sufficient information for CATS to access a prediction of the carbon intensity of the relevant 
 power distribution network which is used to compute the start time that minimises the carbon intensity 
 over the duration of the computation.
+
+.. code-block:: console
+   :caption: *Minimal example of the use of CATS on the command line with a postcode and duration provided.*
+
+   $ cats --duration 480 --location "EH8"
+   ...
+
+   The.____ ..... __ .... ________ . ______...
+   .. /  __)...../  \....(__    __).)  ____)....
+   ..|  /......./    \......|  |...(  (___........
+   ..| |limate./  ()  \ware.|  |ask.\___  \cheduler
+   ..|  \__...|   __   |....|  |....____)  )....
+   ...\    )..|  (..)  |....|  |...(      (..
+
+
+   Best job start time                       = 2026-01-22 01:43:27
+   Carbon intensity if job started now       = 43.23 gCO2eq/kWh
+   Carbon intensity at optimal time          = 1.66 gCO2eq/kWh
+
 
 At the moment, CATS is available for the UK through the National Grid's API which provides 
 postcode-specific 48 hour forecasts broken down into 30 minute periods. This granular data contains 
@@ -72,6 +89,17 @@ calculation is provided in Figure 1. Once the carbon intensity minimisation has 
 CATS can optionally submit the computation to a queueing system or make a more detailed report on the 
 climate impact of the proposed computation.
 
+.. figure:: _static/example_plot_output_rg1_180mins.png
+  :width: 400
+  :alt: CATS command run plot example output for RG1 and 3 hour job. 
+     The graph shows the forcast carbon intensity, a red region representing running the job now and 
+     a green region of lower intensity representing running the job in the future.
+  :align: center
+
+  Figure 1. Illustration of the carbon intensity time series for (blue) with the predicted energy use for 
+  running a three hour calculation now (red) or at a time that minimizes the integrated carbon 
+  intensity (green). This plot can be generated with CATS using the ``--plot`` option.
+
 Submitting the computation to a queueing system can take just one more step, most clearly illustrated 
 by using the veritable `at` program available on most Linux and MacOS systems. The `at` program 
 “queues jobs for later execution” and, assuming the user provides the command to run their computation 
@@ -80,27 +108,16 @@ at the optimal time through delayed start activated with the `at` CLI. The optio
 for `at` on different systems are mutually incompatible, so CATS restricts itself to the POSIX 
 compatible time format. CATS also supports job submission to other queuing systems such as slurm.
 
-.. figure:: _static/example_plot_output_rg1_180mins.png
-  :width: 400
-  :alt: CATS command run plot example output for RG1 and 3 hour job. 
-     The graph shows the forcast carbon intensity, a red region representing running the job now and 
-     a green region of lower intensity representing running the job in the future.
-  :align: center
-
-  Illustration of the carbon intensity time series for (blue) with the predicted energy use for 
-  running a three hour calculation now (red) or at a time that minimizes the integrated carbon 
-  intensity (green).
-
 Providing further information about the carbon cost of the proposed computation improves the 
 educational impact of CATS. This can be enabled with the `--footprint` command-line option. 
 This calculation follows that used by the Green Algorithms project :cite:p:`Lannelongue21`, which also 
-provides some easy to understand “equivalent” statements to put these numbers in context. To 
+provides some easy to understand "equivalent" statements to put these numbers in context. To 
 provide this footprint information CATS must be configured with information about the hardware 
-(principally the per-core power consumption of the processors) via “profiles” in the configuration 
+(principally the per-core power consumption of the processors) via "profiles" in the configuration 
 file. Different profiles can allow for different classes of computation (for example, one that 
 only uses the CPU, or one that uses the CPU and an attached GPU). This information, together with 
 the grid carbon intensity and job duration, allows the total power consumption of the computation 
-to be estimated along with the implied CO$_2$ cost if it were to be run now, or if the start time 
+to be estimated along with the implied CO\ :sub:`2`` cost if it were to be run now, or if the start time 
 were to be delayed to minimise the carbon intensity. In addition, this information can be included 
 in graphical output.
 
