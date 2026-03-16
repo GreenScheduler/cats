@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
 
+import requests
 import requests_cache
 
+from .CI_api_interface import CIConnectionError
 from .forecast import CarbonIntensityPointEstimate
 from .version import user_agent
 
@@ -23,10 +25,11 @@ def get_CI_forecast(
     session = requests_cache.CachedSession("cats_cache", use_temp=True)
 
     # get the carbon intensity api data
-    r = session.get(
-        CI_API_interface.get_request_url(datetime.now(timezone.utc), location),
-        headers = user_agent
-    )
+    url = CI_API_interface.get_request_url(datetime.now(timezone.utc), location)
+    try:
+        r = session.get(url, headers=user_agent)
+    except requests.exceptions.ConnectionError:
+        raise CIConnectionError(url)
     data = r.json()
 
     return CI_API_interface.parse_response_data(data)
