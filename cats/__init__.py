@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 from .carbonFootprint import Estimates, get_footprint_reduction_estimate
-from .CI_api_interface import InvalidLocationError
+from .CI_api_interface import CIConnectionError, InvalidLocationError
 from .CI_api_query import get_CI_forecast  # noqa: F401
 from .configure import get_runtime_config
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
@@ -446,6 +446,13 @@ This is usually due to forecast limitations."""
 
     try:
         CI_forecast = get_CI_forecast(location, CI_API_interface)
+    except CIConnectionError as e:
+        logging.error(
+            f"Unable to connect to the API at {e} at the moment. Please try "
+            "again. If the issue is persistent it may be that the API is "
+            "unavailable, so investigate whether that may be the case.\n"
+        )
+        return 1
     except InvalidLocationError:
         logging.error(f"Error: unknown location {location}\n")
         logging.error(

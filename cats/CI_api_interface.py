@@ -10,6 +10,10 @@ class InvalidLocationError(Exception):
     pass
 
 
+class CIConnectionError(Exception):
+    pass
+
+
 APIInterface = namedtuple(
     "APIInterface", ["get_request_url", "parse_response_data", "max_duration"]
 )
