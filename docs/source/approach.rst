@@ -5,7 +5,7 @@ Approach and Implementation
 
 The approach and implementation of CATS is described in a short paper published in the Journal 
 of Open Source Software (`doi:10.21105/joss.08251 <https://doi.org/10.21105/joss.08251>`_). Here
-we describe how CATS works and fits into other approaches to green scheduling in more detail.
+we describe how CATS works and fits alongside other approaches to green scheduling in more detail.
 
 Background
 ----------
