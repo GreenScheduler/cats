@@ -25,7 +25,7 @@ schedule tasks on the command line using the `at` command and data
 from the `Carbon intensity API <CarbonIntensityAPI_>`_ 
 
 During 2024 the `Software Sustainability Institute <SSIsite_>`_ provided funding
-to allow some of us to dedicate further time to the development of CATS. This
+to allow some of us to dedicate time to the further development of CATS. This
 led to the ability to schedule in user space using a SLURM scheduler, significant
 clean-up of the code, the creation of a robust test suite, an update to the
 documentation, publishing of version 1.0 on PyPI and of a paper in the Journal 
