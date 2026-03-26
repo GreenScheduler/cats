@@ -11,19 +11,23 @@ Background
 ----------
 
 There are several approaches that have been proposed and/or implemented to reduce the carbon footprint 
-of computing. These include interventions in procurement to maximize the useful life of computer 
-hardware and thus reduce the embodied carbon cost; exercises in code modification to reduce the 
-carbon cost of a particular calculation, mostly by shortening the runtime or reducing resource needs; 
-modifying default settings to reduce carbon use and attempts to improve data centre efficiency. For example, the clock frequency on ARCHER2, the UK national 
-supercomputer, is now lower by default :cite:p:`Jackson23`. 
+of computing. These include:
+
+* interventions in procurement to maximize the useful life of computer hardware and thus reduce the embodied carbon cost;
+* exercises in code modification to reduce the carbon cost of a particular calculation, mostly by shortening the runtime or reducing resource needs;
+* modifying default settings to reduce carbon use; and 
+* attempts to improve data centre efficiency - for example, the clock frequency on ARCHER2, the UK national supercomputer, is now lower by default :cite:p:`Jackson23`. 
+
 However, many of these can be difficult for individual researchers to implement. One 
-easier-to-implement approach is to make use of lower carbon intensive electricity to power the 
-computation. This can be achieved either by relocating the computer to a part of the world where 
+more direct approach is to make use of lower carbon intensive electricity to power the 
+computation. One way this can be achieved is by relocating the computer to a part of the world where 
 electricity is generated using renewable means. For example, the University of York in the UK have located 
-the latest institutional computing resource in Sweden :cite:p:`Norsecode`. Another approach is
-time shifting the computation such that it runs when the power supplied by the local electricity grid is dominated by renewable 
-generation such as on windy or sunny days rather than periods where legacy fossil fuel generation 
-dominates. The potential impact of minimally-invasive time-shifting approaches has been shown to 
+the latest institutional computing resource in Sweden :cite:p:`Norsecode`.
+
+Another approach is time shifting the computation such that it runs when the power
+supplied by the local electricity grid is dominated by renewable generation such as
+on windy or sunny days rather than periods where legacy fossil fuel generation 
+dominates. Minimally-invasive time-shifting approaches have been shown to 
 result in significantly reduced carbon footprints, by up to 27% in one AI benchmark :cite:p:`Dodge2022`. In a country 
 like the UK, these reductions can reach over 60% by shifting workload by a day or two :cite:p:`ElectricityMaps`. 
 CATS helps researchers timeshift their own computation such that it is scheduled when the forecast 
@@ -32,17 +36,16 @@ carbon intensity of the power grid is minimised.
 The CATS software
 -----------------
 
-At its core CATS is an open-source (MIT licence) Python package (tested with Python 3.9-3.12) that 
+At its core CATS is an open-source (MIT licence) Python package that 
 combines data on the forecast carbon intensity of the local electricity supply with information about 
 a proposed job's duration to assess the best start time of the computation within the validity interval 
 of the forecast. Users typically interact with CATS via a command-line interface targeting the UNIX 
 Shell (CATS is tested on Linux and MacOS) and the best start time can be provided in an informative 
 format (that the user can then use with their infrastructure) or in a way that can be passed on to job 
 schedulers to set the calculation start time. CATS is available via the Python Package Index (PyPI) 
-and can be installed along with its handful of dependencies into a Python environment with pip. 
+and can be installed along with its handful of dependencies into a Python environment with `pip`.
 
-At a minimum, the user must provide CATS with the duration of the proposed computation on the command 
-line and CATS also requires information about the location where the computation is to happen. This 
+At a minimum, the user must provide CATS with the duration of the proposed computation and information about the location where the computation is to happen. This 
 can be provided on the command line, via a configuration file, or from geolocation of the IP address 
 and is sufficient information for CATS to access a prediction of the carbon intensity of the relevant 
 power distribution network which is used to compute the start time that minimises the carbon intensity 
@@ -74,7 +77,7 @@ in Great Britain, weather forecasts and historical generation data. A brief over
 methodology can be found in :cite:t:`Bruce21a` and :cite:t:`Bruce21b` and the forecast, in the form of estimated carbon 
 intensity at the end of each half hour period, is available via a web API 
 (https://carbonintensity.org.uk/). CATS caches requests for this data to avoid repeated requests 
-within the thirty minute time frame of a single forecast. We have designed CATS in a modular way to 
+within the thirty-minute time frame of a single forecast. We have designed CATS in a modular way to 
 enable future integration of other countries' APIs in a straightforward manner. However, to date, we 
 are unaware of any publicly accessible forecasts of carbon intensity for other regional, national or 
 transnational electricity distribution networks.
@@ -92,13 +95,13 @@ climate impact of the proposed computation.
 .. figure:: _static/example_plot_output_rg1_180mins.png
   :width: 400
   :alt: CATS command run plot example output for RG1 and 3 hour job. 
-     The graph shows the forcast carbon intensity, a red region representing running the job now and 
+     The graph shows the forecast carbon intensity, a red region representing running the job now and 
      a green region of lower intensity representing running the job in the future.
   :align: center
 
-  Figure 1. Illustration of the carbon intensity time series for (blue) with the predicted energy use for 
+  Figure 1. Illustration of the carbon intensity time series (blue) with the predicted carbon use for 
   running a three hour calculation now (red) or at a time that minimizes the integrated carbon 
-  intensity (green). This plot can be generated with CATS using the ``--plot`` option.
+  intensity (green). Such a plot can be generated with CATS using the ``--plot`` option.
 
 Submitting the computation to a queueing system can take just one more step, most clearly illustrated 
 by using the veritable `at` program available on most Linux and MacOS systems. The `at` program 
@@ -106,7 +109,7 @@ by using the veritable `at` program available on most Linux and MacOS systems. T
 and any necessary arguments using the CATS `--command` option, the computation can be scheduled to run 
 at the optimal time through delayed start activated with the `at` CLI. The options for the time syntax 
 for `at` on different systems are mutually incompatible, so CATS restricts itself to the POSIX 
-compatible time format. CATS also supports job submission to other queuing systems such as slurm.
+compatible time format. CATS also supports job submission to other queueing systems such as SLURM.
 
 Providing further information about the carbon cost of the proposed computation improves the 
 educational impact of CATS. This can be enabled with the `--footprint` command-line option. 
