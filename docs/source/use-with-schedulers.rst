@@ -19,6 +19,10 @@ duration, in the 'OX1' postcode that would look like:
 
    $ cats -d 5 --loc OX1 --scheduler at --command 'ls'
 
+.. note:: While CATS runs on Windows, it does not currently support scheduling with 
+   the ``at`` scheduler on operating systems other than Linux and MacOS. Windows 
+   scheduling is on our roadmap for a future release.
+
 Using CATS with the ``sbatch`` scheduler
 ----------------------------------------
 

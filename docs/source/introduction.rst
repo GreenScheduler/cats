@@ -62,4 +62,4 @@ Features
   carbon emissions
 * Provides a simple and intuitive API for developers
 * Lightweight and easy to integrate into existing workflows
-* Supports Python 3.9+
+* Supports Python 3.10+

@@ -26,7 +26,7 @@ authors = (
     "Carlos Martinez and Sadie Bartholomew"
 )
 author = authors
-copyright = f"2023, {authors}"
+copyright = f"2023-2026, {authors}"
 # The full version, including alpha/beta/rc tags
 release = cats.__version__
 
@@ -47,7 +47,11 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
     "sphinx_copybutton",
+    "sphinxcontrib.bibtex",
 ]
+# BiBTeX files and style
+bibtex_bibfiles = ['refs.bib']
+bibtex_default_style = 'plain'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

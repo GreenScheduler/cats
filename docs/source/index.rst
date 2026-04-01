@@ -14,11 +14,14 @@ cluster jobs to minimize predicted carbon intensity of running the process.
    introduction.rst
    installation.rst
    quickstart.rst
+   approach.rst
    use-with-schedulers.rst
    cli-reference.rst
    api-reference.rst
    user-agent.rst
    contributing.rst
+   history.rst
+   bibliography.rst
 
 
 Indices and tables
