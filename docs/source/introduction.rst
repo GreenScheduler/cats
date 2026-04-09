@@ -4,7 +4,7 @@
 .. _SSIsite: https://www.software.ac.uk/
 .. _CW23page: https://software.ac.uk/cw23
 .. _CW23HackDaypage: https://www.software.ac.uk/cw23/hack-day
-.. _NationalGridESO: https://www.nationalgrideso.com/
+.. _NationalGridESO: https://www.neso.energy/
 .. _CarbonIntensityAPI: https://carbonintensity.org.uk/
 .. _GitHubrepoissues: https://github.com/GreenScheduler/cats/issues
 
