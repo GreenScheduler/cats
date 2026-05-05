@@ -5,6 +5,6 @@ Command-line (CLI) reference
 
 
 .. argparse::
-  :module: cats
+  :module: cli
   :func: parse_arguments
   :prog: cats
