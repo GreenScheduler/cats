@@ -15,6 +15,7 @@ from cats.CI_api_interface import InvalidLocationError
 from cats.CI_api_query import get_CI_forecast  # noqa: F401
 from cats.plotting import plotplan
 from cats.forecast import WindowedForecast
+from .output import CATSOutput
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
@@ -360,7 +361,7 @@ This is usually due to forecast limitations."""
         end_constraint=end_constraint,
     )
     now_avg, best_avg = wf[0], min(wf)
-    output = cats.CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
+    output = CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
 
     ################################
     ## Calculate carbon footprint ##

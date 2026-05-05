@@ -7,7 +7,6 @@ import pytest
 
 from cats import (
     SCHEDULER_DATE_FORMAT,
-    CATSOutput,
     main,
     print_banner,
     schedule_at,
@@ -16,6 +15,7 @@ from cats import (
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.forecast import CarbonIntensityAverageEstimate
+from cats.output import CATSOutput
 
 API = API_interfaces["carbonintensity.org.uk"]
 
