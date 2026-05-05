@@ -14,12 +14,20 @@ from .forecast import (
     CarbonIntensityAverageEstimate,
     WindowedForecast,
 )
+from .cli import ( # Functions moved - this is for testing
+    main,
+    parse_time_constraint,
+    validate_window_constraints,
+    parse_arguments,
+    print_banner,
+) 
 from .version import version as __version__
 
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
 SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M", "sbatch": "%Y-%m-%dT%H:%M"}
 
+@dataclasses.dataclass
 class CATSOutput:
     """Carbon Aware Task Scheduler output"""
 

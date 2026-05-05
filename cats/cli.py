@@ -360,7 +360,7 @@ This is usually due to forecast limitations."""
         end_constraint=end_constraint,
     )
     now_avg, best_avg = wf[0], min(wf)
-    output = CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
+    output = cats.CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
 
     ################################
     ## Calculate carbon footprint ##
