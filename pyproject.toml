@@ -57,6 +57,7 @@
 
   [project.urls]
     Home = "https://github.com/GreenScheduler/cats"
+    Documentation = "https://cats.readthedocs.io/"
 
   [project.scripts]
     cats = "cats.cli:main"
