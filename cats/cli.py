@@ -1,22 +1,21 @@
 import datetime
 import logging
-import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta
 from pathlib import Path
 
 from typing import Optional
 
-import cats
-from cats.configure import *
-from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
-from cats.carbonFootprint import get_footprint_reduction_estimate
-from cats.CI_api_interface import InvalidLocationError
-from cats.CI_api_query import get_CI_forecast  # noqa: F401
-from cats.plotting import plotplan
-from cats.forecast import WindowedForecast
+from .configure import *
+from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
+from .carbonFootprint import get_footprint_reduction_estimate
+from .CI_api_interface import InvalidLocationError
+from .CI_api_query import get_CI_forecast  # noqa: F401
+from .plotting import plotplan
+from .forecast import WindowedForecast
 from .output import CATSOutput
-from .schedulers import schedule_at, schedule_sbatch
+from .schedulers import schedule_at, schedule_sbatch, SCHEDULER_DATE_FORMAT
+from .version import version
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
@@ -98,7 +97,7 @@ def parse_arguments():
     :return: [dict] parsed arguments
     """
     description_text = f"""
-    Climate-Aware Task Scheduler (version {cats.__version__})
+    Climate-Aware Task Scheduler (version {version})
 
     The Climate-Aware Task Scheduler (cats) command line program helps you run
     your calculations in a way that minimises their impact on the climate by
@@ -381,7 +380,7 @@ This is usually due to forecast limitations."""
 
     if args.format == "json":
         if isinstance(args.dateformat, str) and "%" not in args.dateformat:
-            dateformat = cats.SCHEDULER_DATE_FORMAT.get(args.dateformat, "")
+            dateformat = SCHEDULER_DATE_FORMAT.get(args.dateformat, "")
         else:
             dateformat = args.dateformat or ""
         print(output.to_json(dateformat, sort_keys=True, indent=2))
@@ -393,11 +392,11 @@ This is usually due to forecast limitations."""
         plotplan(CI_forecast, output)
     if args.command:
         if args.scheduler == "at":
-            err = cats.schedule_at(output, args.command.split())
+            err = schedule_at(output, args.command.split())
         elif args.scheduler == "sbatch":
-            err = cats.schedule_sbatch(output, args.command.split())
+            err = schedule_sbatch(output, args.command.split())
         else:  # pragma: no cover - we already check for valid scheduler in parse_arguments
-            err = f"Scheduler {args.scheduler} not in supported schedulers: {cats.SCHEDULER_DATE_FORMAT.keys()}"
+            err = f"Scheduler {args.scheduler} not in supported schedulers: {SCHEDULER_DATE_FORMAT.keys()}"
         if err:
             print(err)
             return 1
