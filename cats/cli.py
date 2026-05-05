@@ -379,7 +379,7 @@ This is usually due to forecast limitations."""
 
     if args.format == "json":
         if isinstance(args.dateformat, str) and "%" not in args.dateformat:
-            dateformat = SCHEDULER_DATE_FORMAT.get(args.dateformat, "")
+            dateformat = cats.SCHEDULER_DATE_FORMAT.get(args.dateformat, "")
         else:
             dateformat = args.dateformat or ""
         print(output.to_json(dateformat, sort_keys=True, indent=2))
@@ -391,11 +391,11 @@ This is usually due to forecast limitations."""
         plotplan(CI_forecast, output)
     if args.command:
         if args.scheduler == "at":
-            err = schedule_at(output, args.command.split())
+            err = cats.schedule_at(output, args.command.split())
         elif args.scheduler == "sbatch":
-            err = schedule_sbatch(output, args.command.split())
+            err = cats.schedule_sbatch(output, args.command.split())
         else:  # pragma: no cover - we already check for valid scheduler in parse_arguments
-            err = f"Scheduler {args.scheduler} not in supported schedulers: {SCHEDULER_DATE_FORMAT.keys()}"
+            err = f"Scheduler {args.scheduler} not in supported schedulers: {cats.SCHEDULER_DATE_FORMAT.keys()}"
         if err:
             print(err)
             return 1
