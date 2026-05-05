@@ -6,16 +6,14 @@ from unittest.mock import patch
 import pytest
 
 from cats import (
-    SCHEDULER_DATE_FORMAT,
     main,
     print_banner,
-    schedule_at,
-    schedule_sbatch,
 )
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.forecast import CarbonIntensityAverageEstimate
 from cats.output import CATSOutput
+from cats.schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 
 API = API_interfaces["carbonintensity.org.uk"]
 

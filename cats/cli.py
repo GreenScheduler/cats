@@ -16,6 +16,7 @@ from cats.CI_api_query import get_CI_forecast  # noqa: F401
 from cats.plotting import plotplan
 from cats.forecast import WindowedForecast
 from .output import CATSOutput
+from .schedulers import schedule_at, schedule_sbatch
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
