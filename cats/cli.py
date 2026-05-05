@@ -1,3 +1,12 @@
+import datetime
+import logging
+import sys
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from datetime import timedelta
+from pathlib import Path
+
+from typing import Optional
+
 import cats
 from cats.configure import *
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
@@ -6,15 +15,6 @@ from cats.CI_api_interface import InvalidLocationError
 from cats.CI_api_query import get_CI_forecast  # noqa: F401
 from cats.plotting import plotplan
 from cats.forecast import WindowedForecast
-
-
-import datetime
-import logging
-import sys
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from datetime import timedelta
-from pathlib import Path
-
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
