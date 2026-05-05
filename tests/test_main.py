@@ -5,10 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from cats import (
-    main,
-    print_banner,
-)
+from cats.cli import print_banner, main
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.forecast import CarbonIntensityAverageEstimate

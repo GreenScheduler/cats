@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
-from cats import main, parse_time_constraint, validate_window_constraints
+from cats.cli import main, parse_time_constraint, validate_window_constraints
 from cats.forecast import (
     CarbonIntensityPointEstimate,
     WindowedForecast,
@@ -324,7 +324,7 @@ class TestConstrainedWindowedForecast:
 class TestMainIntegration:
     """Integration tests for main function with window constraints."""
 
-    @patch("cats.get_CI_forecast")
+    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_window_constraint(
         self, mock_config: MagicMock, mock_forecast: MagicMock
@@ -355,7 +355,7 @@ class TestMainIntegration:
         result = main(["-d", "60", "--loc", "OX1", "--window", "480"])
         assert result == 0
 
-    @patch("cats.get_CI_forecast")
+    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_time_window_constraints(
         self, mock_config: MagicMock, mock_forecast: MagicMock
@@ -400,7 +400,7 @@ class TestMainIntegration:
         )
         assert result == 0
 
-    @patch("cats.get_CI_forecast")
+    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_invalid_window_constraints(
         self, mock_config: MagicMock, mock_forecast: MagicMock
@@ -421,7 +421,7 @@ class TestMainIntegration:
         result = main(["-d", "60", "--loc", "OX1", "--window", "5000"])
         assert result == 1  # Should fail
 
-    @patch("cats.get_CI_forecast")
+    @patch("cats.cli.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_duration_exceeds_window(
         self, mock_config: MagicMock, mock_forecast: MagicMock
@@ -442,7 +442,7 @@ class TestMainIntegration:
         result = main(["-d", "480", "--loc", "OX1", "--window", "240"])
         assert result == 1  # Should fail
 
-    @patch("cats.get_CI_forecast")
+    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_conflicting_time_windows(
         self, mock_config: MagicMock, mock_forecast: MagicMock
