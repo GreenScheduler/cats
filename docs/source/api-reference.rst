@@ -52,3 +52,15 @@ Modules
 
 .. automodule:: cats.forecast
     :members:
+
+``cats.cli``
+^^^^^^^^^^^^^^^^^
+
+.. automodule:: cats.cli
+    :members:
+
+``cats.output``
+^^^^^^^^^^^^^^^^^
+
+.. automodule:: cats.output
+    :members:

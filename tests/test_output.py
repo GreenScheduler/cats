@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from cats import CATSOutput
+from cats.output import CATSOutput
 from cats.carbonFootprint import Estimates
 from cats.forecast import CarbonIntensityAverageEstimate
 

@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 import yaml
 
-from cats import parse_arguments
+from cats.cli import parse_arguments
 from cats.CI_api_interface import API_interfaces
 from cats.configure import (
     CI_API_from_config_or_args,
