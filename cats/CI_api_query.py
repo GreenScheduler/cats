@@ -2,12 +2,11 @@ from datetime import datetime, timezone
 
 import requests_cache
 
-from .forecast import CarbonIntensityPointEstimate
+from .forecast import PointEstimate
 from .version import user_agent
 
-def get_CI_forecast(
-    location: str, CI_API_interface
-) -> list[CarbonIntensityPointEstimate]:
+
+def get_CI_forecast(location: str, CI_API_interface) -> list[PointEstimate]:
     """
     Get carbon intensity from an API
 
@@ -15,7 +14,7 @@ def get_CI_forecast(
     future carbon intensity.
 
     param location: [str] Depends on country. UK postcode (just the first section), e.g. M15.
-    returns: a list of CarbonIntensityPointEstimate
+    returns: a list of PointEstimate
     """
 
     # Setup a session for the API call. This uses a global HTTP cache
@@ -25,7 +24,7 @@ def get_CI_forecast(
     # get the carbon intensity api data
     r = session.get(
         CI_API_interface.get_request_url(datetime.now(timezone.utc), location),
-        headers = user_agent
+        headers=user_agent,
     )
     data = r.json()
 

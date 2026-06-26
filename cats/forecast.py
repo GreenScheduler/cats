@@ -1,15 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
 from datetime import datetime, timedelta
+from typing import Optional
 
 
 @dataclass(order=True)
-class CarbonIntensityPointEstimate:
-    """Represents a single data point within an intensity
-    timeseries. Use order=True in order to enable comparison of class
-    instance based on the first attribute. See
-    https://peps.python.org/pep-0557
-    """
+class PointEstimate:
+    "Represents a single data point within a timeseries"
 
     value: float  # the first attribute is used automatically for sorting methods
     datetime: datetime
@@ -19,12 +15,8 @@ class CarbonIntensityPointEstimate:
 
 
 @dataclass(order=True)
-class CarbonIntensityAverageEstimate:
-    """Represents a single data point within an *integrated* carbon
-    intensity timeseries. Use order=True in order to enable comparison
-    of class instance based on the first attribute.  See
-    https://peps.python.org/pep-0557
-    """
+class AverageEstimate:
+    "Represents a single data point within an *integrated* timeseries"
 
     value: float
     start: datetime  # Start of the time-integration window
@@ -36,7 +28,7 @@ class CarbonIntensityAverageEstimate:
 class WindowedForecast:
     def __init__(
         self,
-        data: list[CarbonIntensityPointEstimate],
+        data: list[PointEstimate],
         duration: int,  # in minutes
         start: datetime,
         max_window_minutes: Optional[int] = None,
@@ -89,12 +81,12 @@ class WindowedForecast:
 
     def _filter_data_by_constraints(
         self,
-        data: list[CarbonIntensityPointEstimate],
+        data: list[PointEstimate],
         start: datetime,
         duration: int,
         max_window_minutes: int,
         end_constraint: Optional[datetime],
-    ) -> list[CarbonIntensityPointEstimate]:
+    ) -> list[PointEstimate]:
         """Filter forecast data based on time constraints."""
 
         # Calculate the maximum time we need data for
@@ -127,7 +119,7 @@ class WindowedForecast:
 
         return filtered_data
 
-    def __getitem__(self, index: int) -> CarbonIntensityAverageEstimate:
+    def __getitem__(self, index: int) -> AverageEstimate:
         """Return the average of timeseries data from index over the
         window size.  Data points are integrated using the trapeziodal
         rule, that is assuming that forecast data points are joined
@@ -176,7 +168,7 @@ class WindowedForecast:
             for a, b in zip(window_data[:-1], window_data[1:])
         ]
         duration = window_data[-1].datetime - window_data[0].datetime
-        return CarbonIntensityAverageEstimate(
+        return AverageEstimate(
             start=window_start,
             end=window_end,
             value=sum(acc) / duration.total_seconds(),
@@ -186,10 +178,10 @@ class WindowedForecast:
 
     @staticmethod
     def interp(
-        p1: CarbonIntensityPointEstimate,
-        p2: CarbonIntensityPointEstimate,
+        p1: PointEstimate,
+        p2: PointEstimate,
         when: datetime,
-    ) -> CarbonIntensityPointEstimate:
+    ) -> PointEstimate:
         """Return carbon intensity pt estimate at a time between data
         points, assuming points are joined by a straight line (linear
         interpolation).
@@ -199,10 +191,7 @@ class WindowedForecast:
         slope = (p2.value - p1.value) / timestep
         offset = (when - p1.datetime).total_seconds()
 
-        return CarbonIntensityPointEstimate(
-            value=p1.value + slope * offset,
-            datetime=when,
-        )
+        return PointEstimate(value=p1.value + slope * offset, datetime=when)
 
     def __iter__(self):
         for index in range(len(self)):

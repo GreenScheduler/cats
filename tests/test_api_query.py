@@ -2,7 +2,7 @@ import pytest
 
 import cats
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
-from cats.forecast import CarbonIntensityPointEstimate
+from cats.forecast import PointEstimate
 
 
 def test_api_call():
@@ -21,7 +21,7 @@ def test_api_call():
     assert response == response_full_postcode
     assert isinstance(response, list)
     for item in response:
-        assert isinstance(item, CarbonIntensityPointEstimate)
+        assert isinstance(item, PointEstimate)
         assert (item.datetime.tzinfo is not None) and (
             item.datetime.tzinfo.utcoffset(item.datetime) is not None
         )

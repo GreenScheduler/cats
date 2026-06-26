@@ -2,9 +2,9 @@ from datetime import datetime
 
 import pytest
 
-from cats.output import CATSOutput
 from cats.carbonFootprint import Estimates
-from cats.forecast import CarbonIntensityAverageEstimate
+from cats.forecast import AverageEstimate
+from cats.output import CATSOutput
 
 now_start = datetime(2024, 3, 15, 16, 0, 0)  # 4pm - 5pm
 now_end = datetime(2024, 3, 15, 17, 0, 0)
@@ -13,15 +13,15 @@ optimal_start = datetime(2024, 3, 16, 2, 0, 0)  # 2am - 3am
 optimal_end = datetime(2024, 3, 16, 3, 0, 0)
 
 OUTPUT = CATSOutput(
-    CarbonIntensityAverageEstimate(50, now_start, now_end, 0.0, 0.0),
-    CarbonIntensityAverageEstimate(20, optimal_start, optimal_end, 0.0, 0.0),
+    AverageEstimate(50, now_start, now_end, 0.0, 0.0),
+    AverageEstimate(20, optimal_start, optimal_end, 0.0, 0.0),
     "OX1",
     "GBR",
 )
 
 OUTPUT_WITH_EMISSION_ESTIMATE = CATSOutput(
-    CarbonIntensityAverageEstimate(50, now_start, now_end, 0.0, 0.0),
-    CarbonIntensityAverageEstimate(20, optimal_start, optimal_end, 0.0, 0.0),
+    AverageEstimate(50, now_start, now_end, 0.0, 0.0),
+    AverageEstimate(20, optimal_start, optimal_end, 0.0, 0.0),
     "OX1",
     "GBR",
     Estimates(19, 9, 10),

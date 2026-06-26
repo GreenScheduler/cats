@@ -4,20 +4,21 @@ import logging
 from typing import Optional
 
 from .carbonFootprint import Estimates
-from .forecast import CarbonIntensityAverageEstimate
+from .forecast import AverageEstimate
+
 
 @dataclasses.dataclass
 class CATSOutput:
     """
     Carbon Aware Task Scheduler output
-    
+
     A dataclass to contain CATS output information for use
     with schedulers accompanied by methods to represent this
     information when reporting to users.
     """
 
-    carbonIntensityNow: CarbonIntensityAverageEstimate
-    carbonIntensityOptimal: CarbonIntensityAverageEstimate
+    carbonIntensityNow: AverageEstimate
+    carbonIntensityOptimal: AverageEstimate
     location: str
     countryISO3: str
     emmissionEstimate: Optional[Estimates] = None

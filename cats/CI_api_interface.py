@@ -3,7 +3,7 @@ from collections import namedtuple
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from .forecast import CarbonIntensityPointEstimate
+from .forecast import PointEstimate
 
 
 class InvalidLocationError(Exception):
@@ -73,7 +73,7 @@ def ciuk_parse_response_data(response: dict):
     # need to add tzinfo data.
     utc = ZoneInfo("UTC")
     return [
-        CarbonIntensityPointEstimate(
+        PointEstimate(
             datetime=datetime.strptime(d["from"], datefmt).replace(tzinfo=utc),
             value=d["intensity"]["forecast"],
         )

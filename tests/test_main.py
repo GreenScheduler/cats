@@ -5,10 +5,10 @@ from unittest.mock import patch
 
 import pytest
 
-from cats.cli import print_banner, main
 from cats.CI_api_interface import API_interfaces, InvalidLocationError
+from cats.cli import main, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
-from cats.forecast import CarbonIntensityAverageEstimate
+from cats.forecast import AverageEstimate
 from cats.output import CATSOutput
 from cats.schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 
@@ -19,8 +19,8 @@ now_start = (datetime.now() + timedelta(minutes=1)).replace(second=0)
 now_end = now_start + timedelta(minutes=5)
 
 OUTPUT = CATSOutput(
-    CarbonIntensityAverageEstimate(20, now_start, now_end, 0.0, 0.0),
-    CarbonIntensityAverageEstimate(20, now_start, now_end, 0.0, 0.0),
+    AverageEstimate(20, now_start, now_end, 0.0, 0.0),
+    AverageEstimate(20, now_start, now_end, 0.0, 0.0),
     "OX1",
     "GBR",
 )

@@ -1,26 +1,26 @@
 import csv
-import pytest
-from datetime import datetime, timedelta, timezone, time
+from datetime import datetime, time, timedelta, timezone
 from pathlib import Path
-
 from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
+import pytest
+
 from cats.cli import main, parse_time_constraint, validate_window_constraints
 from cats.forecast import (
-    CarbonIntensityPointEstimate,
+    PointEstimate,
     WindowedForecast,
 )
 
 
 @pytest.fixture(scope="session")
-def sample_data() -> list[CarbonIntensityPointEstimate]:
+def sample_data() -> list[PointEstimate]:
     """Load sample carbon intensity data for testing."""
     with open(Path(__file__).parent / "carbon_intensity_24h.csv", "r") as f:
         csvfile = csv.reader(f, delimiter=",")
         _ = next(csvfile)  # Skip header line
         data = [
-            CarbonIntensityPointEstimate(
+            PointEstimate(
                 datetime=datetime.fromisoformat(datestr[:-1] + "+00:00"),
                 value=float(intensity_value),
             )
@@ -177,7 +177,7 @@ class TestConstrainedWindowedForecast:
     """Test the ConstrainedWindowedForecast class."""
 
     def test_basic_functionality_without_constraints(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test that ConstrainedWindowedForecast works like WindowedForecast without constraints."""
         duration = 180  # 3 hours
@@ -197,7 +197,7 @@ class TestConstrainedWindowedForecast:
         assert minimum.value <= first.value  # minimum should be <= first
 
     def test_window_constraint_limits_search_space(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test that max_window_minutes limits the search space."""
         duration = 60  # 1 hour
@@ -217,9 +217,7 @@ class TestConstrainedWindowedForecast:
         # Constrained should have fewer or equal options
         assert len(cwf_constrained) <= len(cwf_full)
 
-    def test_end_constraint_limits_start_times(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_end_constraint_limits_start_times(self, sample_data: list[PointEstimate]):
         """Test that end_constraint limits when jobs can start."""
         duration = 60  # 1 hour
         start = sample_data[0].datetime
@@ -233,9 +231,7 @@ class TestConstrainedWindowedForecast:
         for window in cwf:
             assert window.start < end_constraint
 
-    def test_combined_constraints(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_combined_constraints(self, sample_data: list[PointEstimate]):
         """Test using both window and end constraints together."""
         duration = 90  # 1.5 hours
         start = sample_data[0].datetime
@@ -263,9 +259,7 @@ class TestConstrainedWindowedForecast:
         # Create minimal data
         utc = ZoneInfo("UTC")
         minimal_data = [
-            CarbonIntensityPointEstimate(
-                datetime=datetime(2024, 1, 1, 12, 0, tzinfo=utc), value=100
-            )
+            PointEstimate(datetime=datetime(2024, 1, 1, 12, 0, tzinfo=utc), value=100)
         ]
 
         with pytest.raises(ValueError, match="Insufficient forecast data"):
@@ -274,7 +268,7 @@ class TestConstrainedWindowedForecast:
             )
 
     def test_timezone_handling_in_end_constraint(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test proper timezone handling for end constraints."""
         duration = 60
@@ -291,9 +285,7 @@ class TestConstrainedWindowedForecast:
         # Should still work correctly despite timezone difference
         assert len(cwf) > 0
 
-    def test_index_out_of_range_raises_error(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_index_out_of_range_raises_error(self, sample_data: list[PointEstimate]):
         """Test that accessing invalid index raises IndexError."""
         duration = 60
         start = sample_data[0].datetime
@@ -303,9 +295,7 @@ class TestConstrainedWindowedForecast:
         with pytest.raises(IndexError, match="Window index out of range"):
             cwf[len(cwf)]
 
-    def test_iteration_works_correctly(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_iteration_works_correctly(self, sample_data: list[PointEstimate]):
         """Test that iteration over forecast works correctly."""
         duration = 60
         start = sample_data[0].datetime
@@ -345,7 +335,7 @@ class TestMainIntegration:
         utc = ZoneInfo("UTC")
         base_time = datetime.now(utc)
         mock_forecast.return_value = [
-            CarbonIntensityPointEstimate(
+            PointEstimate(
                 datetime=base_time + timedelta(minutes=i * 30), value=100 - i * 5
             )
             for i in range(100)  # 50 hours of data
@@ -376,9 +366,7 @@ class TestMainIntegration:
         utc = ZoneInfo("UTC")
         now = datetime.now(utc)
         mock_forecast.return_value = [
-            CarbonIntensityPointEstimate(
-                datetime=now + timedelta(minutes=i * 30), value=100 - i * 2
-            )
+            PointEstimate(datetime=now + timedelta(minutes=i * 30), value=100 - i * 2)
             for i in range(100)  # 50 hours of data
         ]
 
@@ -483,9 +471,7 @@ class TestMainIntegration:
 class TestEdgeCases:
     """Test edge cases and error conditions."""
 
-    def test_very_short_window_with_sample_data(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_very_short_window_with_sample_data(self, sample_data: list[PointEstimate]):
         """Test behavior with very short window constraint."""
         duration = 30  # 30 minutes
         start = sample_data[0].datetime
@@ -497,7 +483,7 @@ class TestEdgeCases:
         assert len(cwf) > 0
 
     def test_end_constraint_in_past_relative_to_start(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test end constraint that's before the start time."""
         duration = 60
@@ -513,7 +499,7 @@ class TestEdgeCases:
             )
 
     def test_window_exactly_matches_job_duration(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test when window size exactly matches job duration."""
         duration = 120  # 2 hours
