@@ -307,6 +307,7 @@ def run_cats(arguments: list[str] | None = None):
         )
 
     provider_cls, location, duration, jobinfo, PUE = get_runtime_config(args)
+    provider = provider_cls()
 
     # Validate and parse window constraints
     try:
@@ -316,20 +317,20 @@ def run_cats(arguments: list[str] | None = None):
     except ValueError as e:
         raise ValueError(f"Error in window constraints: {e}")
     # Check against both API limit and user-specified window
-    effective_max_duration = min(provider_cls.MAX_DURATION_MINUTES, max_window)
+    max_duration_minutes = provider.get_max_duration_minutes()
+    effective_max_duration = min(max_duration_minutes, max_window)
     if duration > effective_max_duration:
-        if max_window < provider_cls.MAX_DURATION_MINUTES:
+        if max_window < max_duration_minutes:
             raise DurationExceedsWindowError(f"{duration=}, {max_window=}")
         else:
             raise DurationExceedsWindowError(
-                f"{duration=}, maxium forecast duration is {provider_cls.MAX_DURATION_MINUTES}"
+                f"{duration=}, maximum forecast duration is {max_duration_minutes}"
             )
 
     ########################
     ## Obtain CI forecast ##
     ########################
-    provider = provider_cls(location)
-    forecast = provider.get_data(datetime.datetime.now(timezone.utc))
+    forecast = provider.get_data(datetime.datetime.now(timezone.utc), location)
 
     #############################
     ## Find optimal start time ##

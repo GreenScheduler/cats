@@ -3,7 +3,7 @@
   build-backend = 'setuptools.build_meta'
 
 [tool.setuptools]
-  packages = ["cats"]
+  packages = ["cats", "cats.providers"]
   package-data.cats = ["config.yml"]
 
 [project]

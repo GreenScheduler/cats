@@ -65,10 +65,9 @@ def get_runtime_config(
     """Return the runtime cats configuration from list of command line
     arguments and content of configuration file.
 
-    Returns a tuple containing an instance of :py:class:`APIInterface
-    <cats.CI_api_interface.APIInterface>`, the location as a string,
-    the duration in minutes as an integer, as well as information on
-    the number of cpus/gpus used by the job and their power consumption.
+    Returns a tuple containing a :py:class:`BaseProvider <cats.providers.BaseProvider>`,
+    the location as a string, the duration in minutes as an integer, as well as
+    information on the number of cpus/gpus used by the job and their power consumption.
 
     :param args: Command line arguments
     :return: Runtime cats configuration

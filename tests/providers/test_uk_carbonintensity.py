@@ -16,8 +16,9 @@ def test_get_data():
     """
 
     timestamp = datetime.now()
-    response = UKCarbonIntensityProvider("OX1").get_data(timestamp)
-    response_full_postcode = UKCarbonIntensityProvider("OX1 3QD").get_data(timestamp)
+    provider = UKCarbonIntensityProvider()
+    response = provider.get_data(timestamp, "OX1")
+    response_full_postcode = UKCarbonIntensityProvider().get_data(timestamp, "OX1 3QD")
 
     assert response == response_full_postcode
     assert isinstance(response.values, list)
@@ -30,10 +31,18 @@ def test_get_data():
 
 def test_bad_postcode():
     timestamp = datetime.now()
+    provider = UKCarbonIntensityProvider()
 
     with pytest.raises(InvalidLocationError):
         # postcodes failing basic regex are only caught on fetch
-        _ = UKCarbonIntensityProvider("OX40").get_data(timestamp)
+        _ = provider.get_data(timestamp, "OX40")
 
     with pytest.raises(InvalidLocationError):
-        _ = UKCarbonIntensityProvider("A")
+        _ = provider.get_data(timestamp, "A")
+
+
+def test_missing_location_raises_error():
+    timestamp = datetime.now()
+    provider = UKCarbonIntensityProvider()
+    with pytest.raises(InvalidLocationError):
+        _ = provider.get_data(timestamp)
