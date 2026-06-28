@@ -10,9 +10,13 @@ runtime configuration consits of:
 
 """
 
+# pyright: reportUninitializedInstanceVariable=none, reportAny=none
+
+import datetime
 import logging
-import sys
 import os
+import sys
+from argparse import Namespace
 from collections.abc import Mapping
 from typing import Any, Optional
 
@@ -20,17 +24,44 @@ import requests
 import requests_cache
 import yaml
 
-from .CI_api_interface import API_interfaces, APIInterface
+from cats.providers import BaseProvider, get_provider
+
 from .constants import MEMORY_POWER_PER_GB
 from .version import user_agent
 
 __all__ = ["get_runtime_config"]
 # Patch requests to cache location API calls (and allow CI to still work)
-requests_cache.install_cache('cats_cache', use_temp=True)
+requests_cache.install_cache("cats_cache", use_temp=True)
+
+
+class Args(Namespace):
+    duration: int
+    scheduler: str
+    api: str
+    command: str | None
+    dateformat: str | None
+    location: str | None
+    config: str | None
+    profile: str | None
+    format: str | None
+    footprint: bool
+    cpu: int
+    gpu: int
+    memory: int
+    no_colour: bool
+    no_color: bool
+    plot: bool
+    save_plot: str | None
+    window: int
+    start_window: datetime.datetime | None
+    end_window: datetime.datetime | None
+
 
 def get_runtime_config(
-    args,
-) -> tuple[APIInterface, str, int, Optional[list[tuple[int, float]]], Optional[float]]:
+    args: Args,
+) -> tuple[
+    type[BaseProvider], str, int, Optional[list[tuple[int, float]]], Optional[float]
+]:
     """Return the runtime cats configuration from list of command line
     arguments and content of configuration file.
 
@@ -46,7 +77,7 @@ def get_runtime_config(
 
     """
     configmapping = config_from_file(configpath=args.config)
-    CI_API_interface = CI_API_from_config_or_args(args, configmapping)
+    provider_cls: type[BaseProvider] = provider_from_config_or_args(args, configmapping)
     location = get_location_from_config_or_args(args, configmapping)
 
     msg = "Job duration must be a positive integer (number of minutes)"
@@ -68,12 +99,13 @@ def get_runtime_config(
         PUE = configmapping["PUE"]
     else:
         jobinfo = None
-        PUE = None
+        PUE = None  # pyright: ignore[reportConstantRedefinition]
 
-    return CI_API_interface, location, duration, jobinfo, PUE
+    return provider_cls, location, duration, jobinfo, PUE
 
 
-def config_from_file(configpath="") -> Mapping[str, Any]:
+def config_from_file(configpath: str | None = None) -> Mapping[str, Any]:
+    conf_dict: Mapping[str, Any] = {}
     if configpath:
         # if path to config file provided, it is used
         with open(configpath, "r") as f:
@@ -93,13 +125,17 @@ def config_from_file(configpath="") -> Mapping[str, Any]:
             # if no path provided and no env variable, look for a file in current directory
             # we support several file names but warn for deprecated names
             config_file_names = ["cats_config.yml", "cats_config.yaml", "config.yaml"]
-            cfile = next((x for x in config_file_names if os.path.isfile(x)), "config.yml")
+            cfile = next(
+                (x for x in config_file_names if os.path.isfile(x)), "config.yml"
+            )
             try:
                 with open(cfile, "r") as f:
                     conf_dict = yaml.safe_load(f)
                 logging.info(f"Using {cfile} found in current directory\n")
                 if cfile in ["config.yaml", "config.yml"]:
-                    logging.warning(f"Use of {cfile} is deprecated. We suggest renaming to 'cats_config.yml'\n")
+                    logging.warning(
+                        f"Use of {cfile} is deprecated. We suggest renaming to 'cats_config.yml'\n"
+                    )
             except FileNotFoundError:
                 logging.warning("config file not found")
                 conf_dict = {}
@@ -107,24 +143,18 @@ def config_from_file(configpath="") -> Mapping[str, Any]:
     return conf_dict
 
 
-def CI_API_from_config_or_args(args, config) -> APIInterface:
+def provider_from_config_or_args(
+    args: Args, config: Mapping[str, Any]
+) -> type[BaseProvider]:
     try:
         api = args.api if args.api else config["api"]
     except KeyError:
         api = "carbonintensity.org.uk"  # default value
         logging.warning(f"Unspecified carbon intensity forecast service, using {api}")
-    try:
-        interface = API_interfaces[api]
-    except KeyError:
-        logging.error(
-            f"Error: {api} is not a valid API choice. It must be one of " "\n".join(
-                API_interfaces.keys()
-            )
-        )
-    return interface
+    return get_provider(api)
 
 
-def get_location_from_config_or_args(args, config) -> str:
+def get_location_from_config_or_args(args: Args, config: Mapping[str, Any]) -> str:
     if args.location:
         location = args.location
         logging.info(f"Using location provided from command line: {location}")
@@ -134,12 +164,12 @@ def get_location_from_config_or_args(args, config) -> str:
         logging.info(f"Using location from config file: {location}")
         return location
 
-    r = requests.get("https://ipapi.co/json/", headers = user_agent)
+    r = requests.get("https://ipapi.co/json/", headers=user_agent)
     if r.status_code != 200:
         logging.error(
             "Could not get location from ipapi.co.\n"
-            f"Got Error {r.status_code} - {r.json()['reason']}\n"
-            f"{r.json()['message']}"
+            + f"Got Error {r.status_code} - {r.json()['reason']}\n"
+            + f"{r.json()['message']}"
         )
         sys.exit(1)
     location = r.json()["postal"]
@@ -150,7 +180,7 @@ def get_location_from_config_or_args(args, config) -> str:
     return location
 
 
-def read_device_config(args, key, config):
+def read_device_config(args: Args, key: str, config: Mapping[str, Any]):
     if not (nunits := getattr(args, key.lower()) or config.get("nunits")):
         logging.error(f"No number of units specified for device {key}")
     try:
@@ -161,7 +191,7 @@ def read_device_config(args, key, config):
     return nunits, power
 
 
-def get_job_info(args, profiles: dict) -> list[tuple[int, float]]:
+def get_job_info(args: Args, profiles: dict[str, Any]) -> list[tuple[int, float]]:
     if args.profile:
         try:
             profile = profiles[args.profile]
