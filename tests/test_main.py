@@ -19,10 +19,12 @@ now_start = (datetime.now() + timedelta(minutes=1)).replace(second=0)
 now_end = now_start + timedelta(minutes=5)
 
 OUTPUT = CATSOutput(
+    "Carbon intensity",
     AverageEstimate(20, now_start, now_end, 0.0, 0.0),
     AverageEstimate(20, now_start, now_end, 0.0, 0.0),
     "OX1",
     "GBR",
+    "gCO2eq/kWh",
 )
 
 
@@ -40,9 +42,7 @@ def test_schedule_sbatch_success(fp):
         [
             "sbatch",
             "--begin",
-            OUTPUT.carbonIntensityOptimal.start.strftime(
-                SCHEDULER_DATE_FORMAT["sbatch"]
-            ),
+            OUTPUT.valueOptimal.start.strftime(SCHEDULER_DATE_FORMAT["sbatch"]),
             "./script.sh",
         ],
         stdout=b"Submitted batch job 123456",
@@ -78,7 +78,7 @@ def test_schedule_at_success(fp):
         [
             "at",
             "-t",
-            OUTPUT.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
+            OUTPUT.valueOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
         ]
     )
     schedule_at(OUTPUT, ["ls"])

@@ -1,19 +1,22 @@
 import os
 from contextlib import contextmanager
+from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
 import yaml
 
 from cats.cli import parse_arguments
-from cats.CI_api_interface import API_interfaces
 from cats.configure import (
-    CI_API_from_config_or_args,
+    Args,
     config_from_file,
     get_job_info,
     get_location_from_config_or_args,
+    provider_from_config_or_args,
 )
 from cats.constants import MEMORY_POWER_PER_GB
+from cats.exceptions import UnsupportedProviderError
+from cats.providers import UKCarbonIntensityProvider
 
 CATS_CONFIG = {
     "location": "EH8",
@@ -31,7 +34,7 @@ def change_dir(p):
 
 @pytest.fixture
 def local_config_file(request, tmp_path_factory):
-    # This fixture allows tests that use it to pass in 
+    # This fixture allows tests that use it to pass in
     # a file name as a fixt_data mark. Default to config.yml
     marker = request.node.get_closest_marker("fixt_data")
     if marker is None:
@@ -112,24 +115,26 @@ def test_get_location_from_config_or_args(mock_requests):
     assert location == expected_location
 
 
-def get_CI_API_from_config_or_args(args, config):
-    expected_interface = API_interfaces["carbonintensity.org.uk"]
-    args = parse_arguments().parse_args(
-        ["--api", "carbonintensity.org.uk", "--duration", "1"]
+def get_provider_from_config_or_args(args, config):
+    args = cast(
+        Args,
+        parse_arguments().parse_args(
+            ["--api", "carbonintensity.org.uk", "--duration", "1"]
+        ),
     )
-    API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
-    assert API_interface == expected_interface
+    assert provider_from_config_or_args(args, CATS_CONFIG) == UKCarbonIntensityProvider
 
-    args = parse_arguments().parse_args(["--duration", "1"])
-    API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
-    assert API_interface == expected_interface
+    args = cast(Args, parse_arguments().parse_args(["--duration", "1"]))
+    assert provider_from_config_or_args(args, CATS_CONFIG) == UKCarbonIntensityProvider
 
-    args = parse_arguments().parse_args(
-        ["--api", "doesnotexist.co.uk", "--duration", "1"]
+    args = cast(
+        Args,
+        parse_arguments().parse_args(
+            ["--api", "doesnotexist.co.uk", "--duration", "1"]
+        ),
     )
-    API_interface = CI_API_from_config_or_args(args, CATS_CONFIG)
-    with pytest.raises(KeyError):
-        CI_API_from_config_or_args(args, CATS_CONFIG)
+    with pytest.raises(UnsupportedProviderError):
+        _ = provider_from_config_or_args(args, CATS_CONFIG)
 
 
 def test_get_jobinfo():

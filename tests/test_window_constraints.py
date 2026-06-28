@@ -9,8 +9,10 @@ import pytest
 from cats.cli import main, parse_time_constraint, validate_window_constraints
 from cats.forecast import (
     PointEstimate,
+    Timeseries,
     WindowedForecast,
 )
+from cats.providers import UKCarbonIntensityProvider
 
 
 @pytest.fixture(scope="session")
@@ -314,17 +316,16 @@ class TestConstrainedWindowedForecast:
 class TestMainIntegration:
     """Integration tests for main function with window constraints."""
 
-    @patch("cats.CI_api_query.get_CI_forecast")
+    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_window_constraint(
         self, mock_config: MagicMock, mock_forecast: MagicMock
     ):
         """Test main function with --window parameter."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -334,28 +335,31 @@ class TestMainIntegration:
         # Mock forecast data
         utc = ZoneInfo("UTC")
         base_time = datetime.now(utc)
-        mock_forecast.return_value = [
-            PointEstimate(
-                datetime=base_time + timedelta(minutes=i * 30), value=100 - i * 5
-            )
-            for i in range(100)  # 50 hours of data
-        ]
+        mock_forecast.return_value = Timeseries(
+            "Carbon intensity",
+            [
+                PointEstimate(
+                    datetime=base_time + timedelta(minutes=i * 30), value=100 - i * 5
+                )
+                for i in range(100)  # 50 hours of data
+            ],
+            "gCO2eq/kWh",
+        )
 
         # Test with window constraint
         result = main(["-d", "60", "--loc", "OX1", "--window", "480"])
         assert result == 0
 
-    @patch("cats.CI_api_query.get_CI_forecast")
+    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_time_window_constraints(
         self, mock_config: MagicMock, mock_forecast: MagicMock
     ):
         """Test main function with --start-window and --end-window parameters."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -365,10 +369,16 @@ class TestMainIntegration:
         # Mock forecast data
         utc = ZoneInfo("UTC")
         now = datetime.now(utc)
-        mock_forecast.return_value = [
-            PointEstimate(datetime=now + timedelta(minutes=i * 30), value=100 - i * 2)
-            for i in range(100)  # 50 hours of data
-        ]
+        mock_forecast.return_value = Timeseries(
+            "Carbon intensity",
+            [
+                PointEstimate(
+                    datetime=now + timedelta(minutes=i * 30), value=100 - i * 2
+                )
+                for i in range(100)  # 50 hours of data
+            ],
+            "gCO2eq/kWh",
+        )
 
         # Test with both start and end window constraints
         tomorrow = (now + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M")
@@ -388,17 +398,13 @@ class TestMainIntegration:
         )
         assert result == 0
 
-    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
-    def test_main_with_invalid_window_constraints(
-        self, mock_config: MagicMock, mock_forecast: MagicMock
-    ):
+    def test_main_with_invalid_window_constraints(self, mock_config: MagicMock):
         """Test main function with invalid window constraints."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -409,17 +415,13 @@ class TestMainIntegration:
         result = main(["-d", "60", "--loc", "OX1", "--window", "5000"])
         assert result == 1  # Should fail
 
-    @patch("cats.cli.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
-    def test_main_with_duration_exceeds_window(
-        self, mock_config: MagicMock, mock_forecast: MagicMock
-    ):
+    def test_main_with_duration_exceeds_window(self, mock_config: MagicMock):
         """Test main function when job duration exceeds specified window."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             480,  # 8 hour duration
             None,  # jobinfo
@@ -430,17 +432,13 @@ class TestMainIntegration:
         result = main(["-d", "480", "--loc", "OX1", "--window", "240"])
         assert result == 1  # Should fail
 
-    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
-    def test_main_with_conflicting_time_windows(
-        self, mock_config: MagicMock, mock_forecast: MagicMock
-    ):
+    def test_main_with_conflicting_time_windows(self, mock_config: MagicMock):
         """Test main function with conflicting start and end windows."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,
             None,
