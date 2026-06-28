@@ -1,5 +1,4 @@
 import subprocess
-
 from typing import Optional
 
 from .output import CATSOutput
@@ -7,6 +6,7 @@ from .output import CATSOutput
 # To add a scheduler, add a date format here
 # and create a scheduler_<new>(...) function
 SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M", "sbatch": "%Y-%m-%dT%H:%M"}
+
 
 def schedule_at(output: CATSOutput, args: list[str]) -> Optional[str]:
     """Schedule job with optimal start time using at(1)
@@ -19,9 +19,7 @@ def schedule_at(output: CATSOutput, args: list[str]) -> Optional[str]:
             (
                 "at",
                 "-t",
-                output.carbonIntensityOptimal.start.strftime(
-                    SCHEDULER_DATE_FORMAT["at"]
-                ),
+                output.valueOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
             ),
             stdin=proc.stdout,
         )
@@ -42,9 +40,7 @@ def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
             [
                 "sbatch",
                 "--begin",
-                output.carbonIntensityOptimal.start.strftime(
-                    SCHEDULER_DATE_FORMAT["sbatch"]
-                ),
+                output.valueOptimal.start.strftime(SCHEDULER_DATE_FORMAT["sbatch"]),
                 *args,
             ]
         )
@@ -54,4 +50,3 @@ def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
         return "No sbatch command found in PATH, ensure slurm is configured correctly"
     except subprocess.CalledProcessError as e:  # pragma: no cover
         return f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}"
-
