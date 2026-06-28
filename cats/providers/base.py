@@ -1,4 +1,12 @@
-"Base API provider"
+"""
+Base API provider
+-----------------
+
+This module provides the base provider class from which all API providers for
+CATS are derived from. To define a new provider, create a new class derived from
+BaseProvider and add the ``@provider`` decorator to register the provider with
+appropriate provider.
+"""
 
 # pyright: reportAny=none
 
