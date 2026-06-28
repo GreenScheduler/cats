@@ -16,7 +16,7 @@ raw_output=$(docker exec -i slurmctld \
 job_id=$(echo "$raw_output" | grep ^Submitted | awk '{print $4}')
 echo "Detected job submission ID: $job_id"
 raw_json=$(echo "$raw_output" | grep -v ^Submitted)
-raw_start=$(printf '%s\n' "$raw_json" | jq -r '.carbonIntensityOptimal.start')
+raw_start=$(printf '%s\n' "$raw_json" | jq -r '.valueOptimal.start')
 
 # Replace seconds with 00 (truncate last 6 chars and add "00")
 # Example: 2025-08-28T12:43:30.156434+00:00 -> 2025-08-28T12:43:00
