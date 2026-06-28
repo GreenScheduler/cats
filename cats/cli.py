@@ -1,21 +1,26 @@
+# pyright: reportUninitializedInstanceVariable=none, reportUnknownArgumentType=none, reportUnusedCallResult=none, reportUnknownMemberType=none
 import datetime
-import logging
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-from datetime import timedelta
+from datetime import timedelta, timezone
 from pathlib import Path
+from typing import Optional, cast
 
-from typing import Optional
-
-from .configure import *
-from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .carbonFootprint import get_footprint_reduction_estimate
-from .CI_api_interface import InvalidLocationError
-from .CI_api_query import get_CI_forecast  # noqa: F401
-from .plotting import plotplan
+from .configure import Args, get_runtime_config
+from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
+from .exceptions import (
+    DurationExceedsWindowError,
+    InvalidLocationError,
+    MissingArgumentError,
+    SchedulerError,
+    UnsupportedProviderError,
+)
 from .forecast import WindowedForecast
 from .output import CATSOutput
-from .schedulers import schedule_at, schedule_sbatch, SCHEDULER_DATE_FORMAT
+from .plotting import plotplan
+from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
+
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
@@ -159,7 +164,7 @@ def parse_arguments():
         formatter_class=RawDescriptionHelpFormatter,
     )
 
-    def positive_integer(string):
+    def positive_integer(string: str):
         n = int(string)
         assert n >= 0
         return n
@@ -187,6 +192,7 @@ def parse_arguments():
         "-a",
         "--api",
         type=str,
+        default="carbonintensity.org.uk",
         help="API to use to obtain carbon intensity forecasts. Overrides `config.yml`. "
         "For now, only choice is `carbonintensity.org.uk` (hence UK only forecasts). "
         "Default: `carbonintensity.org.uk`.",
@@ -263,6 +269,7 @@ def parse_arguments():
         "\"pip install 'climate-aware-task-scheduler[plots]'\"",
         action="store_true",
     )
+    parser.add_argument("--save-plot", help="Saves plot to filename")
     parser.add_argument(
         "--window",
         type=positive_integer,
@@ -288,19 +295,18 @@ def parse_arguments():
     return parser
 
 
-def main(arguments=None) -> int:
+def run_cats(arguments: list[str] | None = None):
+    "Main CLI runner, raises exceptions"
     parser = parse_arguments()
-    args = parser.parse_args(arguments)
+    args = cast(Args, parser.parse_args(arguments))
     colour_output = args.no_colour or args.no_color
 
     if args.command and not args.scheduler:
-        print(
-            "cats: To run a command or sbatch script with the -c or --command option, you must\n"
-            "      specify the scheduler with the -s or --scheduler option"
+        raise MissingArgumentError(
+            "To run a command or sbatch script with -c / --comand, you must specify scheduler with -s / --scheduler"
         )
-        return 1
 
-    CI_API_interface, location, duration, jobinfo, PUE = get_runtime_config(args)
+    provider_cls, location, duration, jobinfo, PUE = get_runtime_config(args)
 
     # Validate and parse window constraints
     try:
@@ -308,35 +314,22 @@ def main(arguments=None) -> int:
             args.start_window, args.end_window, args.window
         )
     except ValueError as e:
-        print(f"Error in window constraints: {e}")
-        return 1
+        raise ValueError(f"Error in window constraints: {e}")
     # Check against both API limit and user-specified window
-    effective_max_duration = min(CI_API_interface.max_duration, max_window)
+    effective_max_duration = min(provider_cls.MAX_DURATION_MINUTES, max_window)
     if duration > effective_max_duration:
-        if max_window < CI_API_interface.max_duration:
-            print(
-                f"""Job duration ({duration} minutes) exceeds specified window ({max_window} minutes)."""
-            )
+        if max_window < provider_cls.MAX_DURATION_MINUTES:
+            raise DurationExceedsWindowError(f"{duration=}, {max_window=}")
         else:
-            print(
-                f"""API allows a maximum job duration of {CI_API_interface.max_duration} minutes.
-This is usually due to forecast limitations."""
+            raise DurationExceedsWindowError(
+                f"{duration=}, maxium forecast duration is {provider_cls.MAX_DURATION_MINUTES}"
             )
-        return 1
 
     ########################
     ## Obtain CI forecast ##
     ########################
-
-    try:
-        CI_forecast = get_CI_forecast(location, CI_API_interface)
-    except InvalidLocationError:
-        logging.error(f"Error: unknown location {location}\n")
-        logging.error(
-            "Location should be be specified as the outward code,\n"
-            "for example 'SW7' for postcode 'SW7 EAZ'.\n"
-        )
-        return 1
+    provider = provider_cls(location)
+    forecast = provider.get_data(datetime.datetime.now(timezone.utc))
 
     #############################
     ## Find optimal start time ##
@@ -354,20 +347,28 @@ This is usually due to forecast limitations."""
         search_start = max(search_start, start_constraint)
 
     wf = WindowedForecast(
-        CI_forecast,
+        forecast.values,
         duration,
         start=search_start,
         max_window_minutes=max_window,
         end_constraint=end_constraint,
     )
     now_avg, best_avg = wf[0], min(wf)
-    output = CATSOutput(now_avg, best_avg, location, "GBR", colour=not colour_output)
+    output = CATSOutput(
+        forecast.metric,
+        now_avg,
+        best_avg,
+        location,
+        "GBR",
+        unit=forecast.unit,
+        colour=not colour_output,
+    )
 
     ################################
     ## Calculate carbon footprint ##
     ################################
 
-    if args.footprint:
+    if args.footprint and forecast.metric == "Carbon intensity":
         assert PUE is not None, "PUE not set by get_runtime_config!"
         assert jobinfo is not None, "jobinfo not set by get_runtime_config!"
         output.emmissionEstimate = get_footprint_reduction_estimate(
@@ -388,8 +389,10 @@ This is usually due to forecast limitations."""
         # Print CATS ASCII art banner, before any output from printing or logging
         print_banner(colour_output)
         print(output)
-    if args.plot:
-        plotplan(CI_forecast, output)
+    if args.plot or args.save_plot:
+        plotplan(forecast, output, args.save_plot)
+        if args.save_plot:
+            print("Saved plot to:", args.save_plot)
     if args.command:
         if args.scheduler == "at":
             err = schedule_at(output, args.command.split())
@@ -398,6 +401,26 @@ This is usually due to forecast limitations."""
         else:  # pragma: no cover - we already check for valid scheduler in parse_arguments
             err = f"Scheduler {args.scheduler} not in supported schedulers: {SCHEDULER_DATE_FORMAT.keys()}"
         if err:
-            print(err)
-            return 1
-    return 0
+            raise SchedulerError(err)
+
+
+def main(arguments: list[str] | None = None):
+    try:
+        run_cats(arguments)
+        return 0
+    except InvalidLocationError as e:
+        print(f"Invalid location: {e}")
+    except UnsupportedProviderError as e:
+        print(f"Unsupported provider: {e}")
+    except MissingArgumentError as e:
+        print(f"One or more arguments missing: {e}")
+    except DurationExceedsWindowError as e:
+        print(f"Duration exceeds limit: {e}")
+    except SchedulerError as e:
+        print(f"Scheduler error: {e}")
+    except ValueError as e:
+        print(f"Value error: {e}")
+    except Exception:
+        # If exception is not expected, raise
+        raise
+    return 1
