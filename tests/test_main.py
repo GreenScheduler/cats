@@ -5,14 +5,12 @@ from unittest.mock import patch
 
 import pytest
 
-from cats.CI_api_interface import API_interfaces, InvalidLocationError
 from cats.cli import main, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
+from cats.exceptions import InvalidLocationError
 from cats.forecast import AverageEstimate
 from cats.output import CATSOutput
 from cats.schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
-
-API = API_interfaces["carbonintensity.org.uk"]
 
 AT_OUTPUT = "%a %b %d %H:%M:%S %Y"
 now_start = (datetime.now() + timedelta(minutes=1)).replace(second=0)
@@ -110,7 +108,7 @@ def raiseLocationError():
     raise InvalidLocationError
 
 
-@patch("cats.CI_api_query.get_CI_forecast")
+@patch("cats.providers.UKCarbonIntensityProvider.get_data")
 def test_main_failures(get_CI_forecast):
     get_CI_forecast.return_value = {}
     get_CI_forecast.side_effect = raiseLocationError
