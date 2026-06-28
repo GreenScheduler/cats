@@ -25,6 +25,13 @@ class AverageEstimate:
     end_value: float  # CI point estimate at end time
 
 
+@dataclass
+class Timeseries:
+    metric: str
+    values: list[PointEstimate]
+    unit: str
+
+
 class WindowedForecast:
     def __init__(
         self,
