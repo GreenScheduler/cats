@@ -220,7 +220,7 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     ax.scatter(date2num(now_times), now_values, color=now_colour, s=8, alpha=0.3)
     ax.scatter(date2num(opt_times), opt_values, color=optimal_colour, s=8, alpha=0.3)
 
-    def tick_formatting(x: float, _):
+    def readable_datetime_tick_formatter(x: float, _):
         """Format datetimes so the x-axis labels become more readable.
 
         Namely, only show the full 'yy-mm-dd hh:mm' format date at the start
@@ -251,7 +251,7 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     # The x axis label needs some padding at the figure foot else it gets a
     # bit cut off due to the length of some datetime x labels
     ax.set_xlabel(r"Time ($\mathbf{yy\text{-}mm\text{-}dd}$ hh:mm)")
-    ax.xaxis.set_major_formatter(FuncFormatter(tick_formatting))
+    ax.xaxis.set_major_formatter(FuncFormatter(readable_datetime_tick_formatter))
     ax.set_ylabel(rf"Forecast {forecast.metric} ({units})")
     ax.label_outer()
 
