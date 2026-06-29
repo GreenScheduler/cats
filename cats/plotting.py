@@ -1,6 +1,17 @@
+"Plotting functions for CATS"
+# pyright: reportPossiblyUnboundVariable=none, reportArgumentType=none, reportUnknownArgumentType=none
+# pyright: reportUnknownMemberType=none, reportAny=none, reportUnusedCallResult=none
+
+from datetime import datetime
+
+from matplotlib.dates import date2num  # pyright: ignore[reportUnknownVariableType]
+
+from .forecast import Timeseries
+from .output import CATSOutput
+
 try:
-    import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
+    import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
     from matplotlib.ticker import FuncFormatter
 
@@ -8,10 +19,16 @@ try:
 except ImportError:
     have_matplotlib = False
 
+# PRETTY_UNITS: Latex version of plain text units
+# To avoid having to check if a user has (La)TeX available, to format the
+# units, use matploltib built-in lightweight TeX parser 'Mathtext' via
+# '$' symbols. Allows subscript on 2, etc. Needs a raw string to work.
+PRETTY_UNITS = {"gCO2eq/kWh": r"$\mathrm{g\,CO_{2}\,eq\;kWh^{-1}}$"}
 
-def plotplan(CI_forecast, output):
+
+def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = None):
     """
-    Plot the carbon intensity forecast and optimised plan
+    Plot the metric forecast and optimised plan
     """
     if not have_matplotlib:
         print("To plot graphs you must import matplotlib")
@@ -19,50 +36,48 @@ def plotplan(CI_forecast, output):
         return
 
     # Just for now pull the CI forecast apart... probably belongs as method...
-    values = []
-    times = []
-    now_values = []
-    now_times = []
-    opt_values = []
-    opt_times = []
+    values: list[float] = []
+    times: list[datetime] = []
+    now_values: list[float] = []
+    now_times: list[datetime] = []
+    opt_values: list[float] = []
+    opt_times: list[datetime] = []
 
     # For our now and optimal series, start with the starting data (interpolated)
-    opt_times.append(output.carbonIntensityOptimal.start)
-    opt_values.append(output.carbonIntensityOptimal.start_value)
-    now_times.append(output.carbonIntensityNow.start)
-    now_values.append(output.carbonIntensityNow.start_value)
+    opt_times.append(output.valueOptimal.start)
+    opt_values.append(output.valueOptimal.start_value)
+    now_times.append(output.valueNow.start)
+    now_values.append(output.valueNow.start_value)
 
     # Build the three time series of point from the API
-    for point in CI_forecast:
+    for point in forecast.values:
         values.append(point.value)
         times.append(point.datetime)
         if (
-            point.datetime >= output.carbonIntensityOptimal.start
-            and point.datetime <= output.carbonIntensityOptimal.end
+            point.datetime >= output.valueOptimal.start
+            and point.datetime <= output.valueOptimal.end
         ):
             opt_values.append(point.value)
             opt_times.append(point.datetime)
         if (
-            point.datetime >= output.carbonIntensityNow.start
-            and point.datetime <= output.carbonIntensityNow.end
+            point.datetime >= output.valueNow.start
+            and point.datetime <= output.valueNow.end
         ):
             now_values.append(point.value)
             now_times.append(point.datetime)
 
     # For our now and optimal series, end with the end data (interpolated)
-    opt_times.append(output.carbonIntensityOptimal.end)
-    opt_values.append(output.carbonIntensityOptimal.end_value)
-    now_times.append(output.carbonIntensityNow.end)
-    now_values.append(output.carbonIntensityNow.end_value)
+    opt_times.append(output.valueOptimal.end)
+    opt_values.append(output.valueOptimal.end_value)
+    now_times.append(output.valueNow.end)
+    now_values.append(output.valueNow.end_value)
 
     # Determine if there is any window overlap, since then we add an extra
     # element to the legend to make clear how the overlap region looks but
     # otherwise we can leave it out. There will be an overlap if the end of
     # the 'now' time is more than the start of the optimal time since the
     # optimal is only ever time shifted forwards.
-    windows_overlap = (
-        output.carbonIntensityNow.end > output.carbonIntensityOptimal.start
-    )
+    windows_overlap = output.valueNow.end > output.valueOptimal.start
 
     # Make the plot (should probably take fig and ax as opt args...)
 
@@ -81,7 +96,7 @@ def plotplan(CI_forecast, output):
 
     # Filling under curves for the forecast, run now time and optimal run time
     ax.fill_between(
-        times,
+        date2num(times),
         0.0,
         values,
         alpha=0.2,
@@ -91,7 +106,7 @@ def plotplan(CI_forecast, output):
     )
     # Show 'now' window in red with black hatch lines for contrast
     ax.fill_between(
-        now_times,
+        date2num(now_times),
         0.0,
         now_values,
         alpha=0.6,
@@ -104,7 +119,7 @@ def plotplan(CI_forecast, output):
     # but also in black: for any overlapping regions on the two windows, this
     # therefore results in a distinguishable cross-hatch pattern
     ax.fill_between(
-        opt_times,
+        date2num(opt_times),
         0.0,
         opt_values,
         alpha=0.6,
@@ -136,17 +151,14 @@ def plotplan(CI_forecast, output):
         labels.append(overlap_patch.get_label())
         ax.legend(handles=handles, labels=labels)
 
-    now_value = output.carbonIntensityNow.value
-    optimal_value = output.carbonIntensityOptimal.value
-    # To avoid having to check if a user has (La)TeX available, to format the
-    # units, use matploltib built-in lightweight TeX parser 'Mathtext' via
-    # '$' symbols. Allows subscript on 2, etc. Needs a raw string to work.
-    units = r"$\mathrm{g\,CO_{2}\,eq\;kWh^{-1}}$"
+    now_value = output.valueNow.value
+    optimal_value = output.valueOptimal.value
+    units = PRETTY_UNITS.get(forecast.unit, forecast.unit)
 
     ax.text(
         0.5,
         1.05,
-        f"Projected carbon intensity ({units}) mean...",
+        f"Projected {forecast.metric} ({units}) mean...",
         ha="center",
         va="bottom",
         fontsize=14,
@@ -204,11 +216,11 @@ def plotplan(CI_forecast, output):
     # Include subtle markers at each data point, in case it helps to
     # distinguish forecast points from the trend (esp. useful if there)
     # is a similar trend across/for 1 hour or more i.e. 3+ data points
-    ax.scatter(times, values, color=forecast_colour, s=8, alpha=0.3)
-    ax.scatter(now_times, now_values, color=now_colour, s=8, alpha=0.3)
-    ax.scatter(opt_times, opt_values, color=optimal_colour, s=8, alpha=0.3)
+    ax.scatter(date2num(times), values, color=forecast_colour, s=8, alpha=0.3)
+    ax.scatter(date2num(now_times), now_values, color=now_colour, s=8, alpha=0.3)
+    ax.scatter(date2num(opt_times), opt_values, color=optimal_colour, s=8, alpha=0.3)
 
-    def tick_formatting(x, pos):
+    def readable_datetime_tick_formatter(x: float, _):
         """Format datetimes so the x-axis labels become more readable.
 
         Namely, only show the full 'yy-mm-dd hh:mm' format date at the start
@@ -217,7 +229,7 @@ def plotplan(CI_forecast, output):
         makes it much quicker for a reader to parse the date and time
         axis span and partitioning.
         """
-        dt = mdates.num2date(x)
+        dt: datetime = mdates.num2date(x)
 
         # Would otherwise always full date at the first tick, as well as
         # at every point we get to a new day i.e. 00:00 (every four major
@@ -239,8 +251,8 @@ def plotplan(CI_forecast, output):
     # The x axis label needs some padding at the figure foot else it gets a
     # bit cut off due to the length of some datetime x labels
     ax.set_xlabel(r"Time ($\mathbf{yy\text{-}mm\text{-}dd}$ hh:mm)")
-    ax.xaxis.set_major_formatter(FuncFormatter(tick_formatting))
-    ax.set_ylabel(rf"Forecast carbon intensity ({units})")
+    ax.xaxis.set_major_formatter(FuncFormatter(readable_datetime_tick_formatter))
+    ax.set_ylabel(rf"Forecast {forecast.metric} ({units})")
     ax.label_outer()
 
     ax.grid(True)
@@ -250,4 +262,7 @@ def plotplan(CI_forecast, output):
     ax.set_ylim(bottom=0)  # start y-axis at 0, negative CI not possible!
 
     plt.subplots_adjust(bottom=0.20)
-    plt.show()
+    if filename is None:
+        plt.show()
+    else:
+        plt.savefig(filename)

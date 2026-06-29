@@ -1,26 +1,28 @@
 import csv
-import pytest
-from datetime import datetime, timedelta, timezone, time
+from datetime import datetime, time, timedelta, timezone
 from pathlib import Path
-
 from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
+import pytest
+
 from cats.cli import main, parse_time_constraint, validate_window_constraints
 from cats.forecast import (
-    CarbonIntensityPointEstimate,
+    PointEstimate,
+    Timeseries,
     WindowedForecast,
 )
+from cats.providers import UKCarbonIntensityProvider
 
 
 @pytest.fixture(scope="session")
-def sample_data() -> list[CarbonIntensityPointEstimate]:
+def sample_data() -> list[PointEstimate]:
     """Load sample carbon intensity data for testing."""
     with open(Path(__file__).parent / "carbon_intensity_24h.csv", "r") as f:
         csvfile = csv.reader(f, delimiter=",")
         _ = next(csvfile)  # Skip header line
         data = [
-            CarbonIntensityPointEstimate(
+            PointEstimate(
                 datetime=datetime.fromisoformat(datestr[:-1] + "+00:00"),
                 value=float(intensity_value),
             )
@@ -177,7 +179,7 @@ class TestConstrainedWindowedForecast:
     """Test the ConstrainedWindowedForecast class."""
 
     def test_basic_functionality_without_constraints(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test that ConstrainedWindowedForecast works like WindowedForecast without constraints."""
         duration = 180  # 3 hours
@@ -197,7 +199,7 @@ class TestConstrainedWindowedForecast:
         assert minimum.value <= first.value  # minimum should be <= first
 
     def test_window_constraint_limits_search_space(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test that max_window_minutes limits the search space."""
         duration = 60  # 1 hour
@@ -217,9 +219,7 @@ class TestConstrainedWindowedForecast:
         # Constrained should have fewer or equal options
         assert len(cwf_constrained) <= len(cwf_full)
 
-    def test_end_constraint_limits_start_times(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_end_constraint_limits_start_times(self, sample_data: list[PointEstimate]):
         """Test that end_constraint limits when jobs can start."""
         duration = 60  # 1 hour
         start = sample_data[0].datetime
@@ -233,9 +233,7 @@ class TestConstrainedWindowedForecast:
         for window in cwf:
             assert window.start < end_constraint
 
-    def test_combined_constraints(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_combined_constraints(self, sample_data: list[PointEstimate]):
         """Test using both window and end constraints together."""
         duration = 90  # 1.5 hours
         start = sample_data[0].datetime
@@ -263,9 +261,7 @@ class TestConstrainedWindowedForecast:
         # Create minimal data
         utc = ZoneInfo("UTC")
         minimal_data = [
-            CarbonIntensityPointEstimate(
-                datetime=datetime(2024, 1, 1, 12, 0, tzinfo=utc), value=100
-            )
+            PointEstimate(datetime=datetime(2024, 1, 1, 12, 0, tzinfo=utc), value=100)
         ]
 
         with pytest.raises(ValueError, match="Insufficient forecast data"):
@@ -274,7 +270,7 @@ class TestConstrainedWindowedForecast:
             )
 
     def test_timezone_handling_in_end_constraint(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test proper timezone handling for end constraints."""
         duration = 60
@@ -291,9 +287,7 @@ class TestConstrainedWindowedForecast:
         # Should still work correctly despite timezone difference
         assert len(cwf) > 0
 
-    def test_index_out_of_range_raises_error(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_index_out_of_range_raises_error(self, sample_data: list[PointEstimate]):
         """Test that accessing invalid index raises IndexError."""
         duration = 60
         start = sample_data[0].datetime
@@ -303,9 +297,7 @@ class TestConstrainedWindowedForecast:
         with pytest.raises(IndexError, match="Window index out of range"):
             cwf[len(cwf)]
 
-    def test_iteration_works_correctly(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_iteration_works_correctly(self, sample_data: list[PointEstimate]):
         """Test that iteration over forecast works correctly."""
         duration = 60
         start = sample_data[0].datetime
@@ -324,17 +316,16 @@ class TestConstrainedWindowedForecast:
 class TestMainIntegration:
     """Integration tests for main function with window constraints."""
 
-    @patch("cats.CI_api_query.get_CI_forecast")
+    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_window_constraint(
         self, mock_config: MagicMock, mock_forecast: MagicMock
     ):
         """Test main function with --window parameter."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -344,28 +335,31 @@ class TestMainIntegration:
         # Mock forecast data
         utc = ZoneInfo("UTC")
         base_time = datetime.now(utc)
-        mock_forecast.return_value = [
-            CarbonIntensityPointEstimate(
-                datetime=base_time + timedelta(minutes=i * 30), value=100 - i * 5
-            )
-            for i in range(100)  # 50 hours of data
-        ]
+        mock_forecast.return_value = Timeseries(
+            "Carbon intensity",
+            [
+                PointEstimate(
+                    datetime=base_time + timedelta(minutes=i * 30), value=100 - i * 5
+                )
+                for i in range(100)  # 50 hours of data
+            ],
+            "gCO2eq/kWh",
+        )
 
         # Test with window constraint
         result = main(["-d", "60", "--loc", "OX1", "--window", "480"])
         assert result == 0
 
-    @patch("cats.CI_api_query.get_CI_forecast")
+    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_time_window_constraints(
         self, mock_config: MagicMock, mock_forecast: MagicMock
     ):
         """Test main function with --start-window and --end-window parameters."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -375,12 +369,16 @@ class TestMainIntegration:
         # Mock forecast data
         utc = ZoneInfo("UTC")
         now = datetime.now(utc)
-        mock_forecast.return_value = [
-            CarbonIntensityPointEstimate(
-                datetime=now + timedelta(minutes=i * 30), value=100 - i * 2
-            )
-            for i in range(100)  # 50 hours of data
-        ]
+        mock_forecast.return_value = Timeseries(
+            "Carbon intensity",
+            [
+                PointEstimate(
+                    datetime=now + timedelta(minutes=i * 30), value=100 - i * 2
+                )
+                for i in range(100)  # 50 hours of data
+            ],
+            "gCO2eq/kWh",
+        )
 
         # Test with both start and end window constraints
         tomorrow = (now + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M")
@@ -400,17 +398,13 @@ class TestMainIntegration:
         )
         assert result == 0
 
-    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
-    def test_main_with_invalid_window_constraints(
-        self, mock_config: MagicMock, mock_forecast: MagicMock
-    ):
+    def test_main_with_invalid_window_constraints(self, mock_config: MagicMock):
         """Test main function with invalid window constraints."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -421,17 +415,13 @@ class TestMainIntegration:
         result = main(["-d", "60", "--loc", "OX1", "--window", "5000"])
         assert result == 1  # Should fail
 
-    @patch("cats.cli.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
-    def test_main_with_duration_exceeds_window(
-        self, mock_config: MagicMock, mock_forecast: MagicMock
-    ):
+    def test_main_with_duration_exceeds_window(self, mock_config: MagicMock):
         """Test main function when job duration exceeds specified window."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             480,  # 8 hour duration
             None,  # jobinfo
@@ -442,17 +432,13 @@ class TestMainIntegration:
         result = main(["-d", "480", "--loc", "OX1", "--window", "240"])
         assert result == 1  # Should fail
 
-    @patch("cats.CI_api_query.get_CI_forecast")
     @patch("cats.configure.get_runtime_config")
-    def test_main_with_conflicting_time_windows(
-        self, mock_config: MagicMock, mock_forecast: MagicMock
-    ):
+    def test_main_with_conflicting_time_windows(self, mock_config: MagicMock):
         """Test main function with conflicting start and end windows."""
         # Mock the configuration
-        from cats.CI_api_interface import API_interfaces
 
         mock_config.return_value = (
-            API_interfaces["carbonintensity.org.uk"],
+            UKCarbonIntensityProvider,
             "OX1",
             60,
             None,
@@ -483,9 +469,7 @@ class TestMainIntegration:
 class TestEdgeCases:
     """Test edge cases and error conditions."""
 
-    def test_very_short_window_with_sample_data(
-        self, sample_data: list[CarbonIntensityPointEstimate]
-    ):
+    def test_very_short_window_with_sample_data(self, sample_data: list[PointEstimate]):
         """Test behavior with very short window constraint."""
         duration = 30  # 30 minutes
         start = sample_data[0].datetime
@@ -497,7 +481,7 @@ class TestEdgeCases:
         assert len(cwf) > 0
 
     def test_end_constraint_in_past_relative_to_start(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test end constraint that's before the start time."""
         duration = 60
@@ -513,7 +497,7 @@ class TestEdgeCases:
             )
 
     def test_window_exactly_matches_job_duration(
-        self, sample_data: list[CarbonIntensityPointEstimate]
+        self, sample_data: list[PointEstimate]
     ):
         """Test when window size exactly matches job duration."""
         duration = 120  # 2 hours

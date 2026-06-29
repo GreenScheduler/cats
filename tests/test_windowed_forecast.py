@@ -8,8 +8,8 @@ import pytest
 from numpy.testing import assert_allclose
 
 from cats.forecast import (
-    CarbonIntensityAverageEstimate,
-    CarbonIntensityPointEstimate,
+    AverageEstimate,
+    PointEstimate,
     WindowedForecast,
 )
 
@@ -17,7 +17,7 @@ d = datetime(year=2023, month=1, day=1)
 NDATA = 200
 step = math.pi / NDATA
 DATA = [
-    CarbonIntensityPointEstimate(
+    PointEstimate(
         datetime=d + timedelta(minutes=i),
         value=-1.0 * math.sin(i * step),
     )
@@ -31,7 +31,7 @@ def sample_data():
         csvfile = csv.reader(f, delimiter=",")
         next(csvfile)  # Skip header line
         data = [
-            CarbonIntensityPointEstimate(
+            PointEstimate(
                 datetime=datetime.fromisoformat(datestr[:-1] + "+00:00"),
                 value=float(intensity_value),
             )
@@ -41,7 +41,7 @@ def sample_data():
 
 
 def test_repr():
-    est = CarbonIntensityPointEstimate(
+    est = PointEstimate(
         datetime=datetime.fromisoformat("2023-05-04T12:30+00:00"), value=12.0
     )
     assert repr(est) == "2023-05-04T12:30:00+00:00\t12.0"
@@ -83,12 +83,12 @@ def test_minimise_average(sample_data):
 
     # Intensity point estimates over best runtime period
     v = [10, 8, 7, 7, 5, 8, 8]
-    expected = CarbonIntensityAverageEstimate(
+    expected = AverageEstimate(
         start=datetime.fromisoformat("2023-05-05T12:00+00:00"),
         end=datetime.fromisoformat("2023-05-05T15:00+00:00"),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
         start_value=v[0],
-        end_value=v[-1]
+        end_value=v[-1],
     )
     assert result == expected
 
@@ -102,12 +102,12 @@ def test_maximum_duration(sample_data):
     # Intensity point estimates over best runtime period
     # In this case, the entire period is selected which is 2850 minutes long
     v = [s.value for s in sample_data]
-    expected = CarbonIntensityAverageEstimate(
+    expected = AverageEstimate(
         start=datetime.fromisoformat("2023-05-04T12:30+00:00"),
         end=datetime.fromisoformat("2023-05-06T12:00+00:00"),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
         start_value=v[0],
-        end_value=v[-1]
+        end_value=v[-1],
     )
     assert result == expected
 
@@ -127,12 +127,12 @@ def test_minimise_average_bst(sample_data):
 
     # Intensity point estimates over best runtime period
     v = [10, 8, 7, 7, 5, 8, 8]
-    expected = CarbonIntensityAverageEstimate(
+    expected = AverageEstimate(
         start=datetime.fromisoformat("2023-05-05T11:00-01:00"),
         end=datetime.fromisoformat("2023-05-05T14:00-01:00"),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
         start_value=v[0],
-        end_value=v[-1]
+        end_value=v[-1],
     )
     assert result == expected
     assert result.start.tzinfo == expected.start.tzinfo
@@ -147,12 +147,12 @@ def test_average_intensity_now(sample_data):
 
     # Intensity point estimates over best runtime period
     v = [p.value for p in sample_data[: window_size + 1]]
-    expected = CarbonIntensityAverageEstimate(
+    expected = AverageEstimate(
         start=sample_data[0].datetime,
         end=sample_data[window_size].datetime,
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / window_size,
         start_value=v[0],
-        end_value=v[-1]
+        end_value=v[-1],
     )
     assert result == expected
 
@@ -164,11 +164,11 @@ def test_average_intensity_with_offset():
     # duration window.
     utc = ZoneInfo("UTC")
     CI_forecast = [
-        CarbonIntensityPointEstimate(26, datetime(2023, 1, 1, 8, 30, tzinfo=utc)),
-        CarbonIntensityPointEstimate(40, datetime(2023, 1, 1, 9, 0, tzinfo=utc)),
-        CarbonIntensityPointEstimate(50, datetime(2023, 1, 1, 9, 30, tzinfo=utc)),
-        CarbonIntensityPointEstimate(60, datetime(2023, 1, 1, 10, 0, tzinfo=utc)),
-        CarbonIntensityPointEstimate(25, datetime(2023, 1, 1, 10, 30, tzinfo=utc)),
+        PointEstimate(26, datetime(2023, 1, 1, 8, 30, tzinfo=utc)),
+        PointEstimate(40, datetime(2023, 1, 1, 9, 0, tzinfo=utc)),
+        PointEstimate(50, datetime(2023, 1, 1, 9, 30, tzinfo=utc)),
+        PointEstimate(60, datetime(2023, 1, 1, 10, 0, tzinfo=utc)),
+        PointEstimate(25, datetime(2023, 1, 1, 10, 30, tzinfo=utc)),
     ]
     duration = 70  # in minutes
     # First available data point is for 08:00 but the job
@@ -178,7 +178,7 @@ def test_average_intensity_with_offset():
 
     interp1 = 40 + 15 * (50 - 40) / 30
     interp2 = 60 + 25 * (25 - 60) / 30
-    expected = CarbonIntensityAverageEstimate(
+    expected = AverageEstimate(
         start=datetime(2023, 1, 1, 9, 15, tzinfo=utc),
         end=datetime(2023, 1, 1, 10, 25, tzinfo=utc),
         value=(
@@ -186,7 +186,7 @@ def test_average_intensity_with_offset():
         )
         / duration,
         start_value=45,
-        end_value=30.833333333333332
+        end_value=30.833333333333332,
     )
     assert result == expected
 
@@ -218,7 +218,7 @@ def test_average_intensity_with_offset_long_job(sample_data):
     # e.g v[0] = 15 + 18min * (18 - 15) / 30min = 16.8
     v = [16.8, 18, 19, 17, 16, 11, 11, 11, 11]
     data_timestep = sample_data[1].datetime - sample_data[0].datetime  # 30 minutes
-    expected = CarbonIntensityAverageEstimate(
+    expected = AverageEstimate(
         start=job_start + 2 * data_timestep,
         end=job_start + 2 * data_timestep + timedelta(minutes=duration),
         value=(
@@ -228,7 +228,7 @@ def test_average_intensity_with_offset_long_job(sample_data):
         )
         / duration,
         start_value=v[0],
-        end_value=v[-1]
+        end_value=v[-1],
     )
     assert result == expected
     assert result.start.tzinfo == expected.start.tzinfo
@@ -254,12 +254,12 @@ def test_average_intensity_with_offset_short_job(sample_data):
     # and v[1] = v[-1] = 15 + 24min * (18 - 15) / 30min = 17.4
     v = [16.8, 17.4]
     data_timestep = sample_data[1].datetime - sample_data[0].datetime
-    expected = CarbonIntensityAverageEstimate(
+    expected = AverageEstimate(
         start=job_start + 2 * data_timestep,
         end=job_start + 2 * data_timestep + timedelta(minutes=duration),
         value=sum([0.5 * (a + b) for a, b in zip(v[:-1], v[1:])]) / (len(v) - 1),
         start_value=v[0],
-        end_value=v[-1]
+        end_value=v[-1],
     )
     assert result == expected
 

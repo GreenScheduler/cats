@@ -4,22 +4,25 @@ import logging
 from typing import Optional
 
 from .carbonFootprint import Estimates
-from .forecast import CarbonIntensityAverageEstimate
+from .forecast import AverageEstimate
+
 
 @dataclasses.dataclass
 class CATSOutput:
     """
     Carbon Aware Task Scheduler output
-    
+
     A dataclass to contain CATS output information for use
     with schedulers accompanied by methods to represent this
     information when reporting to users.
     """
 
-    carbonIntensityNow: CarbonIntensityAverageEstimate
-    carbonIntensityOptimal: CarbonIntensityAverageEstimate
+    metric: str
+    valueNow: AverageEstimate
+    valueOptimal: AverageEstimate
     location: str
     countryISO3: str
+    unit: str
     emmissionEstimate: Optional[Estimates] = None
     colour: bool = False
 
@@ -45,9 +48,9 @@ class CATSOutput:
             col_ee_opt = ""
 
         out = f"""
-Best job start time                       = {col_dt_opt}{self.carbonIntensityOptimal.start:%Y-%m-%d %H:%M:%S}{col_normal}
-Carbon intensity if job started now       = {col_ci_now}{self.carbonIntensityNow.value:.2f} gCO2eq/kWh{col_normal}
-Carbon intensity at optimal time          = {col_ci_opt}{self.carbonIntensityOptimal.value:.2f} gCO2eq/kWh{col_normal}"""
+Best job start time                       = {col_dt_opt}{self.valueOptimal.start:%Y-%m-%d %H:%M:%S}{col_normal}
+{self.metric} if job started now       = {col_ci_now}{self.valueNow.value:.2f} {self.unit}{col_normal}
+{self.metric} at optimal time          = {col_ci_opt}{self.valueOptimal.value:.2f} {self.unit}{col_normal}"""
 
         if self.emmissionEstimate:
             out += f"""
@@ -59,12 +62,12 @@ Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.
 
     def to_json(self, dateformat: str = "", **kwargs) -> str:
         data = dataclasses.asdict(self)
-        for ci in ["carbonIntensityNow", "carbonIntensityOptimal"]:
+        for val in ["valueNow", "valueOptimal"]:
             if dateformat == "":
-                data[ci]["start"] = data[ci]["start"].isoformat()
-                data[ci]["end"] = data[ci]["end"].isoformat()
+                data[val]["start"] = data[val]["start"].isoformat()
+                data[val]["end"] = data[val]["end"].isoformat()
             else:
-                data[ci]["start"] = data[ci]["start"].strftime(dateformat)
-                data[ci]["end"] = data[ci]["end"].strftime(dateformat)
+                data[val]["start"] = data[val]["start"].strftime(dateformat)
+                data[val]["end"] = data[val]["end"].strftime(dateformat)
 
         return json.dumps(data, **kwargs)

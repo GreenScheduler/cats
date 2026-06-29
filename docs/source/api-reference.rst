@@ -29,16 +29,10 @@ Modules
 .. automodule:: cats.configure
    :members:
 
-``cats.CI_api_interface``
+``cats.providers``
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: cats.CI_api_interface
-    :members:
-
-``cats.CI_api_query``
-^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: cats.CI_api_query
+.. automodule:: cats.providers
     :members:
 
 ``cats.carbonFootprint``

@@ -5,24 +5,24 @@ from unittest.mock import patch
 
 import pytest
 
-from cats.cli import print_banner, main
-from cats.CI_api_interface import API_interfaces, InvalidLocationError
+from cats.cli import main, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
-from cats.forecast import CarbonIntensityAverageEstimate
+from cats.exceptions import InvalidLocationError
+from cats.forecast import AverageEstimate
 from cats.output import CATSOutput
 from cats.schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
-
-API = API_interfaces["carbonintensity.org.uk"]
 
 AT_OUTPUT = "%a %b %d %H:%M:%S %Y"
 now_start = (datetime.now() + timedelta(minutes=1)).replace(second=0)
 now_end = now_start + timedelta(minutes=5)
 
 OUTPUT = CATSOutput(
-    CarbonIntensityAverageEstimate(20, now_start, now_end, 0.0, 0.0),
-    CarbonIntensityAverageEstimate(20, now_start, now_end, 0.0, 0.0),
+    "Carbon intensity",
+    AverageEstimate(20, now_start, now_end, 0.0, 0.0),
+    AverageEstimate(20, now_start, now_end, 0.0, 0.0),
     "OX1",
     "GBR",
+    "gCO2eq/kWh",
 )
 
 
@@ -40,9 +40,7 @@ def test_schedule_sbatch_success(fp):
         [
             "sbatch",
             "--begin",
-            OUTPUT.carbonIntensityOptimal.start.strftime(
-                SCHEDULER_DATE_FORMAT["sbatch"]
-            ),
+            OUTPUT.valueOptimal.start.strftime(SCHEDULER_DATE_FORMAT["sbatch"]),
             "./script.sh",
         ],
         stdout=b"Submitted batch job 123456",
@@ -78,7 +76,7 @@ def test_schedule_at_success(fp):
         [
             "at",
             "-t",
-            OUTPUT.carbonIntensityOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
+            OUTPUT.valueOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
         ]
     )
     schedule_at(OUTPUT, ["ls"])
@@ -110,7 +108,7 @@ def raiseLocationError():
     raise InvalidLocationError
 
 
-@patch("cats.CI_api_query.get_CI_forecast")
+@patch("cats.providers.UKCarbonIntensityProvider.get_data")
 def test_main_failures(get_CI_forecast):
     get_CI_forecast.return_value = {}
     get_CI_forecast.side_effect = raiseLocationError
