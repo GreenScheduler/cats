@@ -104,14 +104,14 @@ def test_schedule_at_side_effects(exc, err):
         assert schedule_at(OUTPUT, ["ls"]) == err
 
 
-def raiseLocationError():
+def raiseLocationError(*args, **kwargs):  # pyright: ignore[reportUnusedParameter, reportUnknownParameterType]
     raise InvalidLocationError
 
 
 @patch("cats.providers.UKCarbonIntensityProvider.get_data")
-def test_main_failures(get_CI_forecast):
-    get_CI_forecast.return_value = {}
-    get_CI_forecast.side_effect = raiseLocationError
+def test_main_failures(get_data):
+    get_data.return_value = {}
+    get_data.side_effect = raiseLocationError
 
     # CATS should fail when command is supplied, but no scheduler
     assert main(["-c", "ls", "-d", "5"]) == 1
