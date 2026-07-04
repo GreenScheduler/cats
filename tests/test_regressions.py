@@ -17,35 +17,19 @@ def test_127_bug_report():
     """
     # Reported input data
     d = datetime(year=2025, month=3, day=10, hour=15)
+    # fmt: off
+    values = [
+        14, 20, 20, 22, 13, 40, 49, 76, 91, 86,
+        61, 28, 24, 26, 25, 27, 27, 26, 23
+    ]
+    # fmt: on
+
     data = [
         PointEstimate(
             datetime=d + timedelta(minutes=idt * 30),
             value=v,
         )
-        for idt, v in zip(
-            range(19),
-            [
-                14,
-                20,
-                20,
-                22,
-                13,
-                40,
-                49,
-                76,
-                91,
-                86,
-                61,
-                28,
-                24,
-                26,
-                25,
-                27,
-                27,
-                26,
-                23,
-            ],
-        )
+        for idt, v in enumerate(values)
     ]
 
     # Reported job data
