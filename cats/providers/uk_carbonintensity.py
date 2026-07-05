@@ -14,6 +14,10 @@ from ..forecast import PointEstimate, Timeseries
 from .base import BaseProvider, fetch_url, provider
 
 UK_POSTCODE_REGEX = re.compile(r"^[A-Z]{1,2}\d[A-Z\d]?")
+INVALID_LOCATION_MESSAGE = (
+    "{location}. UKCarbonIntensityProvider only supports UK postcodes, "
+    + "specified as the outward code, for example 'OX1' for postcode 'OX1 3QD'"
+)
 
 
 @provider("carbonintensity.org.uk")
@@ -31,7 +35,9 @@ class UKCarbonIntensityProvider(BaseProvider):
         if match is not None:
             return match.group(0)
         else:
-            raise InvalidLocationError(f"Invalid UK postcode supplied: {location}")
+            raise InvalidLocationError(
+                INVALID_LOCATION_MESSAGE.format(location=location)
+            )
 
     @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
@@ -67,7 +73,9 @@ class UKCarbonIntensityProvider(BaseProvider):
         if response is None or "postcode" in response.get("error", {}).get(
             "message", {}
         ):
-            raise InvalidLocationError(f"Invalid UK postcode: {location}")
+            raise InvalidLocationError(
+                INVALID_LOCATION_MESSAGE.format(location=location)
+            )
 
         # The "Z" at the end of the format string indicates UTC,
         # however, strptime does not know how to parse this, so we
