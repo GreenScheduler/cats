@@ -34,7 +34,6 @@ def test_bad_postcode():
     provider = UKCarbonIntensityProvider()
 
     with pytest.raises(InvalidLocationError):
-        # postcodes failing basic regex are only caught on fetch
         _ = provider.get_data(timestamp, "OX40")
 
     with pytest.raises(InvalidLocationError):

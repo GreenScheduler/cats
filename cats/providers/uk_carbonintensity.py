@@ -2,8 +2,8 @@
 
 # pyright: reportUnknownArgumentType=none, reportUnknownVariableType=none, reportAny=none
 
-import re
 from datetime import datetime
+from importlib.resources import files
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
@@ -13,10 +13,16 @@ from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
 from .base import BaseProvider, fetch_url, provider
 
-UK_POSTCODE_REGEX = re.compile(r"^[A-Z]{1,2}\d[A-Z\d]?")
 INVALID_LOCATION_MESSAGE = (
     "{location}. UKCarbonIntensityProvider only supports UK postcodes, "
     + "specified as the outward code, for example 'OX1' for postcode 'OX1 3QD'"
+)
+# This file is generated using scripts/uk_outcodes.py:
+#     python3 scripts/uk_outcodes.py <ONS postcode file> -o cats/data/uk_outcodes.txt
+# ONS data:
+# https://geoportal.statistics.gov.uk/datasets/6fff67d204fd4f339591ed667a6e3642/about
+UK_OUTCODES: set[str] = set(
+    (files("cats") / "data" / "uk_outcodes.txt").read_text().split()
 )
 
 
@@ -31,13 +37,12 @@ class UKCarbonIntensityProvider(BaseProvider):
                 "Must provide location for UK Carbon Intensity provider"
             )
         location = location.upper()
-        match = UK_POSTCODE_REGEX.match(location)
-        if match is not None:
-            return match.group(0)
-        else:
-            raise InvalidLocationError(
-                INVALID_LOCATION_MESSAGE.format(location=location)
-            )
+        # UK postcodes have two components, an out-code and in-code, e.g. OX1 3QD
+        # The API only requires the outcode
+        location = location.split()[0]
+        if location in UK_OUTCODES:
+            return location
+        raise InvalidLocationError(INVALID_LOCATION_MESSAGE.format(location=location))
 
     @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
