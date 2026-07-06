@@ -1,5 +1,7 @@
 # pyright: reportUninitializedInstanceVariable=none, reportUnknownArgumentType=none, reportUnusedCallResult=none, reportUnknownMemberType=none
 import datetime
+import os
+import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
@@ -20,6 +22,14 @@ from .output import CATSOutput
 from .plotting import plotplan
 from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
+
+
+def is_headless() -> bool:
+    return (
+        sys.platform.startswith("linux")
+        and "DISPLAY" not in os.environ
+        and "WAYLAND_DISPLAY" not in os.environ
+    )
 
 
 def indent_lines(lines, spaces):
@@ -391,9 +401,22 @@ def run_cats(arguments: list[str] | None = None):
         print_banner(colour_output)
         print(output)
     if args.plot or args.save_plot:
-        plotplan(forecast, output, args.save_plot)
-        if args.save_plot:
-            print("Saved plot to:", args.save_plot)
+        default_filename = (
+            "cats-"
+            + datetime.datetime.now()
+            .isoformat(timespec="seconds")
+            .replace("-", "")
+            .replace(":", "")
+            + ".png"
+        )
+        filename = (
+            default_filename
+            if (is_headless() and args.save_plot is None)
+            else args.save_plot
+        )
+        plotplan(forecast, output, filename)
+        if filename:
+            print("Saved plot to:", filename)
     if args.command:
         if args.scheduler == "at":
             err = schedule_at(output, args.command.split())
