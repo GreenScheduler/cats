@@ -1,0 +1,4 @@
+- [ ] I have authored this pull request
+- [ ] I agree to release my contribution under the [MIT license](https://github.com/GreenScheduler/cats/blob/main/LICENSE)
+- [ ] I have disclosed use of AI tools as per the [AI use policy](https://cats.readthedocs.io/en/latest/devguide.html#ai-policy)
+- [ ] I have added tests for any new functionality added
