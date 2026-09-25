@@ -36,6 +36,7 @@ class UKCarbonIntensityProvider(BaseProvider):
     carbon intensity forecast. Data has 30 minute resolution and extends 2 days into the future. No
     authentication is needed.
     """
+
     BASE_URL: ClassVar[str] = "https://api.carbonintensity.org.uk"
 
     @override

@@ -3,14 +3,14 @@
 Maintainer's guide
 ==================
 
-We have split the documentation and information about contributing to CATS into three pages. On this 
-page you will find information mostly focussing on how we maintain CATS. We also have a guide to 
+We have split the documentation and information about contributing to CATS into three pages. On this
+page you will find information mostly focussing on how we maintain CATS. We also have a guide to
 :ref:`contributing` ideas, questions and bug reports as well as a :ref:`devguide` which focusses on
 contributing code.
 
 .. NOTE::
   Maintainers are expected to set a example to the community by following the guidance in :ref:`contributing`
-  and :ref:`devguide` as well as following the 
+  and :ref:`devguide` as well as following the
   `CODE_OF_CONDUCT.md <https://github.com/GreenScheduler/cats/blob/main/CODE_OF_CONDUCT.md>`__ in the repository
   and our policy around the use of AI tools.
 
@@ -30,7 +30,7 @@ idea behind the change will improve CATS, that the long-term maintainability of 
 that the change is tested and the new and old tests pass, that the change is documented, and that the developer has followed our
 policies. Once a maintainer has confirmed that they are content by completing their review code can be merged by them or by any other
 maintainer (including by a maintainer who has created the change). It will often be the case that some revision of the proposed
-changes will be required. 
+changes will be required.
 
 Developer how-to guide
 ------------------------
@@ -46,4 +46,4 @@ should be discussed ahead of time (via a PR changing the version string, see 1 b
  1. Merge a pull request onto main that updates the CATS version number ``version`` in ``version.py`` and adds any release notes / key changes to the documentation. We use a "major.minor.patch" semantic versioning scheme; for bug fixes etc. bump the patch number, for significant new features bump the minor version number, for changes that break previous behavior update the major version number.
  2. Check that all tests have passed after the merge and that the "latest" documentation at read the docs is updated.
  3. Create a release via the GitHub web interface. This involves creating a new tag ("v1.2.3" for version "1.2.3"), giving the release a name (just "1.2.3"), and adding short release notes using markdown as needed. Make sure this is "set as the latest release".
- 4. After a short time you should be able to check that the new release exists on PyPI and is documented in the stable docs on read the docs.   
+ 4. After a short time you should be able to check that the new release exists on PyPI and is documented in the stable docs on read the docs.

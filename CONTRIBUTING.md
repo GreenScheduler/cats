@@ -3,7 +3,7 @@
 
 First off, thanks for taking the time to contribute!
 
-All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. All contributors are expected to abide by our [code of conduct](./CODE_OF_CONDUCT.md). 
+All types of contributions are encouraged and valued. See the [Table of Contents](#table-of-contents) for different ways to help and details about how this project handles them. Please make sure to read the relevant section before making your contribution. It will make it a lot easier for us maintainers and smooth out the experience for all involved. The community looks forward to your contributions. All contributors are expected to abide by our [code of conduct](./CODE_OF_CONDUCT.md).
 
 > And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support the project and show your appreciation, which we would also be very happy about:
 > - Star the project
@@ -39,7 +39,7 @@ If you then still feel the need to ask a question and need clarification, we rec
 - Provide project and platform versions (nodejs, npm, etc), depending on what seems relevant.
 - We use labels on GitHub to manage issues. Please add the "question" label to your issue.
 
-We will then take care of the issue as soon as possible. 
+We will then take care of the issue as soon as possible.
 
 <!--
 You might want to create a separate issue tag for questions and include it in this description. People should then tag their issues accordingly.
@@ -124,7 +124,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/GreenS
 <!-- You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description. -->
 
 ## Contributing code or documentation
-Information on how to contribute code or documentation to CATS can be found in the [main documentation](https://cats.readthedocs.io/) 
+Information on how to contribute code or documentation to CATS can be found in the [main documentation](https://cats.readthedocs.io/)
 
 <!-- omit in toc -->
 ## Attribution

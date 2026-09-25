@@ -5,14 +5,14 @@ Contributing
 
 First off, thanks for taking the time to contribute!
 
-All types of contributions are encouraged and valued. See the below for different ways to help and details about 
-how this project handles them. Please make sure to read the relevant section before making your contribution. It 
-will make it a lot easier for maintainers and smooth out the experience for all involved. The community looks 
-forward to your contributions. All contributors are expected to abide by our code of conduct (see 
-`CODE_OF_CONDUCT.md <https://github.com/GreenScheduler/cats/blob/main/CODE_OF_CONDUCT.md>`__ in the repository). 
+All types of contributions are encouraged and valued. See the below for different ways to help and details about
+how this project handles them. Please make sure to read the relevant section before making your contribution. It
+will make it a lot easier for maintainers and smooth out the experience for all involved. The community looks
+forward to your contributions. All contributors are expected to abide by our code of conduct (see
+`CODE_OF_CONDUCT.md <https://github.com/GreenScheduler/cats/blob/main/CODE_OF_CONDUCT.md>`__ in the repository).
 
 .. NOTE::
-  And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways 
+  And if you like the project, but just don't have time to contribute, that's fine. There are other easy ways
   to support the project and show your appreciation, which we would also be very happy about.
   These include staring the project, writing about the project, referring to this project in your project's readme,
   mentioning the project at local meetups, and telling your friends/colleagues.
@@ -28,8 +28,8 @@ I Have a Question
 .. NOTE::
   If you want to ask a question, we assume that you have read the available documentation (at https://cats.readthedocs.io/).
 
-Before you ask a question, it is best to search for `existing issues <https://github.com/GreenScheduler/cats/issues>`__ 
-that might help you. In case you have found a suitable issue and still need clarification, you can write your question 
+Before you ask a question, it is best to search for `existing issues <https://github.com/GreenScheduler/cats/issues>`__
+that might help you. In case you have found a suitable issue and still need clarification, you can write your question
 in this issue. It is also advisable to search the internet for answers first.
 
 If you then still feel the need to ask a question and need clarification, we recommend the following:
@@ -39,7 +39,7 @@ If you then still feel the need to ask a question and need clarification, we rec
 * Provide project and platform versions (python version etc), depending on what seems relevant.
 * We use labels on GitHub to manage issues. Please add the "question" label to your issue.
 
-We will then take care of the issue as soon as possible. 
+We will then take care of the issue as soon as possible.
 
 
 Reporting Bugs
@@ -82,17 +82,17 @@ Once it's filed:
 
 * The project team will label the issue accordingly.
 * A team member will try to reproduce the issue with your provided steps. If there are no reproduction steps or no obvious way to reproduce the issue, the team will ask you for those steps and mark the issue as `needs-repro`. Bugs with the `needs-repro` tag will not be addressed until they are reproduced.
-* If the team is able to reproduce the issue, it will be marked 
-  `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will 
+* If the team is able to reproduce the issue, it will be marked
+  `needs-fix`, as well as possibly other tags (such as `critical`), and the issue will
   be left to be fixed by someone (see the :ref:`devguide`).
 
 
 Suggesting Enhancements
 -----------------------
 
-This section guides you through submitting an enhancement suggestion for cats, 
-**including completely new features and minor improvements to existing functionality**. 
-Following these guidelines will help maintainers and the community to understand your 
+This section guides you through submitting an enhancement suggestion for cats,
+**including completely new features and minor improvements to existing functionality**.
+Following these guidelines will help maintainers and the community to understand your
 suggestion and find related suggestions.
 
 Before Suggesting an Enhancement
@@ -117,7 +117,7 @@ Enhancement suggestions are tracked as GitHub issues (https://github.com/GreenSc
 Contributing code or documentation
 ----------------------------------
 
-We also welcome contributions in the form of improvements to the code or documentation. 
+We also welcome contributions in the form of improvements to the code or documentation.
 Information to help make this process as smooth as possible can be found in the :ref:`devguide`.
 
 
@@ -125,4 +125,3 @@ Attribution
 -----------
 
 This guide is based on https://contributing.md/generator
-
