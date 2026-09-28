@@ -53,7 +53,8 @@ Code style, tests and documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We do not have a formal style guide, but code changes and additions should seek to follow the style 
-established by the existing CATS codebase. CATS has a fairly comprehensive test suite that runs
+established by the existing CATS codebase. We have a precommit git hook that can be used to run
+Ruff to help maintain a consistent style. CATS has a fairly comprehensive test suite that runs
 automatically against all pull requests and new code should either come with new tests or with an
 explanation about why tests for the new code are not included. Please indicate where changes to 
 behavior have been made (especially where this means changes to the tests have also been needed).  
@@ -92,7 +93,7 @@ a checked out copy of the source::
   cd docs
   make html
 
-Update html documentation can then be found in the ``docs/build/html`` directory.
+Updated HTML documentation can then be found in the ``docs/build/html`` directory.
 
 AI policy
 ^^^^^^^^^
