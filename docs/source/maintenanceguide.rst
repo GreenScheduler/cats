@@ -23,9 +23,11 @@ Maintainers will, by agreement amongst themselves, ensure that a subset of maint
 of contact for code of conduct and security reports. They will also ensure that sufficient maintainers have access to the
 other tooling used to maintain, develop and distribute CATS (such as PyPI and ReadTheDocs). Maintainers must individually
 ensure that their authentication tokens are secure for all these services using multi-factor authentication where available.
+In general, the project will make use of the most secure available methods for publishing artifacts (e.g. OIDC based
+authentication is used for publishing to PyPI).
 
 Maintainers are collectively responsible for reviewing contributions before they are incorporated into CATS. At a minimum there
-should be a review by one maintainer who was not involved in making the change and this should incorporate a checks that the
+should be a review by one maintainer who was not involved in making the change and this should incorporate a check that the
 idea behind the change will improve CATS, that the long-term maintainability of the code is not unnecessarily compromised,
 that the change is tested and the new and old tests pass, that the change is documented, and that the developer has followed our
 policies. Once a maintainer has confirmed that they are content by completing their review code can be merged by them or by any other

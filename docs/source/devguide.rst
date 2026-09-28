@@ -40,7 +40,7 @@ Pull requests should also:
 
 1. Include confirmation that the named author(s) are able to assert copyright, legal, and moral ownership
    on their contribution. Because contributors to CATS do not assign copyright this important to protect the
-   distribution.
+   ongoing development of the software.
 2. Agree to release their contribution under the
    `MIT license <https://github.com/GreenScheduler/cats/blob/main/LICENSE>`__.
 3. Are willing and able to discuss their proposed contribution in a constructive way
@@ -52,8 +52,9 @@ We have set up pull request templates to remind contributors to check these item
 Code style, tests and documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We do not have a formal style guide, but code changes and additions should seek to follow the style
-established by the existing CATS codebase. CATS has a fairly comprehensive test suite that runs
+We do not have a formal style guide, but code changes and additions should seek to follow the style 
+established by the existing CATS codebase. We have a precommit git hook that can be used to run
+Ruff to help maintain a consistent style. CATS has a fairly comprehensive test suite that runs
 automatically against all pull requests and new code should either come with new tests or with an
 explanation about why tests for the new code are not included. Please indicate where changes to
 behavior have been made (especially where this means changes to the tests have also been needed).
@@ -99,7 +100,7 @@ a checked out copy of the source::
   cd docs
   make html
 
-Update html documentation can then be found in the ``docs/build/html`` directory.
+Updated HTML documentation can then be found in the ``docs/build/html`` directory.
 
 AI policy
 ^^^^^^^^^
