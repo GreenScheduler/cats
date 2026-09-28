@@ -20,6 +20,8 @@ cluster jobs to minimize predicted carbon intensity of running the process.
    api-reference.rst
    user-agent.rst
    contributing.rst
+   devguide.rst
+   maintenanceguide.rst
    history.rst
    bibliography.rst
 
