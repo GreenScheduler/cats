@@ -36,7 +36,7 @@ environmentally-conscious developers.
 Scope
 -----
 
-Currently CATS only works in the UK with experimental support 
+Currently CATS only works in the UK with experimental support
 elsewhere in Europe. If you are aware of APIs for
 realtime grid carbon intensity data in other locations, please
 `open an issue <GitHubrepoissues_>`_ to let us know.
@@ -47,12 +47,12 @@ on Linux, Windows and MacOS.
 Background
 ----------
 
-CATS is described in a paper published in the Journal 
+CATS is described in a paper published in the Journal
 of Open Source Software (`doi:10.21105/joss.08251 <https://doi.org/10.21105/joss.08251>`_)
 and was created as part of the
 `Software Sustainability Institute’s <SSIsite_>`_
 `Collaborations Workshop 2023 <CW23page_>`_
-`Hack Day <CW23HackDaypage_>`_. 
+`Hack Day <CW23HackDaypage_>`_.
 
 
 Features

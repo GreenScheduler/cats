@@ -13,15 +13,15 @@ number of times that these services are used and sets its User-agent
 header to help API providers manage their services.
 
 The CATS HTTP User-agent header is::
-    
+
      CATS/version +https://cats.readthedocs.io/
-     
+
 where version corresponds to the version number stored in ``cats.__version__``.
 
 For a single user and on a single system CATS will request carbon intensity
 information at most once in any half-hour period. This is achieved by setting
-the start time embedded in the URL used to request data to the most recent 
-half- or whole-hour time. The ``requests_cache`` package then intercepts 
+the start time embedded in the URL used to request data to the most recent
+half- or whole-hour time. The ``requests_cache`` package then intercepts
 subsequent API calls and returns data without making a new HTTP call to the
 carbon intensity service.
 

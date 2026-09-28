@@ -14,9 +14,9 @@ from .exceptions import (
     DurationExceedsWindowError,
     InvalidLocationError,
     MissingArgumentError,
+    ProviderAuthenticationError,
     SchedulerError,
     UnsupportedProviderError,
-    ProviderAuthenticationError,
 )
 from .forecast import WindowedForecast
 from .output import CATSOutput

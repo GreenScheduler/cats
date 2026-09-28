@@ -34,10 +34,10 @@ def fetch_url(url: str, headers: dict[str, str] | None = None) -> Any:
     either extracted from a cache (if the forecast has been requested before with
     the same URL) or requested from the provider. The provider can also add `headers`
     as needed. This function always includes the CATS user_agent in the headers
-    used in the request. Successful responses are cached, decoded from json to 
+    used in the request. Successful responses are cached, decoded from json to
     python objects and returned to the provider (which is responsible for extracting
     the required information). Python objects may be returned as a dictionary or a list,
-    depending on the structure of the json. Failed requests may return empty 
+    depending on the structure of the json. Failed requests may return empty
     dictionaries or lists, or may include debugging information. The provider is
     responsible for checking this.
 
@@ -53,7 +53,7 @@ def fetch_url(url: str, headers: dict[str, str] | None = None) -> Any:
     response = session.get(url, headers=headers)
     # Catch and raise any HTTP errors
     response.raise_for_status()
-    return response.json() # pyright: ignore[reportUnknownMemberType]
+    return response.json()  # pyright: ignore[reportUnknownMemberType]
 
 
 class BaseProvider(ABC):
@@ -61,7 +61,9 @@ class BaseProvider(ABC):
 
     BASE_URL: ClassVar[str]
 
-    def __init__(self, api_data: dict[str, Any] | None = None, base_url: str | None = None):
+    def __init__(
+        self, api_data: dict[str, Any] | None = None, base_url: str | None = None
+    ):
         self.api_data: dict[str, Any] | None = api_data
         self.base_url: str = base_url or self.BASE_URL
 
