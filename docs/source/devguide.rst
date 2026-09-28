@@ -40,7 +40,7 @@ Pull requests should also:
 
 1. Include confirmation that the named author(s) are able to assert copyright, legal, and moral ownership
    on their contribution. Because contributors to CATS do not assign copyright this important to protect the
-   distribution.
+   ongoing development of the software.
 2. Agree to release their contribution under the
    `MIT license <https://github.com/GreenScheduler/cats/blob/main/LICENSE>`__. 
 3. Are willing and able to discuss their proposed contribution in a constructive way 
