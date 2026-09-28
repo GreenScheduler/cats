@@ -52,7 +52,7 @@ We have set up pull request templates to remind contributors to check these item
 Code style, tests and documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We do not have a formal style guide, but code changes and additions should seek to follow the style 
+We do not have a formal style guide, but code changes and additions should seek to follow the style
 established by the existing CATS codebase. We have a precommit git hook that can be used to run
 Ruff to help maintain a consistent style. CATS has a fairly comprehensive test suite that runs
 automatically against all pull requests and new code should either come with new tests or with an
