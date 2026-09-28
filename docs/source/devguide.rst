@@ -62,6 +62,13 @@ code (although documentation only pull requests are welcome). Some of this docum
 automatically generated (from doc strings and help text for command line tools) so please make
 sure that this internal documentation is up to date.
 
+We use `pre-commit <https://pre-commit.com>` to automatically check linting and perform auto-formatting.
+You can install pre-commit using your package manager and install the git hooks (only needs to be performed once):
+
+  pre-commit install
+
+Once the hook is installed, pre-commit will automatically check each commit.
+
 Running Tests
 ^^^^^^^^^^^^^
 
