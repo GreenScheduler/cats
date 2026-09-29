@@ -4,9 +4,9 @@
 #   ./cluster/start.sh
 set -eou pipefail
 
-docker exec slurmctld mkdir /tmp/cats
+docker exec slurmctld mkdir -p /tmp/cats
 for file in pyproject.toml ./cats; do
   docker cp "$file" slurmctld:/tmp/cats
 done
-docker exec slurmctld uv tool install /tmp/cats
+docker exec slurmctld uv tool install --reinstall /tmp/cats
 docker exec slurmctld cp /root/.local/bin/cats /usr/local/bin/cats

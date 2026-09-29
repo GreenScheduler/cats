@@ -34,11 +34,14 @@ services:
     command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
+    environment:
+      CATS_HISTORY_DB: /var/lib/cats/history.sqlite3
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - slurm_jobdir:/data
       - var_log_slurm:/var/log/slurm
+      - cats_data:/var/lib/cats
     expose:
       - "6817"
     depends_on:
@@ -86,6 +89,7 @@ volumes:
   slurm_jobdir:
   var_lib_mysql:
   var_log_slurm:
+  cats_data:
 
 networks:
   slurm-network:
