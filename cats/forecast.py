@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional
@@ -10,7 +11,7 @@ class PointEstimate:
     value: float  # the first attribute is used automatically for sorting methods
     datetime: datetime
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.datetime.isoformat()}\t{self.value}"
 
 
@@ -61,10 +62,11 @@ class WindowedForecast:
         # first data interval.  In other we don't need any data prior
         # the closest data preceding (on the left of) the job start
         # time.
-        def bisect_right(data, t):
+        def bisect_right(data: list[PointEstimate], t: datetime) -> int | None:
             for i, d in enumerate(data):
                 if d.datetime > t:
                     return i - 1
+            return None  # preserves current behaviour: slicing with None keeps everything
 
         # bisect_right(data, start) returns the index of the first
         # data point with datetime value immediately preceding the job
@@ -78,7 +80,7 @@ class WindowedForecast:
         #
         # bisect_left(data, self.end, key=lambda x: x.datetime)
         #
-        def bisect_left(data, t):
+        def bisect_left(data: list[PointEstimate], t: datetime) -> int:
             for i, d in enumerate(data):
                 if d.datetime + self.data_stepsize >= t:
                     return i + 1
@@ -200,11 +202,11 @@ class WindowedForecast:
 
         return PointEstimate(value=p1.value + slope * offset, datetime=when)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[AverageEstimate]:
         for index in range(len(self)):
             yield self[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of valid forecast windows respecting all constraints."""
         base_length = len(self.data) - self.ndata
 

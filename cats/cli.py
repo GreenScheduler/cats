@@ -33,11 +33,11 @@ def is_headless() -> bool:
     )
 
 
-def indent_lines(lines, spaces):
+def indent_lines(lines: str, spaces: int) -> str:
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
 
 
-def print_banner(disable_colour):
+def print_banner(disable_colour: bool) -> None:
     """Print an ASCII art banner with the CATS title, optionally in colour."""
     if disable_colour:
         print(CATS_ASCII_BANNER_NO_COLOUR)
@@ -46,7 +46,7 @@ def print_banner(disable_colour):
 
 
 def parse_time_constraint(
-    time_str: str, timezone_info=None
+    time_str: str, timezone_info: Optional[datetime.tzinfo] = None
 ) -> Optional[datetime.datetime]:
     """
     Parse a time constraint string into a datetime object.
@@ -107,7 +107,7 @@ def validate_window_constraints(
     return start_window, end_window, window_minutes
 
 
-def parse_arguments():
+def parse_arguments() -> ArgumentParser:
     """
     Parse command line arguments
     :return: [dict] parsed arguments
@@ -175,7 +175,7 @@ def parse_arguments():
         formatter_class=RawDescriptionHelpFormatter,
     )
 
-    def positive_integer(string: str):
+    def positive_integer(string: str) -> int:
         n = int(string)
         assert n >= 0
         return n
@@ -308,7 +308,7 @@ def parse_arguments():
     return parser
 
 
-def run_cats(arguments: list[str] | None = None):
+def run_cats(arguments: list[str] | None = None) -> None:
     "Main CLI runner, raises exceptions"
     parser = parse_arguments()
     args = cast(Args, parser.parse_args(arguments))
@@ -431,7 +431,7 @@ def run_cats(arguments: list[str] | None = None):
             raise SchedulerError(err)
 
 
-def main(arguments: list[str] | None = None):
+def main(arguments: list[str] | None = None) -> int:
     try:
         run_cats(arguments)
         return 0

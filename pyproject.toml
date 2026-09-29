@@ -61,6 +61,12 @@
   [project.scripts]
     cats = "cats.cli:main"
 
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "types-pyyaml>=6.0.12.20260906",
+]
+
   [tool.ruff.lint]
     # Pyflakes (`F`), subset of the pycodestyle (`E`) and unsorted imports (`I001`)
     select = ["E4", "E7", "E9", "F", "I001"]

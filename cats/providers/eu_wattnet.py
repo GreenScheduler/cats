@@ -3,7 +3,7 @@
 import datetime
 import os
 from importlib.resources import files
-from typing import ClassVar
+from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
 import requests
@@ -149,7 +149,7 @@ class WattnetEuProvider(BaseProvider):
         headers = {"Authorization": f"Bearer {self.api_data['access_token']}"}
 
         # Get the data
-        response: list | None = fetch_url(url, headers=headers)
+        response: list[Any] | None = fetch_url(url, headers=headers)
 
         # Invalid responses may return empty lists. We've done the useful
         # validation already, so just raise an assertion error.

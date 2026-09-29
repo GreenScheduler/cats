@@ -100,7 +100,7 @@ class BaseProvider(ABC):
 def provider(name: str) -> Callable[[type[BaseProvider]], type[BaseProvider]]:
     "Decorator to register a provider class with CATS"
 
-    def decorator(cls: type[BaseProvider]):
+    def decorator(cls: type[BaseProvider]) -> type[BaseProvider]:
         PROVIDERS[name] = cls
         return cls
 
