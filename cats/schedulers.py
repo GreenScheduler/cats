@@ -1,3 +1,4 @@
+import re
 import subprocess
 from typing import Optional
 
@@ -30,10 +31,12 @@ def schedule_at(output: CATSOutput, args: list[str]) -> Optional[str]:
         return f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}"
 
 
-def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
+def schedule_sbatch(
+    output: CATSOutput, args: list[str]
+) -> tuple[str | None, str | None]:
     """Schedule job with optimal start time using sbatch(1)
 
-    :return: Error as a string, or None if successful
+    :return: A Slurm job ID and an error, if any
     """
     try:
         sbatch_output = subprocess.check_output(
@@ -45,8 +48,48 @@ def schedule_sbatch(output: CATSOutput, args: list[str]) -> Optional[str]:
             ]
         )
         print(sbatch_output.decode("utf-8"))
-        return None
+        match = re.search(rb"Submitted batch job (\d+)", sbatch_output)
+        if match is None:
+            return None, "Could not determine Slurm job ID from sbatch output"
+        return match.group(1).decode("ascii"), None
     except FileNotFoundError:
-        return "No sbatch command found in PATH, ensure slurm is configured correctly"
+        return None, "No sbatch command found in PATH, ensure slurm is configured correctly"
     except subprocess.CalledProcessError as e:  # pragma: no cover
-        return f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}"
+        return None, f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}"
+
+
+def get_sbatch_job_state(job_id: str) -> str | None:
+    """Return the current or final Slurm state for a job, if available."""
+    try:
+        queue_output = subprocess.check_output(
+            ["squeue", "-h", "-j", job_id, "-o", "%T"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if queue_output:
+            return queue_output.splitlines()[0].strip().upper()
+    except (OSError, subprocess.CalledProcessError):
+        pass
+
+    try:
+        accounting_output = subprocess.check_output(
+            [
+                "sacct",
+                "--noheader",
+                "--parsable2",
+                "--jobs",
+                job_id,
+                "--format=JobIDRaw,State",
+            ],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+    for line in accounting_output.splitlines():
+        fields = line.strip().split("|")
+        if len(fields) >= 2 and fields[0] == job_id:
+            state = fields[1].strip().split()[0].rstrip("+").upper()
+            return state or None
+    return None
