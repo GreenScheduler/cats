@@ -21,7 +21,7 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 - Schedules tasks based on the estimated carbon intensity, minimizing carbon emissions
 - Provides a simple and intuitive API for developers
 - Lightweight and easy to integrate into existing workflows
-- Supports Python 3.10+
+- Supports Python 3.11+
 
 ## Brief example with plot to illustrate
 

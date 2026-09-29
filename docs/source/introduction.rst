@@ -41,7 +41,7 @@ elsewhere in Europe. If you are aware of APIs for
 realtime grid carbon intensity data in other locations, please
 `open an issue <GitHubrepoissues_>`_ to let us know.
 
-CATS is currently tested with Python versions 3.10-3.14 running
+CATS is currently tested with Python versions 3.11-3.14 running
 on Linux, Windows and MacOS.
 
 Background
