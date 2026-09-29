@@ -66,7 +66,9 @@ class WindowedForecast:
             for i, d in enumerate(data):
                 if d.datetime > t:
                     return i - 1
-            return None  # preserves current behaviour: slicing with None keeps everything
+            return (
+                None  # preserves current behaviour: slicing with None keeps everything
+            )
 
         # bisect_right(data, start) returns the index of the first
         # data point with datetime value immediately preceding the job
