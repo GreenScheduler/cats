@@ -1,4 +1,3 @@
-
 # CATS: **C**limate-**A**ware **T**ask **S**cheduler
 
 ![CATS logo](docs/source/_static/cats_dalle_img_200x200px_for_logo.png)
