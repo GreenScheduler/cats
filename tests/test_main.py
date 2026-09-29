@@ -10,7 +10,12 @@ from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.exceptions import InvalidLocationError
 from cats.forecast import AverageEstimate
 from cats.output import CATSOutput
-from cats.schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
+from cats.schedulers import (
+    SCHEDULER_DATE_FORMAT,
+    get_sbatch_job_state,
+    schedule_at,
+    schedule_sbatch,
+)
 
 AT_OUTPUT = "%a %b %d %H:%M:%S %Y"
 now_start = (datetime.now() + timedelta(minutes=1)).replace(second=0)
@@ -45,11 +50,30 @@ def test_schedule_sbatch_success(fp):
         ],
         stdout=b"Submitted batch job 123456",
     )
-    schedule_sbatch(OUTPUT, ["./script.sh"])
+    assert schedule_sbatch(OUTPUT, ["./script.sh"]) == ("123456", None)
 
 
 def test_schedule_sbatch_failure():
-    assert schedule_sbatch(OUTPUT, ["./script.sh"])
+    job_id, error = schedule_sbatch(OUTPUT, ["./script.sh"])
+    assert job_id is None
+    assert error
+
+
+def test_get_sbatch_job_state_from_queue():
+    with patch(
+        "cats.schedulers.subprocess.check_output", return_value="RUNNING\n"
+    ) as check_output:
+        assert get_sbatch_job_state("123456") == "RUNNING"
+    assert check_output.call_count == 1
+
+
+def test_get_sbatch_job_state_from_accounting():
+    with patch(
+        "cats.schedulers.subprocess.check_output",
+        side_effect=["", "123456|COMPLETED\n"],
+    ) as check_output:
+        assert get_sbatch_job_state("123456") == "COMPLETED"
+    assert check_output.call_count == 2
 
 
 @pytest.mark.parametrize(
@@ -67,7 +91,7 @@ def test_schedule_sbatch_failure():
 )
 def test_schedule_sbatch_side_effects(exc, err):
     with patch("subprocess.check_output", side_effect=exc):
-        assert schedule_sbatch(OUTPUT, ["./script.sh"]) == err
+        assert schedule_sbatch(OUTPUT, ["./script.sh"]) == (None, err)
 
 
 def test_schedule_at_success(fp):
