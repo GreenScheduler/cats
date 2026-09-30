@@ -1,9 +1,3 @@
-x-slurm-image: &slurm-image
-  image: cats-slurm-docker-cluster:at
-  build:
-    context: .
-    dockerfile: Dockerfile
-
 services:
   mysql:
     image: mariadb:10.11
@@ -20,7 +14,7 @@ services:
       - slurm-network
 
   slurmdbd:
-    <<: *slurm-image
+    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
     command: ["slurmdbd"]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -36,13 +30,8 @@ services:
       - slurm-network
 
   slurmctld:
-    <<: *slurm-image
-    command:
-      - bash
-      - -lc
-      - |
-        /usr/sbin/atd
-        exec /usr/local/bin/docker-entrypoint.sh slurmctld
+    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
+    command: ["slurmctld"]
     container_name: slurmctld
     hostname: slurmctld
     environment:
@@ -53,7 +42,6 @@ services:
       - slurm_jobdir:/data
       - var_log_slurm:/var/log/slurm
       - cats_data:/var/lib/cats
-      - at_spool:/var/spool/at
     expose:
       - "6817"
     depends_on:
@@ -62,7 +50,7 @@ services:
       - slurm-network
 
   catsd:
-    <<: *slurm-image
+    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
     container_name: catsd
     command:
       - bash
@@ -86,7 +74,6 @@ services:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - cats_data:/var/lib/cats
-      - at_spool:/var/spool/at
     depends_on:
       - slurmctld
     restart: unless-stopped
@@ -94,7 +81,7 @@ services:
       - slurm-network
 
   c1:
-    <<: *slurm-image
+    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
     command: ["slurmd"]
     hostname: c1
     container_name: c1
@@ -111,7 +98,7 @@ services:
       - slurm-network
 
   c2:
-    <<: *slurm-image
+    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
     command: ["slurmd"]
     hostname: c2
     container_name: c2
@@ -131,7 +118,6 @@ volumes:
   etc_munge:
   etc_slurm:
   slurm_jobdir:
-  at_spool:
   var_lib_mysql:
   var_log_slurm:
   cats_data:

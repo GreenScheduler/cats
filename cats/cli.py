@@ -34,7 +34,6 @@ from .output import CATSOutput
 from .plotting import plotplan
 from .schedulers import (
     SCHEDULER_DATE_FORMAT,
-    get_at_job_state,
     get_sbatch_job_state,
     schedule_at,
     schedule_sbatch,
@@ -258,7 +257,7 @@ def parse_arguments():
     parser.add_argument(
         "--dynamic",
         action="store_true",
-        help="Re-evaluate a pending at or sbatch job over time (requires CATS_HISTORY_DB).",
+        help="Re-evaluate a pending sbatch job over time (requires --scheduler sbatch and CATS_HISTORY_DB).",
     )
 
     parser.add_argument(
@@ -452,9 +451,9 @@ def run_cats(arguments: list[str] | None = None):
         raise MissingArgumentError(
             "To run a command or sbatch script with -c / --comand, you must specify scheduler with -s / --scheduler"
         )
-    if args.dynamic and (not args.command or args.scheduler not in ("at", "sbatch")):
+    if args.dynamic and (not args.command or args.scheduler != "sbatch"):
         raise MissingArgumentError(
-            "--dynamic requires --scheduler at or sbatch and a command passed with --command"
+            "--dynamic requires --scheduler sbatch and a command passed with --command"
         )
     if args.dynamic and not os.environ.get("CATS_HISTORY_DB"):
         raise MissingArgumentError(
@@ -509,12 +508,6 @@ def run_cats(arguments: list[str] | None = None):
         max_window_minutes=max_window,
         end_constraint=end_constraint,
     )
-    if len(wf) == 0:
-        raise ValueError(
-            "No valid forecast windows are available for the requested job duration "
-            "and search window. Try increasing --window or checking that the "
-            "forecast covers the job duration."
-        )
     now_avg, best_avg = wf[0], min(wf)
     output = CATSOutput(
         forecast.metric,
@@ -575,21 +568,17 @@ def run_cats(arguments: list[str] | None = None):
             _refresh_history_job_states(history_db)
 
         if args.scheduler == "at":
-            job_id, err = schedule_at(output, shlex.split(args.command))
+            err = schedule_at(output, args.command.split())
         elif args.scheduler == "sbatch":
-            job_id, err = schedule_sbatch(output, shlex.split(args.command))
+            job_id, err = schedule_sbatch(output, args.command.split())
         else:  # pragma: no cover - we already check for valid scheduler in parse_arguments
             err = f"Scheduler {args.scheduler} not in supported schedulers: {SCHEDULER_DATE_FORMAT.keys()}"
         if err:
             raise SchedulerError(err)
 
-        if job_id and history_db and (args.scheduler == "sbatch" or args.dynamic):
+        if args.scheduler == "sbatch" and job_id and history_db:
             estimate = output.emmissionEstimate
-            job_state = (
-                get_at_job_state(job_id)
-                if args.scheduler == "at"
-                else get_sbatch_job_state(job_id)
-            ) or "PENDING"
+            slurm_state = get_sbatch_job_state(job_id) or "PENDING"
             try:
                 record_schedule_check(
                     history_db,
@@ -608,15 +597,11 @@ def run_cats(arguments: list[str] | None = None):
                     estimated_emissions_now_g=(estimate.now if estimate else None),
                     estimated_emissions_optimal_g=(estimate.best if estimate else None),
                     active_job_id=job_id,
-                    slurm_state=job_state,
-                    scheduler=args.scheduler,
-                    command=args.command if args.dynamic else None,
-                    working_directory=os.getcwd() if args.dynamic else None,
+                    slurm_state=slurm_state,
                 )
             except (OSError, sqlite3.Error) as error:
                 logging.warning(
-                    "%s job %s was submitted, but its CATS history could not be saved: %s",
-                    args.scheduler,
+                    "Slurm job %s was submitted, but its CATS history could not be saved: %s",
                     job_id,
                     error,
                 )

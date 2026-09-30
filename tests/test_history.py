@@ -1,19 +1,17 @@
+from contextlib import closing
 import json
 import sqlite3
-from contextlib import closing
-from pathlib import Path
 from types import SimpleNamespace
-
-import pytest
 
 from cats import cli
 from cats.forecast import AverageEstimate
 from cats.history import (
     get_jobs_requiring_state_refresh,
-    read_schedule_checks,
     record_schedule_check,
+    read_schedule_checks,
     update_schedule_job_state,
 )
+from cats.output import CATSOutput
 
 
 def test_show_data_prints_all_records_without_duration(monkeypatch, tmp_path, capsys):
@@ -102,13 +100,7 @@ def test_report_deduplicates_jobs_and_separates_completed_savings(
     assert report["completed_jobs_by_location"]["OX1"]["completed_jobs"] == 1
 
 
-@pytest.mark.parametrize(
-    ("scheduler", "job_id"),
-    [("sbatch", "123456"), ("at", "17")],
-)
-def test_cli_records_successful_dynamic_submission(
-    monkeypatch, tmp_path, scheduler, job_id
-):
+def test_cli_records_successful_sbatch_submission(monkeypatch, tmp_path):
     start = cli.datetime.datetime.now().astimezone()
     now = AverageEstimate(100.0, start, start, 100.0, 100.0)
     optimal = AverageEstimate(50.0, start, start, 50.0, 50.0)
@@ -131,9 +123,6 @@ def test_cli_records_successful_dynamic_submission(
         def __getitem__(self, index):
             return now
 
-        def __len__(self):
-            return 1
-
         def __iter__(self):
             return iter([optimal])
 
@@ -141,10 +130,7 @@ def test_cli_records_successful_dynamic_submission(
     monkeypatch.setenv("CATS_HISTORY_DB", str(db_path))
     monkeypatch.setattr(cli, "get_runtime_config", lambda args: (FakeProvider, "OX1", 5, None, None))
     monkeypatch.setattr(cli, "WindowedForecast", FakeWindowedForecast)
-    monkeypatch.setattr(cli, "schedule_sbatch", lambda output, args: (job_id, None))
-    monkeypatch.setattr(cli, "schedule_at", lambda output, args: (job_id, None))
-    monkeypatch.setattr(cli, "get_sbatch_job_state", lambda _: "PENDING")
-    monkeypatch.setattr(cli, "get_at_job_state", lambda _: "PENDING")
+    monkeypatch.setattr(cli, "schedule_sbatch", lambda output, args: ("123456", None))
 
     cli.run_cats(
         [
@@ -153,7 +139,7 @@ def test_cli_records_successful_dynamic_submission(
             "--loc",
             "OX1",
             "--scheduler",
-            scheduler,
+            "sbatch",
             "--command",
             "./script.sh",
             "--dynamic",
@@ -166,8 +152,7 @@ def test_cli_records_successful_dynamic_submission(
                 """
                 SELECT workload_key, duration_minutes, location,
                        current_ci_g_per_kwh, optimal_ci_g_per_kwh,
-                        action, dynamic, active_job_id, max_window_minutes,
-                           scheduler, command, working_directory
+                      action, dynamic, active_job_id, max_window_minutes
                 FROM schedule_checks
                 """
             ).fetchone()
@@ -180,11 +165,8 @@ def test_cli_records_successful_dynamic_submission(
         50.0,
         "submitted",
         1,
-        job_id,
+        "123456",
         2820,
-        scheduler,
-        "./script.sh",
-        str(Path.cwd()),
     )
 
 
