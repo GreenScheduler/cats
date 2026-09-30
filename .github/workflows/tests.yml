@@ -5,23 +5,22 @@ name: tests
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-    - '**.py'
-    - '.github/workflows/tests.yml'
-    - 'pyproject.toml'
+      - "**.py"
+      - ".github/workflows/tests.yml"
+      - "pyproject.toml"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-    - '**.py'
-    - '.github/workflows/tests.yml'
-    - 'pyproject.toml'
+      - "**.py"
+      - ".github/workflows/tests.yml"
+      - "pyproject.toml"
 
 permissions: {}
 
 jobs:
   build:
-
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
@@ -29,34 +28,34 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
-      with:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+        with:
           persist-credentials: false
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-    - name: Install dependencies
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install '.[test]'
-    - name: Lint with flake8
-      run: |
-        python3 -m pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Check types with mypy
-      run: |
-        python3 -m pip install '.[types]'
-        python3 -m mypy cats
-    - name: Test with pytest
-      run: |
-        python3 -m pytest --cov
-    - name: Upload coverage to Codecov
-      if: matrix.python-version == 3.10
-      uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # Pin to v5.5.1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install '.[test]'
+      - name: Lint with flake8
+        run: |
+          python3 -m pip install flake8
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Check types with mypy
+        run: |
+          python3 -m pip install '.[types]'
+          python3 -m mypy cats
+      - name: Test with pytest
+        run: |
+          python3 -m pytest --cov
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == 3.10
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c72b706298ca349f7 # Pin to v5.5.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

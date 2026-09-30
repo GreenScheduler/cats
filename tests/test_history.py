@@ -34,6 +34,72 @@ def test_show_data_prints_all_records_without_duration(monkeypatch, tmp_path, ca
     assert records[0]["active_job_id"] == "123456"
 
 
+def test_report_deduplicates_jobs_and_separates_completed_savings(
+    monkeypatch, tmp_path, capsys
+):
+    db_path = tmp_path / "history.sqlite3"
+    record_schedule_check(
+        db_path,
+        workload_key="analysis.sh",
+        duration_minutes=120,
+        location="OX1",
+        action="submitted",
+        dynamic=True,
+        active_job_id="completed-job",
+        slurm_state="COMPLETED",
+        estimated_emissions_now_g=1000.0,
+        estimated_emissions_optimal_g=800.0,
+    )
+    record_schedule_check(
+        db_path,
+        workload_key="analysis.sh",
+        duration_minutes=120,
+        location="OX1",
+        action="unchanged",
+        dynamic=True,
+        active_job_id="completed-job",
+        slurm_state="COMPLETED",
+        estimated_emissions_now_g=900.0,
+        estimated_emissions_optimal_g=500.0,
+    )
+    record_schedule_check(
+        db_path,
+        workload_key="failed.sh",
+        duration_minutes=60,
+        location="RG1",
+        action="submitted",
+        active_job_id="failed-job",
+        slurm_state="FAILED",
+        estimated_emissions_now_g=300.0,
+        estimated_emissions_optimal_g=100.0,
+    )
+    record_schedule_check(
+        db_path,
+        workload_key="pending.sh",
+        duration_minutes=60,
+        location="OX1",
+        action="submitted",
+        active_job_id="pending-job",
+        slurm_state="PENDING",
+    )
+    monkeypatch.setenv("CATS_HISTORY_DB", str(db_path))
+    monkeypatch.setattr(cli, "_refresh_history_job_states", lambda _: None)
+
+    assert cli.main(["--report", "--format", "json"]) == 0
+
+    report = json.loads(capsys.readouterr().out)
+    assert report["schedule_checks"] == 4
+    assert report["tracked_jobs"] == 3
+    assert report["completed_jobs"] == 1
+    assert report["failed_jobs"] == 1
+    assert report["active_jobs"] == 1
+    assert report["completed_runtime_hours"] == 2
+    assert report["estimated_co2_saved_g_all_tracked_jobs"] == 400
+    assert report["estimated_co2_saved_g_completed_jobs"] == 200
+    assert report["completed_jobs_with_emissions_estimate"] == 1
+    assert report["completed_jobs_by_location"]["OX1"]["completed_jobs"] == 1
+
+
 def test_cli_records_successful_sbatch_submission(monkeypatch, tmp_path):
     start = cli.datetime.datetime.now().astimezone()
     now = AverageEstimate(100.0, start, start, 100.0, 100.0)
