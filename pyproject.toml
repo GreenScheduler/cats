@@ -61,6 +61,7 @@
 
   [project.scripts]
     cats = "cats.cli:main"
+  catsd = "cats.daemon:main"
 
   [tool.ruff.lint]
     # Pyflakes (`F`), subset of the pycodestyle (`E`) and unsorted imports (`I001`)
