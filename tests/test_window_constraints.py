@@ -362,7 +362,7 @@ class TestMainIntegration:
         assert result == 1
         assert "No valid forecast windows are available" in capsys.readouterr().out
 
-    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
+    @patch("cats.providers.UKCarbonIntensityProviderTest.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_window_constraint(
         self, mock_config: MagicMock, mock_forecast: MagicMock
