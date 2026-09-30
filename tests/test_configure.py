@@ -16,7 +16,7 @@ from cats.configure import (
 )
 from cats.constants import MEMORY_POWER_PER_GB
 from cats.exceptions import UnsupportedProviderError
-from cats.providers import UKCarbonIntensityProvider
+from cats.providers import GBCarbonIntensityProvider
 
 CATS_CONFIG = {
     "location": "EH8",
@@ -122,10 +122,10 @@ def get_provider_from_config_or_args(args, config):
             ["--api", "carbonintensity.org.uk", "--duration", "1"]
         ),
     )
-    assert provider_from_config_or_args(args, CATS_CONFIG) == UKCarbonIntensityProvider
+    assert provider_from_config_or_args(args, CATS_CONFIG) == GBCarbonIntensityProvider
 
     args = cast(Args, parse_arguments().parse_args(["--duration", "1"]))
-    assert provider_from_config_or_args(args, CATS_CONFIG) == UKCarbonIntensityProvider
+    assert provider_from_config_or_args(args, CATS_CONFIG) == GBCarbonIntensityProvider
 
     args = cast(
         Args,

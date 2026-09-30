@@ -1,4 +1,4 @@
-"UK Carbon Intensity API"
+"GB Carbon Intensity API"
 
 # pyright: reportUnknownArgumentType=none, reportUnknownVariableType=none, reportAny=none
 
@@ -12,25 +12,25 @@ from ..forecast import PointEstimate, Timeseries
 from .base import BaseProvider, fetch_url, provider
 
 INVALID_LOCATION_MESSAGE = (
-    "{location}. UKCarbonIntensityProvider only supports UK postcodes, "
+    "{location}. GBCarbonIntensityProvider only supports GB postcodes, "
     + "specified as the outward code, for example 'OX1' for postcode 'OX1 3QD'"
 )
-# This file is generated using scripts/uk_outcodes.py:
-#     python3 scripts/uk_outcodes.py <ONS postcode file> -o cats/data/uk_outcodes.txt
+# This file is generated using scripts/gb_outcodes.py:
+#     python3 scripts/gb_outcodes.py <ONS postcode file> -o cats/data/gb_outcodes.txt
 # ONS data:
 # https://geoportal.statistics.gov.uk/datasets/6fff67d204fd4f339591ed667a6e3642/about
-UK_OUTCODES: set[str] = set(
-    (files("cats") / "data" / "uk_outcodes.txt").read_text().split()
+GB_OUTCODES: set[str] = set(
+    (files("cats") / "data" / "gb_outcodes.txt").read_text().split()
 )
 
 
 @provider("carbonintensity.org.uk")
-class UKCarbonIntensityProvider(BaseProvider):
+class GBCarbonIntensityProvider(BaseProvider):
     """
     Default provider for the National Energy System Operator's carbonintensity.org.uk API
 
     The service covers most of Great Britain with the location specified using a the first part
-    of a UK postcode. This relates to one of 14 areas forming the GB grid which each have their own
+    of a GB postcode. This relates to one of 14 areas forming the GB grid which each have their own
     carbon intensity forecast. Data has 30 minute resolution and extends 2 days into the future. No
     authentication is needed.
     """
@@ -40,13 +40,13 @@ class UKCarbonIntensityProvider(BaseProvider):
     def validate_location(self, location: str | None) -> str:
         if location is None:
             raise InvalidLocationError(
-                "Must provide location for UK Carbon Intensity provider"
+                "Must provide location for GB Carbon Intensity provider"
             )
         location = location.upper()
-        # UK postcodes have two components, an out-code and in-code, e.g. OX1 3QD
+        # GB postcodes have two components, an out-code and in-code, e.g. OX1 3QD
         # The API only requires the outcode
         location = location.split()[0]
-        if location in UK_OUTCODES:
+        if location in GB_OUTCODES:
             return location
         raise InvalidLocationError(INVALID_LOCATION_MESSAGE.format(location=location))
 
@@ -65,7 +65,7 @@ class UKCarbonIntensityProvider(BaseProvider):
     ) -> Timeseries:
         if location is None:
             raise InvalidLocationError(
-                "Location must be supplied for UK Carbon Intensity API"
+                "Location must be supplied for GB Carbon Intensity API"
             )
         location = self.validate_location(location)
         patch_minute = 31 if timestamp.minute > 30 else 1

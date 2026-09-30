@@ -1,5 +1,5 @@
 # pyright: reportUnusedCallResult=none, reportUninitializedInstanceVariable=none
-# Script to generate UK outcodes from the ONS Postcode Directory
+# Script to generate GB outcodes from the ONS Postcode Directory
 # Example (May 2026): https://geoportal.statistics.gov.uk/datasets/6fff67d204fd4f339591ed667a6e3642/about
 
 import argparse
@@ -24,14 +24,14 @@ def get_outcodes(input_file: str) -> set[str]:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Write UK postcodes out-code component from ONS data"
+        description="Write GB postcodes out-code component from ONS data"
     )
     parser.add_argument("input_file", help="Path to the input CSV file")
     parser.add_argument(
         "-o",
         "--output-file",
         help="Path to output outcodes file",
-        default="uk_outcodes.txt",
+        default="gb_outcodes.txt",
     )
     args = cast(Args, parser.parse_args())
     outcodes = get_outcodes(args.input_file)
