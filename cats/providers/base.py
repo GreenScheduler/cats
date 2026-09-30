@@ -12,12 +12,13 @@ using the ``@provider`` decorator to register the provider.
 
 from __future__ import annotations
 
+import tempfile
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, Callable, ClassVar
 
-import requests_cache
-
+from ..cache import Cache
 from ..exceptions import UnsupportedProviderError
 from ..forecast import Timeseries
 from ..version import user_agent
@@ -45,12 +46,12 @@ def fetch_url(url: str, headers: dict[str, str] | None = None) -> Any:
             contain valid json.
     :raises requests.exceptions.HTTPError: If the HTTP request fails
     """
-    # Setup a session for the API call. This uses a global HTTP cache
-    # with the URL as the key. Failed attempts are not cached.
-    session = requests_cache.CachedSession("cats_cache", use_temp=True)
+    # Use a global HTTP cache in the temp directory with the URL as the key.
+    # Entries expire after a day. Failed attempts are not cached.
+    cache = Cache(Path(tempfile.gettempdir()), expires_after=timedelta(days=1))
     headers = headers or {}
     headers.update(user_agent)
-    response = session.get(url, headers=headers)
+    response = cache.get(url, headers=headers)
     # Catch and raise any HTTP errors
     response.raise_for_status()
     return response.json()  # pyright: ignore[reportUnknownMemberType]
