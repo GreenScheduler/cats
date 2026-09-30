@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
-from typing_extensions import override
 
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
@@ -86,7 +85,6 @@ class OctopusAgilePriceProvider(BaseProvider):
     SUPPORTED_METRICS: ClassVar[frozenset[str]] = frozenset({"price"})
     DEFAULT_METRIC: ClassVar[str] = "price"
 
-    @override
     def validate_location(self, location: str | None) -> str:
         if location is None:
             raise InvalidLocationError(
@@ -97,7 +95,6 @@ class OctopusAgilePriceProvider(BaseProvider):
             return location
         raise InvalidLocationError(INVALID_LOCATION_MESSAGE.format(location=location))
 
-    @override
     def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         return [
@@ -107,7 +104,6 @@ class OctopusAgilePriceProvider(BaseProvider):
             )
         ]
 
-    @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         # Nominal "today + tomorrow" day-ahead window, lop off one 30 min
@@ -117,7 +113,6 @@ class OctopusAgilePriceProvider(BaseProvider):
         # 16:00 UK time.
         return 2820
 
-    @override
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         return 30
@@ -146,7 +141,6 @@ class OctopusAgilePriceProvider(BaseProvider):
             "Could not find an active Octopus Agile product"
         )  # pragma: no cover
 
-    @override
     def get_data(
         self,
         timestamp: datetime,

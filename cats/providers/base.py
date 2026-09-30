@@ -12,15 +12,14 @@ using the ``@provider`` decorator to register the provider.
 
 from __future__ import annotations
 
+import tempfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any, Callable, ClassVar
 
-import requests_cache
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-
+from ..cache import RETRY_STATUSES, Cache  # noqa: F401
 from ..exceptions import InvalidMetricError, UnsupportedProviderError
 from ..forecast import Timeseries
 from ..version import user_agent
@@ -40,12 +39,6 @@ class LocationGroup:
     heading: str
     locations: dict[str, str]
     note: str = ""
-
-
-# Transient failures worth retrying: rate limiting (429) and upstream gateway
-# problems. Plain 500s are not retried since they are usually persistent
-# (e.g. an unsupported location) and would only slow down the failure.
-RETRY_STATUSES = (429, 502, 503, 504)
 
 
 def fetch_url(url: str, headers: dict[str, str] | None = None) -> Any:
@@ -70,21 +63,12 @@ def fetch_url(url: str, headers: dict[str, str] | None = None) -> Any:
             contain valid json.
     :raises requests.exceptions.HTTPError: If the HTTP request fails
     """
-    # Setup a session for the API call. This uses a global HTTP cache
-    # with the URL as the key. Failed attempts are not cached.
-    session = requests_cache.CachedSession("cats_cache", use_temp=True)
-    retry = Retry(
-        total=3,
-        backoff_factor=1,
-        status_forcelist=RETRY_STATUSES,
-        raise_on_status=False,  # let raise_for_status() below report the final failure
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount("https://", adapter)
-    session.mount("http://", adapter)
+    # Use a global HTTP cache in the temp directory with the URL as the key.
+    # Entries expire after a day. Failed attempts are not cached.
+    cache = Cache(Path(tempfile.gettempdir()), expires_after=timedelta(days=1))
     headers = headers or {}
     headers.update(user_agent)
-    response = session.get(url, headers=headers)
+    response = cache.get(url, headers=headers)
     # Catch and raise any HTTP errors
     response.raise_for_status()
     return response.json()  # pyright: ignore[reportUnknownMemberType]

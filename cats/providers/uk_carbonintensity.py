@@ -7,8 +7,6 @@ from importlib.resources import files
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
-from typing_extensions import override
-
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
 from .base import (
@@ -69,7 +67,6 @@ class UKCarbonIntensityProvider(BaseProvider):
     SUPPORTED_METRICS: ClassVar[frozenset[str]] = frozenset({"carbon", "renewables"})
     DEFAULT_METRIC: ClassVar[str] = "carbon"
 
-    @override
     def validate_location(self, location: str | None) -> str:
         if location is None:
             raise InvalidLocationError(
@@ -83,7 +80,6 @@ class UKCarbonIntensityProvider(BaseProvider):
             return location
         raise InvalidLocationError(INVALID_LOCATION_MESSAGE.format(location=location))
 
-    @override
     def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         return [
@@ -93,17 +89,14 @@ class UKCarbonIntensityProvider(BaseProvider):
             )
         ]
 
-    @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         return 2820
 
-    @override
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         return 30
 
-    @override
     def get_data(
         self,
         timestamp: datetime,

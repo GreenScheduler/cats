@@ -7,7 +7,6 @@ from importlib.resources import files
 from typing import Any, ClassVar
 from urllib.parse import quote
 
-from typing_extensions import override
 
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
@@ -140,7 +139,6 @@ class EnergyChartsProvider(BaseProvider):
     SUPPORTED_METRICS: ClassVar[frozenset[str]] = frozenset({"price", "renewables"})
     DEFAULT_METRIC: ClassVar[str] = "price"
 
-    @override
     def validate_location(self, location: str | None) -> str:
         if location is None:
             raise InvalidLocationError(
@@ -178,7 +176,6 @@ class EnergyChartsProvider(BaseProvider):
             )
         return country
 
-    @override
     def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
         if metric is not None:
             metric = resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
@@ -201,7 +198,6 @@ class EnergyChartsProvider(BaseProvider):
             )
         return groups
 
-    @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         metric = resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         if metric == "price":
@@ -215,12 +211,10 @@ class EnergyChartsProvider(BaseProvider):
         # single-day nominal maximum instead.
         return 1425  # nominal "rest of today", lop off one 15 min step
 
-    @override
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         return 15
 
-    @override
     def get_data(
         self,
         timestamp: datetime,

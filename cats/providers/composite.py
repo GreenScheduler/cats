@@ -15,7 +15,6 @@ from collections.abc import Iterable
 from datetime import datetime
 from typing import Any, ClassVar
 
-from typing_extensions import override
 
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
@@ -338,7 +337,6 @@ class CompositeProvider(BaseProvider):
             "octopus.energy) or wattnet.eu zone code."
         )
 
-    @override
     def validate_location(self, location: str | None) -> str:
         return self._detect_location(location)[1]
 
@@ -468,7 +466,6 @@ class CompositeProvider(BaseProvider):
             logging.warning(note)
         return provider.get_data(timestamp, provider_location, metric=metric)
 
-    @override
     def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
         wattnet_zones = WattnetEuProvider().list_locations()[0].locations
         zones = {}
@@ -495,7 +492,6 @@ class CompositeProvider(BaseProvider):
             ),
         ]
 
-    @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         # Location-independent nominal capability (used e.g. by
         # --list-providers, which has no location to detect a kind from):
@@ -509,7 +505,6 @@ class CompositeProvider(BaseProvider):
             EnergyChartsProvider().get_max_duration_minutes("renewables"),
         )
 
-    @override
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         # Nominal value for the UK postcode default combination (30 minute
         # settlement periods); a wattnet.eu zone location, or an explicit
@@ -517,7 +512,6 @@ class CompositeProvider(BaseProvider):
         # intersects by exact timestamp regardless of what this declares.
         return 30
 
-    @override
     def get_data(
         self,
         timestamp: datetime,
