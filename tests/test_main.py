@@ -121,3 +121,18 @@ def test_main_failures(get_data):
 
     # Duration larger than API maximum
     assert main(["-d", "5000", "--loc", "OX1"]) == 1
+
+    # Missing required --duration (and --list-providers not given)
+    assert main([]) == 1
+
+
+def test_list_providers(capsys):
+    assert main(["--list-providers"]) == 0
+    out = capsys.readouterr().out
+    for name in [
+        "carbonintensity.org.uk",
+        "wattnet.eu",
+        "energy-charts.info",
+        "octopus.energy",
+    ]:
+        assert name in out

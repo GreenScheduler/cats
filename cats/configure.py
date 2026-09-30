@@ -35,7 +35,7 @@ requests_cache.install_cache("cats_cache", use_temp=True)
 
 
 class Args(Namespace):
-    duration: int
+    duration: int | None
     scheduler: str
     api: str
     command: str | None
@@ -55,6 +55,8 @@ class Args(Namespace):
     window: int
     start_window: datetime.datetime | None
     end_window: datetime.datetime | None
+    list_providers: bool
+    metric: str | None
 
 
 def get_runtime_config(
@@ -80,6 +82,9 @@ def get_runtime_config(
     location = get_location_from_config_or_args(args, configmapping)
 
     msg = "Job duration must be a positive integer (number of minutes)"
+    if args.duration is None:
+        logging.error(msg)
+        raise ValueError
     try:
         duration = int(args.duration)
     except ValueError:

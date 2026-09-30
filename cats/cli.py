@@ -13,6 +13,7 @@ from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .exceptions import (
     DurationExceedsWindowError,
     InvalidLocationError,
+    InvalidMetricError,
     MissingArgumentError,
     ProviderAuthenticationError,
     SchedulerError,
@@ -21,6 +22,7 @@ from .exceptions import (
 from .forecast import WindowedForecast
 from .output import CATSOutput
 from .plotting import plotplan
+from .providers import list_providers
 from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
 
@@ -35,6 +37,28 @@ def is_headless() -> bool:
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
+
+
+def print_providers():
+    "Print the registered data providers and their properties"
+    for name, provider_cls in sorted(list_providers().items()):
+        instance = provider_cls()
+        docstring = (provider_cls.__doc__ or "").strip().splitlines()
+        summary = docstring[0].strip() if docstring else ""
+        print(f"{name}")
+        print(f"    {summary}")
+        print(
+            "    max duration: "
+            f"{instance.get_max_duration_minutes()} min, "
+            "resolution: "
+            f"{instance.get_temporal_resolution_minutes()} min"
+        )
+        if instance.SUPPORTED_METRICS:
+            metrics = ", ".join(
+                f"{m} (default)" if m == instance.DEFAULT_METRIC else m
+                for m in sorted(instance.SUPPORTED_METRICS)
+            )
+            print(f"    metrics: {metrics}")
 
 
 def print_banner(disable_colour):
@@ -186,11 +210,28 @@ def parse_arguments():
         "-d",
         "--duration",
         type=int,
-        required=True,
-        help="[required] Expected duration of the job in minutes.",
+        help="[required, unless --list-providers is given] Expected duration "
+        "of the job in minutes.",
     )
 
     ### Optional
+
+    parser.add_argument(
+        "--list-providers",
+        action="store_true",
+        help="List the registered data providers and their properties, then exit "
+        "(no --duration needed).",
+    )
+    parser.add_argument(
+        "--metric",
+        type=str,
+        help="Which metric to request from the chosen provider, for providers that "
+        "serve more than one (e.g. carbonintensity.org.uk: carbon, renewables; "
+        "wattnet.eu: carbon, water, water_stress, environmental_score; "
+        "energy-charts.info: price, renewables). Run --list-providers to see each "
+        "provider's supported metrics and its default. Ignored by providers that "
+        "only serve a single metric.",
+    )
 
     parser.add_argument(
         "-s",
@@ -204,10 +245,17 @@ def parse_arguments():
         "--api",
         type=str,
         default="carbonintensity.org.uk",
-        help="API to use to obtain carbon intensity forecasts. Overrides `config.yml`. "
-        "There is a choice of `carbonintensity.org.uk` (only forecasts in Great Britain)"
-        "or `wattnet.eu` (experimental, for forecasts across Europe). "
-        "Default: `carbonintensity.org.uk`.",
+        help="API to use to obtain forecasts. Overrides `config.yml`. "
+        "There is a choice of `carbonintensity.org.uk` (Great Britain: carbon "
+        "intensity or non-renewable share, see --metric), `wattnet.eu` (experimental, "
+        "across Europe: carbon intensity, water footprint, water impact or "
+        "environmental score, see --metric), `energy-charts.info` (across Europe "
+        "excluding Great Britain: day-ahead price or non-renewable share, see "
+        "--metric) or `octopus.energy` (Great Britain: Agile tariff price in "
+        "GBP/MWh). See --metric for the multi-metric providers. Run "
+        "--list-providers for details. The non-carbon metrics enable more than "
+        "purely carbon-aware scheduling; --footprint only has an effect when "
+        "forecast.metric == 'Carbon intensity'. Default: `carbonintensity.org.uk`.",
     )
     parser.add_argument(
         "-c", "--command", help="Command to schedule, requires --scheduler to be set"
@@ -314,6 +362,15 @@ def run_cats(arguments: list[str] | None = None):
     args = cast(Args, parser.parse_args(arguments))
     colour_output = args.no_colour or args.no_color
 
+    if args.list_providers:
+        print_providers()
+        return
+
+    if args.duration is None:
+        raise MissingArgumentError(
+            "-d / --duration is required, unless --list-providers is given"
+        )
+
     if args.command and not args.scheduler:
         raise MissingArgumentError(
             "To run a command or sbatch script with -c / --comand, you must specify scheduler with -s / --scheduler"
@@ -330,7 +387,7 @@ def run_cats(arguments: list[str] | None = None):
     except ValueError as e:
         raise ValueError(f"Error in window constraints: {e}")
     # Check against both API limit and user-specified window
-    max_duration_minutes = provider.get_max_duration_minutes()
+    max_duration_minutes = provider.get_max_duration_minutes(metric=args.metric)
     effective_max_duration = min(max_duration_minutes, max_window)
     if duration > effective_max_duration:
         if max_window < max_duration_minutes:
@@ -343,7 +400,9 @@ def run_cats(arguments: list[str] | None = None):
     ########################
     ## Obtain CI forecast ##
     ########################
-    forecast = provider.get_data(datetime.datetime.now(timezone.utc), location)
+    forecast = provider.get_data(
+        datetime.datetime.now(timezone.utc), location, metric=args.metric
+    )
 
     #############################
     ## Find optimal start time ##
@@ -437,6 +496,8 @@ def main(arguments: list[str] | None = None):
         return 0
     except InvalidLocationError as e:
         print(f"Invalid location: {e}")
+    except InvalidMetricError as e:
+        print(f"Invalid metric: {e}")
     except UnsupportedProviderError as e:
         print(f"Unsupported provider: {e}")
     except ProviderAuthenticationError as e:
