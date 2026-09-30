@@ -1,7 +1,7 @@
+import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
-import sqlite3
 
 _TERMINAL_SLURM_STATES = (
     "COMPLETED",
@@ -26,8 +26,8 @@ def record_schedule_check(
     location: str,
     action: str,
     dynamic: bool = False,
-        api: str = "carbonintensity.org.uk",
-        max_window_minutes: int = 2820,
+    api: str = "carbonintensity.org.uk",
+    max_window_minutes: int = 2820,
     current_ci_g_per_kwh: float | None = None,
     optimal_start_utc: str | None = None,
     optimal_ci_g_per_kwh: float | None = None,
@@ -78,7 +78,8 @@ def record_schedule_check(
                 ON schedule_checks (workload_key, checked_at_utc)
             """)
 
-            cursor = connection.execute("""
+            cursor = connection.execute(
+                """
                 INSERT INTO schedule_checks (
                     workload_key,
                     checked_at_utc,
@@ -98,25 +99,27 @@ def record_schedule_check(
                     slurm_state,
                     error
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                workload_key,
-                checked_at_utc,
-                duration_minutes,
-                location,
-                current_ci_g_per_kwh,
-                optimal_start_utc,
-                optimal_ci_g_per_kwh,
-                estimated_emissions_now_g,
-                estimated_emissions_optimal_g,
-                action,
-                int(dynamic),
-                api,
-                max_window_minutes,
-                previous_job_id,
-                active_job_id,
-                slurm_state,
-                error,
-            ))
+            """,
+                (
+                    workload_key,
+                    checked_at_utc,
+                    duration_minutes,
+                    location,
+                    current_ci_g_per_kwh,
+                    optimal_start_utc,
+                    optimal_ci_g_per_kwh,
+                    estimated_emissions_now_g,
+                    estimated_emissions_optimal_g,
+                    action,
+                    int(dynamic),
+                    api,
+                    max_window_minutes,
+                    previous_job_id,
+                    active_job_id,
+                    slurm_state,
+                    error,
+                ),
+            )
 
             return cursor.lastrowid
 
@@ -166,9 +169,7 @@ def summarize_schedule_checks(
                 "duration_minutes": record.get("duration_minutes"),
                 "location": record.get("location") or "unknown",
                 "workload_key": record.get("workload_key") or "unknown",
-                "estimated_emissions_now_g": record.get(
-                    "estimated_emissions_now_g"
-                ),
+                "estimated_emissions_now_g": record.get("estimated_emissions_now_g"),
                 "estimated_emissions_optimal_g": record.get(
                     "estimated_emissions_optimal_g"
                 ),
@@ -209,9 +210,7 @@ def summarize_schedule_checks(
         return float(now) - float(optimal)
 
     estimated_jobs = [job for job in jobs.values() if savings(job) is not None]
-    completed_estimated_jobs = [
-        job for job in completed if savings(job) is not None
-    ]
+    completed_estimated_jobs = [job for job in completed if savings(job) is not None]
 
     def total_savings(items: list[dict[str, object]]) -> float:
         return sum(savings(job) or 0.0 for job in items)
@@ -246,9 +245,7 @@ def summarize_schedule_checks(
         "jobs_with_emissions_estimate": len(estimated_jobs),
         "completed_jobs_with_emissions_estimate": len(completed_estimated_jobs),
         "estimated_co2_saved_g_all_tracked_jobs": total_savings(estimated_jobs),
-        "estimated_co2_saved_g_completed_jobs": total_savings(
-            completed_estimated_jobs
-        ),
+        "estimated_co2_saved_g_completed_jobs": total_savings(completed_estimated_jobs),
         "completed_jobs_by_location": by_location,
         "completed_jobs_by_workload": by_workload,
     }
@@ -286,7 +283,8 @@ def get_dynamic_schedule_checks(db_path: str | Path) -> list[dict[str, object]]:
                 WHERE checks.slurm_state IS NULL
                    OR UPPER(checks.slurm_state) NOT IN (%s)
                 ORDER BY checks.id
-                """ % placeholders,
+                """
+                % placeholders,
                 _TERMINAL_SLURM_STATES,
             )
             records = []
@@ -318,9 +316,7 @@ def get_jobs_requiring_state_refresh(db_path: str | Path) -> list[str]:
             return [row[0] for row in rows]
 
 
-def update_schedule_job_state(
-    db_path: str | Path, job_id: str, state: str
-) -> None:
+def update_schedule_job_state(db_path: str | Path, job_id: str, state: str) -> None:
     path = Path(db_path)
     if not path.is_file():
         return

@@ -1,17 +1,16 @@
-from contextlib import closing
 import json
 import sqlite3
+from contextlib import closing
 from types import SimpleNamespace
 
 from cats import cli
 from cats.forecast import AverageEstimate
 from cats.history import (
     get_jobs_requiring_state_refresh,
-    record_schedule_check,
     read_schedule_checks,
+    record_schedule_check,
     update_schedule_job_state,
 )
-from cats.output import CATSOutput
 
 
 def test_show_data_prints_all_records_without_duration(monkeypatch, tmp_path, capsys):
@@ -128,7 +127,9 @@ def test_cli_records_successful_sbatch_submission(monkeypatch, tmp_path):
 
     db_path = tmp_path / "history.sqlite3"
     monkeypatch.setenv("CATS_HISTORY_DB", str(db_path))
-    monkeypatch.setattr(cli, "get_runtime_config", lambda args: (FakeProvider, "OX1", 5, None, None))
+    monkeypatch.setattr(
+        cli, "get_runtime_config", lambda args: (FakeProvider, "OX1", 5, None, None)
+    )
     monkeypatch.setattr(cli, "WindowedForecast", FakeWindowedForecast)
     monkeypatch.setattr(cli, "schedule_sbatch", lambda output, args: ("123456", None))
 

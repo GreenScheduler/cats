@@ -27,7 +27,9 @@ def process_dynamic_jobs_once(
     db_path: str,
     cats_executable: str | None = None,
 ) -> None:
-    cats_executable = cats_executable or os.environ.get("CATS_EXECUTABLE") or shutil.which("cats")
+    cats_executable = (
+        cats_executable or os.environ.get("CATS_EXECUTABLE") or shutil.which("cats")
+    )
     if not cats_executable:
         raise RuntimeError("Could not find the CATS executable for daemon forecasts")
 
@@ -97,8 +99,16 @@ def process_dynamic_jobs_once(
                 slurm_state="PENDING",
                 error=error_message,
             )
-        except (OSError, subprocess.CalledProcessError, KeyError, TypeError, ValueError) as error:
-            logging.warning("Dynamic scheduling check failed for job %s: %s", job_id, error)
+        except (
+            OSError,
+            subprocess.CalledProcessError,
+            KeyError,
+            TypeError,
+            ValueError,
+        ) as error:
+            logging.warning(
+                "Dynamic scheduling check failed for job %s: %s", job_id, error
+            )
 
 
 def main() -> None:

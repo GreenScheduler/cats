@@ -26,7 +26,9 @@ def test_process_dynamic_jobs_reschedules_pending_job(monkeypatch, tmp_path):
     updates = []
 
     monkeypatch.setattr(daemon, "get_sbatch_job_state", lambda job_id: "PENDING")
-    monkeypatch.setattr(daemon, "get_sbatch_job_start_time", lambda job_id: original_start)
+    monkeypatch.setattr(
+        daemon, "get_sbatch_job_start_time", lambda job_id: original_start
+    )
     monkeypatch.setattr(
         daemon,
         "update_sbatch_job_start_time",
@@ -111,7 +113,9 @@ def test_process_dynamic_jobs_does_not_reforecast_running_job(monkeypatch, tmp_p
     monkeypatch.setattr(
         daemon.subprocess,
         "check_output",
-        lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("unexpected forecast")),
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("unexpected forecast")
+        ),
     )
 
     daemon.process_dynamic_jobs_once(str(db_path), cats_executable="cats")

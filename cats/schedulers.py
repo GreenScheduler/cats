@@ -54,9 +54,15 @@ def schedule_sbatch(
             return None, "Could not determine Slurm job ID from sbatch output"
         return match.group(1).decode("ascii"), None
     except FileNotFoundError:
-        return None, "No sbatch command found in PATH, ensure slurm is configured correctly"
+        return (
+            None,
+            "No sbatch command found in PATH, ensure slurm is configured correctly",
+        )
     except subprocess.CalledProcessError as e:  # pragma: no cover
-        return None, f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}"
+        return (
+            None,
+            f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}",
+        )
 
 
 def get_sbatch_job_state(job_id: str) -> str | None:
