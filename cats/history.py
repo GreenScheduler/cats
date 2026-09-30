@@ -2,6 +2,7 @@ import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import TypedDict
 
 _TERMINAL_JOB_STATES = (
     "COMPLETED",
@@ -18,6 +19,28 @@ _TERMINAL_JOB_STATES = (
     "RESCHEDULED",
     "NOT_PENDING",
 )
+
+
+class _ScheduleCheckGroupTotals(TypedDict):
+    completed_jobs: int
+    estimated_co2_saved_g: float
+
+
+class _ScheduleChecksSummary(TypedDict):
+    schedule_checks: int
+    tracked_jobs: int
+    completed_jobs: int
+    failed_jobs: int
+    active_jobs: int
+    unknown_state_jobs: int
+    dynamic_jobs: int
+    completed_runtime_hours: float
+    jobs_with_emissions_estimate: int
+    completed_jobs_with_emissions_estimate: int
+    estimated_co2_saved_g_all_tracked_jobs: float
+    estimated_co2_saved_g_completed_jobs: float
+    completed_jobs_by_location: dict[str, _ScheduleCheckGroupTotals]
+    completed_jobs_by_workload: dict[str, _ScheduleCheckGroupTotals]
 
 
 def record_schedule_check(
@@ -132,7 +155,10 @@ def record_schedule_check(
                 error,
             ))
 
-            return cursor.lastrowid
+            row_id = cursor.lastrowid
+            if row_id is None:
+                raise sqlite3.DatabaseError("Insert did not produce a row ID")
+            return row_id
 
 
 def read_schedule_checks(db_path: str | Path) -> list[dict[str, object]]:
@@ -163,7 +189,7 @@ def read_schedule_checks(db_path: str | Path) -> list[dict[str, object]]:
 
 def summarize_schedule_checks(
     records: list[dict[str, object]],
-) -> dict[str, object]:
+) -> _ScheduleChecksSummary:
     """Summarize tracked jobs once each, despite dynamic forecast history rows."""
     jobs: dict[str, dict[str, object]] = {}
     for record in records:
@@ -224,7 +250,7 @@ def summarize_schedule_checks(
     def savings(job: dict[str, object]) -> float | None:
         now = job["estimated_emissions_now_g"]
         optimal = job["estimated_emissions_optimal_g"]
-        if now is None or optimal is None:
+        if not isinstance(now, (int, float)) or not isinstance(optimal, (int, float)):
             return None
         return float(now) - float(optimal)
 
@@ -236,8 +262,8 @@ def summarize_schedule_checks(
     def total_savings(items: list[dict[str, object]]) -> float:
         return sum(savings(job) or 0.0 for job in items)
 
-    by_location: dict[str, dict[str, float | int]] = {}
-    by_workload: dict[str, dict[str, float | int]] = {}
+    by_location: dict[str, _ScheduleCheckGroupTotals] = {}
+    by_workload: dict[str, _ScheduleCheckGroupTotals] = {}
     for job in completed:
         saved = savings(job)
         for grouping, key in (
@@ -260,9 +286,11 @@ def summarize_schedule_checks(
         "unknown_state_jobs": len(unknown),
         "dynamic_jobs": sum(bool(job["dynamic"]) for job in jobs.values()),
         "completed_runtime_hours": sum(
-            int(job["duration_minutes"] or 0) for job in completed
-        )
-        / 60,
+            int(job["duration_minutes"])
+            if isinstance(job["duration_minutes"], (int, str))
+            else 0
+            for job in completed
+        ) / 60,
         "jobs_with_emissions_estimate": len(estimated_jobs),
         "completed_jobs_with_emissions_estimate": len(completed_estimated_jobs),
         "estimated_co2_saved_g_all_tracked_jobs": total_savings(estimated_jobs),
