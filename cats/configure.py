@@ -57,6 +57,7 @@ class Args(Namespace):
     end_window: datetime.datetime | None
     list_providers: bool
     metric: str | None
+    signal: list[tuple[str, float]] | None
 
 
 def get_runtime_config(

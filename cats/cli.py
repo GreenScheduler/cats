@@ -5,7 +5,7 @@ import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from .carbonFootprint import get_footprint_reduction_estimate
 from .configure import Args, get_runtime_config
@@ -22,7 +22,7 @@ from .exceptions import (
 from .forecast import WindowedForecast
 from .output import CATSOutput
 from .plotting import plotplan
-from .providers import list_providers
+from .providers import CompositeProvider, list_providers
 from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
 
@@ -204,6 +204,18 @@ def parse_arguments():
         assert n >= 0
         return n
 
+    def signal_weight(string: str) -> tuple[str, float]:
+        name, sep, weight_str = string.partition("=")
+        if not sep:
+            raise ValueError(f"--signal must be in NAME=WEIGHT format, got {string!r}")
+        try:
+            weight = float(weight_str)
+        except ValueError:
+            raise ValueError(
+                f"--signal weight must be a number, got {weight_str!r} in {string!r}"
+            )
+        return name, weight
+
     ### Required
 
     parser.add_argument(
@@ -232,6 +244,21 @@ def parse_arguments():
         "provider's supported metrics and its default. Ignored by providers that "
         "only serve a single metric.",
     )
+    parser.add_argument(
+        "--signal",
+        type=signal_weight,
+        action="append",
+        metavar="NAME=WEIGHT",
+        help="Repeatable. Selects which signals to combine, and their relative "
+        "weight, when using the 'composite' provider. Valid signal names: "
+        "carbon, price, renewables, water, water_stress, "
+        "environmental_score. Weights don't need to sum to 1 (normalised "
+        "automatically). Example: "
+        "--signal carbon=0.4 --signal price=0.3 --signal renewables=0.3. "
+        "With no --signal given, every no-extra-authentication signal available "
+        "for that location is combined with equal weight. Ignored by all other "
+        "providers.",
+    )
 
     parser.add_argument(
         "-s",
@@ -251,9 +278,13 @@ def parse_arguments():
         "across Europe: carbon intensity, water footprint, water impact or "
         "environmental score, see --metric), `energy-charts.info` (across Europe "
         "excluding Great Britain: day-ahead price or non-renewable share, see "
-        "--metric) or `octopus.energy` (Great Britain: Agile tariff price in "
-        "GBP/MWh). See --metric for the multi-metric providers. Run "
-        "--list-providers for details. The non-carbon metrics enable more than "
+        "--metric), `octopus.energy` (Great Britain: Agile tariff price in GBP/MWh) "
+        "or `composite` (configurable combination of signals from all the above, "
+        "accepting either a UK postcode or a wattnet.eu zone code and "
+        "automatically picking the right native data source for each requested "
+        "metric and location, see --signal). See --metric and --signal for the "
+        "multi-metric and composite providers. Run --list-providers for details. "
+        "The non-carbon metrics and the composite provider enable more than "
         "purely carbon-aware scheduling; --footprint only has an effect when "
         "forecast.metric == 'Carbon intensity'. Default: `carbonintensity.org.uk`.",
     )
@@ -377,7 +408,10 @@ def run_cats(arguments: list[str] | None = None):
         )
 
     provider_cls, location, duration, jobinfo, PUE = get_runtime_config(args)
-    provider = provider_cls()
+    provider_kwargs: dict[str, Any] = {}
+    if provider_cls is CompositeProvider and args.signal:
+        provider_kwargs["api_data"] = {"signals": dict(args.signal)}
+    provider = provider_cls(**provider_kwargs)
 
     # Validate and parse window constraints
     try:

@@ -134,5 +134,6 @@ def test_list_providers(capsys):
         "wattnet.eu",
         "energy-charts.info",
         "octopus.energy",
+        "composite",
     ]:
         assert name in out
