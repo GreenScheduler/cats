@@ -10,7 +10,7 @@
   name = "climate-aware-task-scheduler"
   import-names = ["cats"]
   dynamic = ["version"]
-  description = "Lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment",
+  description = "Lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment"
   keywords = [
     "carbon intensity",
     "carbon-aware computing",
