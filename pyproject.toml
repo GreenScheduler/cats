@@ -10,6 +10,17 @@
   name = "climate-aware-task-scheduler"
   dynamic = ["version"]
   description = "Lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment"
+  keywords = [
+    "carbon intensity",
+    "carbon-aware computing",
+    "carbon-aware scheduling",
+    "climate-aware computing",
+    "task scheduling",
+    "HPC",
+    "high-performance computing",
+    "energy-aware computing",
+    "green computing",
+  ]
   authors = [
     { name = "Colin Sauze" },
     { name = "Andrew Walker"},
