@@ -9,7 +9,7 @@
 [project]
   name = "climate-aware-task-scheduler"
   dynamic = ["version"]
-  description = "Climate aware task scheduler"
+  description = "Lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment"
   authors = [
     { name = "Colin Sauze" },
     { name = "Andrew Walker"},
