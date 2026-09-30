@@ -76,7 +76,9 @@ def _refresh_history_job_states(history_db: str) -> None:
     try:
         job_ids = get_jobs_requiring_state_refresh(history_db)
     except (OSError, sqlite3.Error) as error:
-        logging.warning("Could not read tracked Slurm jobs from CATS history: %s", error)
+        logging.warning(
+            "Could not read tracked Slurm jobs from CATS history: %s", error
+        )
         return
 
     for job_id in job_ids:
@@ -414,9 +416,7 @@ def run_cats(arguments: list[str] | None = None):
                     "Scheduled runtime of completed jobs: "
                     f"{report['completed_runtime_hours']:.2f} hours"
                 )
-                completed_savings = report[
-                    "estimated_co2_saved_g_completed_jobs"
-                ]
+                completed_savings = report["estimated_co2_saved_g_completed_jobs"]
                 print(
                     "Estimated CO2 savings for completed jobs: "
                     f"{completed_savings:.2f} g "

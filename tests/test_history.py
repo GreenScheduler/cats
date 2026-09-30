@@ -139,7 +139,9 @@ def test_cli_records_successful_dynamic_submission(
 
     db_path = tmp_path / "history.sqlite3"
     monkeypatch.setenv("CATS_HISTORY_DB", str(db_path))
-    monkeypatch.setattr(cli, "get_runtime_config", lambda args: (FakeProvider, "OX1", 5, None, None))
+    monkeypatch.setattr(
+        cli, "get_runtime_config", lambda args: (FakeProvider, "OX1", 5, None, None)
+    )
     monkeypatch.setattr(cli, "WindowedForecast", FakeWindowedForecast)
     monkeypatch.setattr(cli, "schedule_sbatch", lambda output, args: (job_id, None))
     monkeypatch.setattr(cli, "schedule_at", lambda output, args: (job_id, None))

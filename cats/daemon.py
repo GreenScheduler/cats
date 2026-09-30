@@ -30,7 +30,9 @@ def process_dynamic_jobs_once(
     db_path: str,
     cats_executable: str | None = None,
 ) -> None:
-    cats_executable = cats_executable or os.environ.get("CATS_EXECUTABLE") or shutil.which("cats")
+    cats_executable = (
+        cats_executable or os.environ.get("CATS_EXECUTABLE") or shutil.which("cats")
+    )
     if not cats_executable:
         raise RuntimeError("Could not find the CATS executable for daemon forecasts")
 
@@ -43,7 +45,9 @@ def process_dynamic_jobs_once(
             else get_sbatch_job_state(job_id)
         )
         if state is None:
-            logging.warning("Could not read state for dynamic %s job %s", scheduler, job_id)
+            logging.warning(
+                "Could not read state for dynamic %s job %s", scheduler, job_id
+            )
             continue
 
         update_schedule_job_state(db_path, job_id, state, scheduler=scheduler)
@@ -96,7 +100,9 @@ def process_dynamic_jobs_once(
                             else None,
                         )
                         if error_message or active_job_id is None:
-                            raise RuntimeError(error_message or "at rescheduling failed")
+                            raise RuntimeError(
+                                error_message or "at rescheduling failed"
+                            )
                         update_schedule_job_state(
                             db_path, job_id, "RESCHEDULED", scheduler="at"
                         )
@@ -133,8 +139,16 @@ def process_dynamic_jobs_once(
                 slurm_state="PENDING",
                 error=error_message,
             )
-        except (OSError, subprocess.CalledProcessError, KeyError, TypeError, ValueError) as error:
-            logging.warning("Dynamic scheduling check failed for job %s: %s", job_id, error)
+        except (
+            OSError,
+            subprocess.CalledProcessError,
+            KeyError,
+            TypeError,
+            ValueError,
+        ) as error:
+            logging.warning(
+                "Dynamic scheduling check failed for job %s: %s", job_id, error
+            )
 
 
 def main() -> None:
