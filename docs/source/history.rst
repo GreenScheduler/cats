@@ -1,7 +1,7 @@
 .. _history:
 
 .. References to links that may be used in more than one place
-.. _SSIsite: https://www.software.ac.uk/
+.. _TheInsitutesite: https://www.software.ac.uk/
 .. _CW23page: https://software.ac.uk/cw23
 .. _CW23HackDaypage: https://www.software.ac.uk/cw23/hack-day
 .. _TuringWayChapter: https://book.the-turing-way.org/ethical-research/activism/activism-env-impact/#er-activism-env-impact-schedule-low-emission
@@ -11,7 +11,7 @@ History
 =======
 
 The initial version of CATS was created as part of the
-`Software Sustainability Institute’s <SSIsite_>`_
+`Institute for Research Software’s <TheInsitutesite_>`_
 `Collaborations Workshop 2023 <CW23page_>`_
 `Hack Day <CW23HackDaypage_>`_ in Manchester where a team of ten of us (Colin Sauzé,
 Sadie Bartholomew, Andrew Walker, Loïc Lannelongue,
@@ -24,7 +24,8 @@ By the end of that day we had a working prototype of CATS that could
 schedule tasks on the command line using the `at` command and data
 from the `Carbon intensity API <CarbonIntensityAPI_>`_
 
-During 2024 the `Software Sustainability Institute <SSIsite_>`_ provided funding
+During 2024 the `Institute for Research Software (under the former name
+Software Sustainability Institute) <TheInsitutesite_>`_ provided funding
 to allow some of us to dedicate time to the further development of CATS. This
 led to the ability to schedule in user space using a SLURM scheduler, significant
 clean-up of the code, the creation of a robust test suite, an update to the
@@ -42,7 +43,8 @@ second call for community activities.
 Funding
 =======
 
-The development of CATS was supported by the Software Sustainability Institute
+The development of CATS was supported by the Institute for Research Software
+(formerly Software Sustainability Institute)
 funded by EPSRC, BBSRC, ESRC, NERC, AHRC, STFC and MRC
 (grant number `EP/S021779/1 <https://gtr.ukri.org/projects?ref=EP%2FS021779%2F1>`_) and UKRI
 (grant number `AH/Z000114/1 <https://gtr.ukri.org/projects?ref=AH%2FZ000114%2F1>`_).

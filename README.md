@@ -1,8 +1,18 @@
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.08251/status.svg)](https://doi.org/10.21105/joss.08251)
+# CATS: **C**limate-**A**ware **T**ask **S**cheduler
 
 ![CATS logo](docs/source/_static/cats_dalle_img_200x200px_for_logo.png)
 
-# CATS: **C**limate-**A**ware **T**ask **S**cheduler
+| Category      | Links (click badges) |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Paper & DOI | [![JOSS](https://img.shields.io/badge/JOSS-10.21105%2Fjoss.08251-007ec6)](https://doi.org/10.21105/joss.08251) [![Zenodo](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.15753041-007ec6)](https://doi.org/10.5281/zenodo.15753041)|
+| Documentation | [![Read the Docs](https://readthedocs.org/projects/cats/badge/?version=latest)](https://cats.readthedocs.io/en/latest/?badge=latest) |
+| Repository    | [![release](https://img.shields.io/github/v/release/GreenScheduler/cats?color=green)](https://github.com/GreenScheduler/cats/releases) [![contributors](https://img.shields.io/github/contributors/GreenScheduler/cats?color=green)](https://github.com/GreenScheduler/cats/graphs/contributors) [![commits-since](https://img.shields.io/github/commits-since/GreenScheduler/cats/latest.svg?color=green)](https://github.com/GreenScheduler/cats/commits/main) |
+| Testing & CI  | [![CI](https://github.com/GreenScheduler/cats/actions/workflows/tests.yml/badge.svg)](https://github.com/GreenScheduler/cats/actions/workflows/tests.yml) [![CI](https://github.com/GreenScheduler/cats/actions/workflows/cluster-tests.yml/badge.svg)](https://github.com/GreenScheduler/cats/actions/workflows/cluster-tests.yml) [![pre-commit](https://results.pre-commit.ci/badge/github/GreenScheduler/cats/main.svg)](https://results.pre-commit.ci/latest/github/GreenScheduler/cats/main) |
+| Package       | [![PyPI](https://img.shields.io/pypi/v/climate-aware-task-scheduler?color=orange\&label=PyPI\&logo=python\&logoColor=white)](https://pypi.org/project/climate-aware-task-scheduler/) [![Python versions](https://img.shields.io/pypi/pyversions/climate-aware-task-scheduler.svg?color=orange\&logo=python\&label=Python\&logoColor=white)](https://pypi.org/project/climate-aware-task-scheduler/) |
+| Quality       | [![codecov](https://codecov.io/gh/GreenScheduler/cats/branch/main/graph/badge.svg)](https://codecov.io/gh/GreenScheduler/cats) |
+| Community     | [![Contributing](https://img.shields.io/badge/contributing-guidelines-pink)](https://github.com/GreenScheduler/cats/blob/main/CONTRIBUTING.md) [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-2.1-pink.svg)](https://github.com/GreenScheduler/cats/blob/main/CODE_OF_CONDUCT.md) |
+| Licence       | [![MIT Licence](https://img.shields.io/github/license/GreenScheduler/cats?color=grey)](https://github.com/GreenScheduler/cats/blob/main/LICENSE) |
+
 
 CATS is a **C**limate-**A**ware **T**ask **S**cheduler. It schedules cluster jobs to minimize predicted carbon intensity of running the process. It was created as part of the [2023 Collaborations Workshop](https://software.ac.uk/cw23).
 
@@ -21,7 +31,7 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 - Schedules tasks based on the estimated carbon intensity, minimizing carbon emissions
 - Provides a simple and intuitive API for developers
 - Lightweight and easy to integrate into existing workflows
-- Supports Python 3.10+
+- Supports Python 3.11+
 
 ## Brief example with plot to illustrate
 

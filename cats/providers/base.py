@@ -41,9 +41,9 @@ def fetch_url(url: str, headers: dict[str, str] | None = None) -> Any:
     dictionaries or lists, or may include debugging information. The provider is
     responsible for checking this.
 
-    :raises requests.exceptions.JSONDecodeError: If the response body does not contain
-            valid json.
-    :raises resqests.excpetions.HTTPError: If the HTTP request fails
+    :raises requests.exceptions.JSONDecodeError: If the response body does not
+            contain valid json.
+    :raises requests.exceptions.HTTPError: If the HTTP request fails
     """
     # Setup a session for the API call. This uses a global HTTP cache
     # with the URL as the key. Failed attempts are not cached.

@@ -11,3 +11,8 @@
 
 # initial pre-commit run and ruff autoformatting
 9031aafa07bdc3a93a2019648bbf50b894446b70
+# September 2026
+# Run pre-commit initially
+be477445094592866a048d5251d3fde8e9444400
+# Ruff everything
+67461c6dc3bc8ec923cea8ba4001a2e4109311fb
