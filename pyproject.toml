@@ -8,6 +8,7 @@
 
 [project]
   name = "climate-aware-task-scheduler"
+  import-names = ["cats"]
   dynamic = ["version"]
   description = "Lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment",
   keywords = [
@@ -20,7 +21,7 @@
     "high-performance computing",
     "energy-aware computing",
     "green computing",
-  ],
+  ]
   authors = [
     { name = "Colin Sauze" },
     { name = "Andrew Walker"},
@@ -32,7 +33,7 @@
     { name = "Abhishek Dasgupta" },
     { name = "Carlos Martinez" },
     { name = "Sadie Bartholomew" }
-  ],
+  ]
   maintainers = [
     { name = "Sadie Bartholomew" },
     { name = "Abhishek Dasgupta" },
@@ -72,6 +73,8 @@
   [project.urls]
     Home = "https://github.com/GreenScheduler/cats"
     Documentation = "https://cats.readthedocs.io/"
+    Repository = "https://github.com/GreenScheduler/cats"
+    Issues = "https://github.com/GreenScheduler/cats/issues"
 
   [project.scripts]
     cats = "cats.cli:main"
