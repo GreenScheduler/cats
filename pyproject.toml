@@ -52,9 +52,13 @@
     "Environment :: Console",
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
-    "Operating System :: Microsoft :: Windows",
+    "Intended Audience :: Developers",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: System :: Distributed Computing :: Batch Processing",
   ]
   dependencies = ["requests-cache>=1.0", "PyYAML>=6.0", "tzdata ; platform_system == 'Windows'"]
 
