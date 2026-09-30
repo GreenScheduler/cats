@@ -178,6 +178,25 @@ class TestValidateWindowConstraints:
 class TestConstrainedWindowedForecast:
     """Test the ConstrainedWindowedForecast class."""
 
+<<<<<<< HEAD
+=======
+    def test_short_window_retains_interpolation_sample(self):
+        """Test that coarse forecast data can cover a short search window."""
+        utc = ZoneInfo("UTC")
+        start = datetime(2024, 1, 1, 12, 0, tzinfo=utc)
+        data = [
+            PointEstimate(datetime=start, value=100),
+            PointEstimate(datetime=start + timedelta(minutes=30), value=80),
+            PointEstimate(datetime=start + timedelta(minutes=60), value=60),
+        ]
+
+        forecast = WindowedForecast(data, duration=5, start=start, max_window_minutes=5)
+
+        assert len(forecast) == 1
+        assert forecast[0].start == start
+        assert forecast[0].end == start + timedelta(minutes=5)
+
+>>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
     def test_basic_functionality_without_constraints(
         self, sample_data: list[PointEstimate]
     ):

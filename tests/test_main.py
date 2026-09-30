@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
+import requests
 
 from cats.cli import main, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
@@ -113,6 +114,49 @@ def test_schedule_at_success(fp):
     )
 
 
+<<<<<<< HEAD
+=======
+def test_schedule_at_submits_command_script(monkeypatch):
+    with (
+        patch(
+            "cats.schedulers.subprocess.check_output",
+            return_value="job 18 at Thu Oct  1 12:00:00 2026",
+        ) as check_output,
+        patch("cats.schedulers.subprocess.Popen") as popen,
+    ):
+        assert schedule_at_start(now_start, ["sleep", "120"], "/work") == ("18", None)
+
+    assert check_output.call_args.kwargs["stderr"] == subprocess.STDOUT
+    assert check_output.call_args.args[0][0] == "at"
+    assert check_output.call_args.kwargs["input"] == "sleep 120\n"
+    assert check_output.call_args.kwargs["cwd"] == "/work"
+    popen.assert_not_called()
+
+
+def test_reschedule_at_job_adds_replacement_before_removing_old(monkeypatch):
+    operations = []
+    start = now_start + timedelta(hours=1)
+
+    monkeypatch.setattr(
+        "cats.schedulers.schedule_at_start",
+        lambda start_time, args, cwd=None: (
+            operations.append(("add", start_time, args, cwd)) or "2",
+            None,
+        ),
+    )
+    monkeypatch.setattr(
+        "cats.schedulers.remove_at_job",
+        lambda job_id: operations.append(("remove", job_id)),
+    )
+
+    assert reschedule_at_job("1", start, ["sleep", "300"]) == ("2", None)
+    assert operations == [
+        ("add", start, ["sleep", "300"], None),
+        ("remove", "1"),
+    ]
+
+
+>>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
 @pytest.mark.parametrize(
     "exc,err",
     [
@@ -145,3 +189,41 @@ def test_main_failures(get_data):
 
     # Duration larger than API maximum
     assert main(["-d", "5000", "--loc", "OX1"]) == 1
+
+
+def raiseHTTPError(*args, **kwargs):  # pyright: ignore[reportUnusedParameter, reportUnknownParameterType]
+    raise requests.exceptions.HTTPError
+
+
+def raiseJSONError(*args, **kwargs):  # pyright: ignore[reportUnusedParameter, reportUnknownParameterType]
+    raise requests.exceptions.JSONDecodeError
+
+
+@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+def test_main_http_ukci_errors(get_data):
+    get_data.return_value = {}
+    get_data.side_effect = raiseHTTPError
+
+    # CATS should return 1 when we get an HTTP error
+    assert main(["-c", "ls", "-d", "5"]) == 1
+
+    get_data.return_value = {}
+    get_data.side_effect = raiseJSONError
+
+    # CATS should return 1 when we get an JSON error
+    assert main(["-c", "ls", "-d", "5"]) == 1
+
+
+@patch("cats.providers.WattnetEuProvider.get_data")
+def test_main_http_wattnet_errors(get_data):
+    get_data.return_value = {}
+    get_data.side_effect = raiseHTTPError
+
+    # CATS should return 1 when we get an HTTP error
+    assert main(["-c", "ls", "-d", "5"]) == 1
+
+    get_data.return_value = {}
+    get_data.side_effect = raiseJSONError
+
+    # CATS should return 1 when we get an JSON error
+    assert main(["-c", "ls", "-d", "5"]) == 1

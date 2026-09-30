@@ -11,6 +11,8 @@ from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Optional, cast
 
+import requests
+
 from .carbonFootprint import get_footprint_reduction_estimate
 from .configure import Args, get_runtime_config
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
@@ -73,7 +75,9 @@ def _refresh_history_job_states(history_db: str) -> None:
     try:
         job_ids = get_jobs_requiring_state_refresh(history_db)
     except (OSError, sqlite3.Error) as error:
-        logging.warning("Could not read tracked Slurm jobs from CATS history: %s", error)
+        logging.warning(
+            "Could not read tracked Slurm jobs from CATS history: %s", error
+        )
         return
 
     for job_id in job_ids:
@@ -411,9 +415,7 @@ def run_cats(arguments: list[str] | None = None):
                     "Scheduled runtime of completed jobs: "
                     f"{report['completed_runtime_hours']:.2f} hours"
                 )
-                completed_savings = report[
-                    "estimated_co2_saved_g_completed_jobs"
-                ]
+                completed_savings = report["estimated_co2_saved_g_completed_jobs"]
                 print(
                     "Estimated CO2 savings for completed jobs: "
                     f"{completed_savings:.2f} g "
@@ -623,6 +625,10 @@ def main(arguments: list[str] | None = None):
         print(f"Duration exceeds limit: {e}")
     except SchedulerError as e:
         print(f"Scheduler error: {e}")
+    except requests.exceptions.JSONDecodeError as e:
+        print(f"Failed to decode JSON from data provider: {e}")
+    except requests.exceptions.HTTPError as e:
+        print(f"Failed to connect to HTTP server from data provider: {e}")
     except ValueError as e:
         print(f"Value error: {e}")
     except Exception:

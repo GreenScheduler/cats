@@ -26,8 +26,8 @@ def record_schedule_check(
     location: str,
     action: str,
     dynamic: bool = False,
-        api: str = "carbonintensity.org.uk",
-        max_window_minutes: int = 2820,
+    api: str = "carbonintensity.org.uk",
+    max_window_minutes: int = 2820,
     current_ci_g_per_kwh: float | None = None,
     optimal_start_utc: str | None = None,
     optimal_ci_g_per_kwh: float | None = None,
@@ -78,7 +78,8 @@ def record_schedule_check(
                 ON schedule_checks (workload_key, checked_at_utc)
             """)
 
-            cursor = connection.execute("""
+            cursor = connection.execute(
+                """
                 INSERT INTO schedule_checks (
                     workload_key,
                     checked_at_utc,
@@ -97,6 +98,7 @@ def record_schedule_check(
                     active_job_id,
                     slurm_state,
                     error
+<<<<<<< HEAD
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 workload_key,
@@ -117,6 +119,33 @@ def record_schedule_check(
                 slurm_state,
                 error,
             ))
+=======
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+                (
+                    workload_key,
+                    checked_at_utc,
+                    duration_minutes,
+                    location,
+                    current_ci_g_per_kwh,
+                    optimal_start_utc,
+                    optimal_ci_g_per_kwh,
+                    estimated_emissions_now_g,
+                    estimated_emissions_optimal_g,
+                    action,
+                    int(dynamic),
+                    api,
+                    max_window_minutes,
+                    previous_job_id,
+                    active_job_id,
+                    slurm_state,
+                    scheduler,
+                    command,
+                    working_directory,
+                    error,
+                ),
+            )
+>>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
 
             return cursor.lastrowid
 
@@ -166,9 +195,7 @@ def summarize_schedule_checks(
                 "duration_minutes": record.get("duration_minutes"),
                 "location": record.get("location") or "unknown",
                 "workload_key": record.get("workload_key") or "unknown",
-                "estimated_emissions_now_g": record.get(
-                    "estimated_emissions_now_g"
-                ),
+                "estimated_emissions_now_g": record.get("estimated_emissions_now_g"),
                 "estimated_emissions_optimal_g": record.get(
                     "estimated_emissions_optimal_g"
                 ),
@@ -209,9 +236,7 @@ def summarize_schedule_checks(
         return float(now) - float(optimal)
 
     estimated_jobs = [job for job in jobs.values() if savings(job) is not None]
-    completed_estimated_jobs = [
-        job for job in completed if savings(job) is not None
-    ]
+    completed_estimated_jobs = [job for job in completed if savings(job) is not None]
 
     def total_savings(items: list[dict[str, object]]) -> float:
         return sum(savings(job) or 0.0 for job in items)
@@ -246,9 +271,7 @@ def summarize_schedule_checks(
         "jobs_with_emissions_estimate": len(estimated_jobs),
         "completed_jobs_with_emissions_estimate": len(completed_estimated_jobs),
         "estimated_co2_saved_g_all_tracked_jobs": total_savings(estimated_jobs),
-        "estimated_co2_saved_g_completed_jobs": total_savings(
-            completed_estimated_jobs
-        ),
+        "estimated_co2_saved_g_completed_jobs": total_savings(completed_estimated_jobs),
         "completed_jobs_by_location": by_location,
         "completed_jobs_by_workload": by_workload,
     }
@@ -286,8 +309,14 @@ def get_dynamic_schedule_checks(db_path: str | Path) -> list[dict[str, object]]:
                 WHERE checks.slurm_state IS NULL
                    OR UPPER(checks.slurm_state) NOT IN (%s)
                 ORDER BY checks.id
+<<<<<<< HEAD
                 """ % placeholders,
                 _TERMINAL_SLURM_STATES,
+=======
+                """
+                % placeholders,
+                _TERMINAL_JOB_STATES,
+>>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
             )
             records = []
             for row in rows:
@@ -353,4 +382,23 @@ def _ensure_history_columns(connection: sqlite3.Connection) -> None:
             ALTER TABLE schedule_checks
             ADD COLUMN max_window_minutes INTEGER NOT NULL DEFAULT 2820
                 CHECK (max_window_minutes > 0)
+<<<<<<< HEAD
         """)
+=======
+        """)
+    if "scheduler" not in columns:
+        connection.execute("""
+            ALTER TABLE schedule_checks
+            ADD COLUMN scheduler TEXT NOT NULL DEFAULT 'sbatch'
+        """)
+    if "command" not in columns:
+        connection.execute("""
+            ALTER TABLE schedule_checks
+            ADD COLUMN command TEXT
+        """)
+    if "working_directory" not in columns:
+        connection.execute("""
+            ALTER TABLE schedule_checks
+            ADD COLUMN working_directory TEXT
+        """)
+>>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5

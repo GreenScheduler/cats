@@ -27,7 +27,9 @@ def process_dynamic_jobs_once(
     db_path: str,
     cats_executable: str | None = None,
 ) -> None:
-    cats_executable = cats_executable or os.environ.get("CATS_EXECUTABLE") or shutil.which("cats")
+    cats_executable = (
+        cats_executable or os.environ.get("CATS_EXECUTABLE") or shutil.which("cats")
+    )
     if not cats_executable:
         raise RuntimeError("Could not find the CATS executable for daemon forecasts")
 
@@ -35,7 +37,13 @@ def process_dynamic_jobs_once(
         job_id = str(job["active_job_id"])
         state = get_sbatch_job_state(job_id)
         if state is None:
+<<<<<<< HEAD
             logging.warning("Could not read state for dynamic Slurm job %s", job_id)
+=======
+            logging.warning(
+                "Could not read state for dynamic %s job %s", scheduler, job_id
+            )
+>>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
             continue
 
         update_schedule_job_state(db_path, job_id, state)
@@ -71,7 +79,28 @@ def process_dynamic_jobs_once(
             error_message = None
             if should_update:
                 try:
+<<<<<<< HEAD
                     update_sbatch_job_start_time(job_id, optimal_start)
+=======
+                    if scheduler == "at":
+                        active_job_id, error_message = reschedule_at_job(
+                            job_id,
+                            optimal_start,
+                            shlex.split(str(job["command"])),
+                            str(job["working_directory"])
+                            if job.get("working_directory")
+                            else None,
+                        )
+                        if error_message or active_job_id is None:
+                            raise RuntimeError(
+                                error_message or "at rescheduling failed"
+                            )
+                        update_schedule_job_state(
+                            db_path, job_id, "RESCHEDULED", scheduler="at"
+                        )
+                    else:
+                        update_sbatch_job_start_time(job_id, optimal_start)
+>>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
                     action = "rescheduled"
                 except (OSError, subprocess.CalledProcessError) as error:
                     action = "update_failed"
@@ -97,8 +126,16 @@ def process_dynamic_jobs_once(
                 slurm_state="PENDING",
                 error=error_message,
             )
-        except (OSError, subprocess.CalledProcessError, KeyError, TypeError, ValueError) as error:
-            logging.warning("Dynamic scheduling check failed for job %s: %s", job_id, error)
+        except (
+            OSError,
+            subprocess.CalledProcessError,
+            KeyError,
+            TypeError,
+            ValueError,
+        ) as error:
+            logging.warning(
+                "Dynamic scheduling check failed for job %s: %s", job_id, error
+            )
 
 
 def main() -> None:
