@@ -3,7 +3,7 @@
 # pyright: reportUnknownMemberType=none, reportAny=none, reportUnusedCallResult=none
 
 from datetime import datetime
-from typing import Any
+from collections.abc import Sequence
 
 from .forecast import Timeseries
 from .output import CATSOutput
@@ -20,9 +20,11 @@ except ImportError:
     have_matplotlib = False
 
 
-def _date2num(dts: list[datetime]) -> Any:
-    return date2num(dts)  # type: ignore[no-untyped-call]
-
+def _date2num(dts: list[datetime]) -> Sequence[float]:
+    # Workaround for missing type hints in matplotlib's date functions.
+    # See matplotlib bug #26942. This manual type override and ignore 
+    # comments can be removed once the issue is fixed upstream.
+    return date2num(dts)  # type: ignore[no-untyped-call, no-any-return]
 
 # PRETTY_UNITS: Latex version of plain text units
 # To avoid having to check if a user has (La)TeX available, to format the
