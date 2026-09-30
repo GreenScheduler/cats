@@ -323,7 +323,7 @@ def parse_arguments():
         "--max-price",
         type=float,
         help="Restrict the job start time search to windows whose average day-ahead "
-        "price does not exceed this absolute cap (GBP/MWh for a UK postcode, "
+        "price does not exceed this absolute cap (GBP/MWh for a GB postcode, "
         "EUR/MWh for a wattnet.eu zone). Works with any --api/--metric, not just "
         "'composite': price is fetched separately for the location regardless of "
         "which metric is being optimised. The search is also implicitly capped to "
@@ -370,7 +370,7 @@ def parse_arguments():
         "excluding Great Britain: day-ahead price or non-renewable share, see "
         "--metric), `octopus.energy` (Great Britain: Agile tariff price in GBP/MWh) "
         "or `composite` (configurable combination of signals from all the above, "
-        "accepting either a UK postcode or a wattnet.eu zone code and "
+        "accepting either a GB postcode or a wattnet.eu zone code and "
         "automatically picking the right native data source for each requested "
         "metric and location, see --signal). See --metric and --signal for the "
         "multi-metric and composite providers. Run --list-providers for details. "
@@ -564,7 +564,7 @@ def run_cats(arguments: list[str] | None = None):
     # Reused for both the constrained search below and the always-on price
     # report: price is fetched for the location independently of whichever
     # metric/provider is actually being optimised (see cats/pricing.py). A
-    # location composite doesn't recognise (neither a UK postcode nor a
+    # location composite doesn't recognise (neither a GB postcode nor a
     # wattnet.eu zone code, e.g. energy-charts.info's own native zone codes
     # used directly rather than through composite) is treated the same as
     # "no price signal available" for the best-effort report, but as a hard

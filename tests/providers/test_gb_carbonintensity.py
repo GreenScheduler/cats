@@ -5,7 +5,7 @@ import pytest
 
 from cats.exceptions import InvalidLocationError, InvalidMetricError
 from cats.forecast import PointEstimate
-from cats.providers import UKCarbonIntensityProvider
+from cats.providers import GBCarbonIntensityProvider
 
 # A real carbonintensity.org.uk regional response, captured live on
 # 2026-09-29, used to test parsing offline/deterministically without
@@ -47,9 +47,9 @@ def test_get_data():
     """
 
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
     response = provider.get_data(timestamp, "OX1")
-    response_full_postcode = UKCarbonIntensityProvider().get_data(timestamp, "OX1 3QD")
+    response_full_postcode = GBCarbonIntensityProvider().get_data(timestamp, "OX1 3QD")
 
     assert response == response_full_postcode
     assert isinstance(response.values, list)
@@ -63,7 +63,7 @@ def test_get_data():
 def test_get_data_renewables_metric():
     "carbon (default) and renewables come from the same underlying request"
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
     carbon = provider.get_data(timestamp, "OX1", metric="carbon")
     renewables = provider.get_data(timestamp, "OX1", metric="renewables")
 
@@ -76,11 +76,11 @@ def test_get_data_renewables_metric():
         assert -10.0 < item.value < 100.0
 
 
-@patch("cats.providers.uk_carbonintensity.fetch_url")
+@patch("cats.providers.gb_carbonintensity.fetch_url")
 def test_get_data_recorded_response(mock_fetch_url):
     "Parses a recorded response without hitting the network"
     mock_fetch_url.return_value = RECORDED_RESPONSE
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
 
     carbon = provider.get_data(datetime.now(), "OX1", metric="carbon")
     assert len(carbon.values) == 1
@@ -95,14 +95,14 @@ def test_get_data_recorded_response(mock_fetch_url):
 
 def test_bad_metric():
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
     with pytest.raises(InvalidMetricError):
         _ = provider.get_data(timestamp, "OX1", metric="not_a_metric")
 
 
 def test_bad_postcode():
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
 
     with pytest.raises(InvalidLocationError):
         _ = provider.get_data(timestamp, "OX40")
@@ -111,8 +111,15 @@ def test_bad_postcode():
         _ = provider.get_data(timestamp, "A")
 
 
+@pytest.mark.parametrize("outcode", ["BT1", "BT9 5AB", "GY1", "JE2"])
+def test_postcodes_outside_gb_rejected(outcode):
+    "Northern Ireland and the Channel Islands are not covered by the API"
+    with pytest.raises(InvalidLocationError):
+        _ = GBCarbonIntensityProvider().validate_location(outcode)
+
+
 def test_missing_location_raises_error():
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
     with pytest.raises(InvalidLocationError):
         _ = provider.get_data(timestamp)

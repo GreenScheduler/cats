@@ -192,12 +192,12 @@ Trading off multiple signals with the composite provider
 
 Rather than optimising for a single signal, CATS can optimise a weighted
 trade-off between any combination of them, via the ``composite`` provider.
-Its location can be either a UK postcode outward code (e.g. ``OX1``) or a
+Its location can be either a GB postcode outward code (e.g. ``OX1``) or a
 wattnet.eu zone code (e.g. ``DE``, ``IT_NORTH``); which kind is detected
 automatically. For each requested signal, ``composite`` then picks whichever
 portal natively serves it for that kind of location:
 
-- for a UK postcode: ``carbon`` and ``renewables`` from
+- for a GB postcode: ``carbon`` and ``renewables`` from
   ``carbonintensity.org.uk``, ``price`` from ``octopus.energy`` (region
   letter derived from the postcode automatically);
 - for a wattnet.eu zone: ``carbon`` from ``wattnet.eu``, ``price`` and
@@ -206,11 +206,11 @@ portal natively serves it for that kind of location:
 
 ``water``, ``water_stress`` and ``environmental_score`` only ever
 come from ``wattnet.eu``. For a wattnet.eu zone location they use that zone
-directly; for a UK postcode they fall back to wattnet.eu's single ``GB``
+directly; for a GB postcode they fall back to wattnet.eu's single ``GB``
 zone instead (wattnet's GB coverage is not postcode-granular), and CATS
 prints a warning noting the substitution. This fallback needs the same
 ``CATS_WATTNET_EMAIL``/``CATS_WATTNET_PASSWORD`` environment variables as
-``wattnet.eu`` itself, even when the rest of a UK postcode request (carbon,
+``wattnet.eu`` itself, even when the rest of a GB postcode request (carbon,
 price, renewables) does not.
 
 Each selected signal's series is independently min-max normalised to a 0-1
@@ -247,11 +247,11 @@ normalised automatically):
    Composite score (environmental_score=0.50, price=0.50) at optimal time          = 0.38 0-1, lower=better
 
 With no ``--signal`` given at all, every signal available for that location
-that needs no *extra* authentication is combined with equal weight. For a UK
+that needs no *extra* authentication is combined with equal weight. For a GB
 postcode that is always ``carbon``, ``price`` and ``renewables`` (the three
 ``water``/``water_stress``/``environmental_score`` signals need
 explicit ``--signal``, since they need wattnet.eu credentials the rest of a
-UK postcode request does not). For a wattnet.eu zone it is every signal that
+GB postcode request does not). For a wattnet.eu zone it is every signal that
 has a source at all for that zone (wattnet.eu credentials are already
 required there, for ``carbon``); not every wattnet.eu zone has an
 ``energy-charts.info`` price or renewables equivalent (see
@@ -263,9 +263,9 @@ with ``--signal``, on the other hand, raises a clear error rather than
 silently dropping it. As with the plain price and renewables providers,
 ``--footprint`` has no effect with the composite provider.
 
-A handful of codes are valid both as a UK postcode outward code and as a
+A handful of codes are valid both as a GB postcode outward code and as a
 wattnet.eu zone code (``SE1``-``SE4``: South East London postcodes and
-Swedish wattnet.eu price zones); the UK postcode interpretation always wins
+Swedish wattnet.eu price zones); the GB postcode interpretation always wins
 in that case.
 
 Constraining, rather than optimising for, price
@@ -280,7 +280,7 @@ non-price composite blend, ...): keep optimising for that metric, but only
 consider job start times whose price does not exceed a cap.
 
 ``--max-price-increase-pct N`` caps price at N% above running the job right
-now; ``--max-price N`` caps it at an absolute value (GBP/MWh for a UK
+now; ``--max-price N`` caps it at an absolute value (GBP/MWh for a GB
 postcode, EUR/MWh for a wattnet.eu zone). They are mutually exclusive, and
 work with *any* provider or metric, not just ``composite`` - price is
 fetched for the location independently of what is actually being optimised:
@@ -357,7 +357,7 @@ to also supply ``--duration``:
 Listing valid locations
 -----------------------
 
-Each provider uses its own location codes (UK postcode outward codes, GB region
+Each provider uses its own location codes (GB postcode outward codes, GB region
 letters, bidding zones, country codes or wattnet.eu zones), so ``--location``
 values are not interchangeable between providers. To see the valid codes,
 without needing ``--duration``:

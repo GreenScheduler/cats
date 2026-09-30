@@ -70,7 +70,7 @@ over the duration of the computation.
    Carbon intensity at optimal time          = 1.66 gCO2eq/kWh
 
 
-At the moment, CATS is available for the UK through the National Grid's API which provides
+At the moment, CATS is available for Great Britain through the National Grid's API which provides
 postcode-specific 48 hour forecasts broken down into 30 minute periods. This granular data contains
 regional distribution networks making use of a parameterised model of the power distribution system
 in Great Britain, weather forecasts and historical generation data. A brief overview of the forecast
@@ -117,13 +117,13 @@ the renewable percentage), so the same minimisation logic applies unmodified her
 
 CATS also has a single ``composite`` provider that trades off any combination of the signals above
 rather than optimising for a single one, across both Great Britain and continental Europe. It
-auto-detects whether the location it is given is a UK postcode outward code or a wattnet.eu zone
+auto-detects whether the location it is given is a GB postcode outward code or a wattnet.eu zone
 code, and for each requested signal picks whichever portal natively serves it for that kind of
-location (e.g. for a UK postcode, ``carbon`` and ``renewables`` come from ``carbonintensity.org.uk``
+location (e.g. for a GB postcode, ``carbon`` and ``renewables`` come from ``carbonintensity.org.uk``
 and ``price`` from ``octopus.energy``; for a wattnet.eu zone, ``carbon`` comes from ``wattnet.eu``
 and ``price``/``renewables`` from ``energy-charts.info``), falling back to wattnet.eu's ``GB`` zone,
 with a logged warning, only for the three wattnet-only signals (``water``,
-``water_stress``, ``environmental_score``) when given a UK postcode. It independently min-max
+``water_stress``, ``environmental_score``) when given a GB postcode. It independently min-max
 normalises each selected series over the fetched forecast window, and combines them into a single
 score with configurable weights, set via the repeatable ``--signal NAME=WEIGHT`` option (e.g.
 ``--signal carbon=0.4 --signal price=0.3 --signal renewables=0.3``; weights are normalised

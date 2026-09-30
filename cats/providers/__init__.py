@@ -5,7 +5,7 @@ from .composite import CompositeProvider
 from .eu_energycharts import EnergyChartsProvider
 from .eu_wattnet import WattnetEuProvider
 from .gb_octopus import OctopusAgilePriceProvider
-from .uk_carbonintensity import UKCarbonIntensityProvider
+from .gb_carbonintensity import GBCarbonIntensityProvider
 
 __all__ = [
     "get_provider",
@@ -14,6 +14,6 @@ __all__ = [
     "CompositeProvider",
     "EnergyChartsProvider",
     "OctopusAgilePriceProvider",
-    "UKCarbonIntensityProvider",
+    "GBCarbonIntensityProvider",
     "WattnetEuProvider",
 ]

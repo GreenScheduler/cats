@@ -17,7 +17,7 @@ from .forecast import AverageEstimate, PointEstimate, Timeseries, WindowedForeca
 from .providers.base import BaseProvider
 from .providers.composite import CompositeProvider
 from .providers.eu_wattnet import WattnetEuProvider
-from .providers.uk_carbonintensity import UKCarbonIntensityProvider
+from .providers.gb_carbonintensity import GBCarbonIntensityProvider
 
 # Providers whose location argument unambiguously means one specific kind of
 # composite location scheme. Used so that e.g. `--api wattnet.eu --location
@@ -29,7 +29,7 @@ from .providers.uk_carbonintensity import UKCarbonIntensityProvider
 # own equivalent auto-detection on the same location string) fall back to
 # plain auto-detection.
 PROVIDER_LOCATION_KIND: dict[type[BaseProvider], str] = {
-    UKCarbonIntensityProvider: "uk_postcode",
+    GBCarbonIntensityProvider: "gb_postcode",
     WattnetEuProvider: "wattnet_zone",
 }
 
@@ -42,7 +42,7 @@ def resolve_price_series(
     """
     Get a day-ahead price series for any location composite understands
 
-    :param location: A UK postcode outward code or a wattnet.eu zone code
+    :param location: A GB postcode outward code or a wattnet.eu zone code
     :param timestamp: Timestamp from which to start forecast data retrieval
     :param provider_cls: The provider actually selected for the main
         forecast (via --api), if any. When it unambiguously implies one

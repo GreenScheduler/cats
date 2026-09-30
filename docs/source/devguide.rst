@@ -157,7 +157,7 @@ are cached and have the CATS HTTP header included. In order to optimize this cac
 align the time of requests for forecast data such that repeated requests in a short time period are served from
 the local cache rather than as a series of slightly different hits on the remote server.
 
-The best way to add a new provider is to use ``cats/providers/uk_carbonintensity.py`` (which does not
+The best way to add a new provider is to use ``cats/providers/gb_carbonintensity.py`` (which does not
 involve authentication) or ``cats/providers/eu_wattnet.py`` (which does) as a starting point and modify
 for your needs. Important things to consider are the structure of any returned JSON objects, the duration
 of the forecast and the frequency of data points, issues around authentication and data validation, and the
@@ -197,7 +197,7 @@ for an unknown one) and falls back to the default when the caller passes ``None`
 ever serves one implicit metric can leave ``SUPPORTED_METRICS`` at its empty default and ignore the
 ``metric`` parameter entirely.
 
-``cats/providers/uk_carbonintensity.py`` (``carbon``, ``renewables``) and ``cats/providers/eu_wattnet.py``
+``cats/providers/gb_carbonintensity.py`` (``carbon``, ``renewables``) and ``cats/providers/eu_wattnet.py``
 (``carbon``, ``water``, ``water_stress``, ``environmental_score``) are worked examples. The
 carbonintensity.org.uk case is the simplest: both metrics come from a single API call (the response
 already includes both "intensity" and "generationmix" for every period), so ``get_data()`` makes the same
@@ -227,19 +227,19 @@ A provider does not have to call an external API directly at all. ``cats/provide
 wraps a *registry* of named signals (``carbon``, ``price``, ``renewables``, ``water``,
 ``water_stress``, ``environmental_score``), built per request from a ``(provider instance, metric,
 location, optional note)`` tuple per signal - the same provider instance can back two different signals on
-two different metrics, as ``carbon`` and ``renewables`` both do on ``UKCarbonIntensityProvider`` for a UK
+two different metrics, as ``carbon`` and ``renewables`` both do on ``GBCarbonIntensityProvider`` for a GB
 postcode. Unlike a single-portal multi-metric provider, ``composite``'s location can be either of two
-different kinds (a UK postcode outward code or a wattnet.eu zone code); ``_detect_location()`` tries the UK
+different kinds (a GB postcode outward code or a wattnet.eu zone code); ``_detect_location()`` tries the GB
 postcode scheme first, falling back to the wattnet.eu zone scheme, so a code valid under both (``SE1``-
 ``SE4``, which collide between South East London postcodes and Swedish wattnet.eu price zones) is always
-interpreted as the UK postcode. ``_signal_specs()`` then builds the registry appropriate to that location
-kind: for a UK postcode, the three wattnet-only signals fall back to wattnet.eu's fixed ``GB`` zone (with a
+interpreted as the GB postcode. ``_signal_specs()`` then builds the registry appropriate to that location
+kind: for a GB postcode, the three wattnet-only signals fall back to wattnet.eu's fixed ``GB`` zone (with a
 note logged via ``logging.warning()`` at the point they're used, since this substitutes a country-wide
 value for what looks like a postcode-specific request); for a wattnet.eu zone, ``price`` and ``renewables``
 are only included when a static lookup table (for price) or a derivation rule with explicit exceptions
 (for renewables) actually has an ``energy-charts.info`` equivalent for that zone, since the two portals'
 zone/country naming schemes differ and neither response exposes the other's encoding directly. Prefer
-deriving a location translation live where possible (as the UK postcode's Octopus region letter is,
+deriving a location translation live where possible (as the GB postcode's Octopus region letter is,
 from a field already present in carbonintensity.org.uk's own API response), and fall back to an explicit,
 documented table or rule (including *why* any zones are left unmapped) rather than guessing.
 

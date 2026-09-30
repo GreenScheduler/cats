@@ -17,15 +17,15 @@ def has_auth_env_setup():
     return (email != "") and (password != "")
 
 
-# --- UK postcode kind: carbon/price/renewables come from carbonintensity.org.uk
+# --- GB postcode kind: carbon/price/renewables come from carbonintensity.org.uk
 # and octopus.energy, neither needing authentication, so these hit the real
 # APIs directly (matching the existing no-mock style of
-# tests/providers/test_uk_carbonintensity.py and tests/providers/test_gb_octopus.py).
+# tests/providers/test_gb_carbonintensity.py and tests/providers/test_gb_octopus.py).
 
 
 def test_get_data_default_uses_all_three_no_auth_signals():
     """
-    With no --signal given, a UK postcode combines carbon, price and
+    With no --signal given, a GB postcode combines carbon, price and
     renewables with equal weight, and never needs wattnet.eu credentials.
     """
     timestamp = datetime.now()
@@ -47,7 +47,7 @@ def test_get_data_default_uses_all_three_no_auth_signals():
 
 def test_get_data_default_excludes_wattnet_signals(monkeypatch):
     """
-    The default (no --signal) combination for a UK postcode must never
+    The default (no --signal) combination for a GB postcode must never
     require wattnet.eu credentials, even in an environment where they
     happen to be set.
     """
@@ -66,10 +66,10 @@ def test_get_data_default_excludes_wattnet_signals(monkeypatch):
     not has_auth_env_setup(),
     reason="No wattnet.eu authentication token found in environment",
 )
-def test_wattnet_signal_for_uk_postcode_falls_back_to_gb_zone_with_notice(caplog):
+def test_wattnet_signal_for_gb_postcode_falls_back_to_gb_zone_with_notice(caplog):
     """
     water, water_stress and environmental_score have no
-    postcode-granular source, so for a UK postcode they fall back to
+    postcode-granular source, so for a GB postcode they fall back to
     wattnet.eu's fixed 'GB' zone, only when explicitly requested, with a
     logged notice about the substitution.
     """
@@ -136,7 +136,7 @@ def test_unknown_signal_raises_error():
 
 
 def test_bad_postcode():
-    "OX40 is neither a valid UK postcode outcode nor a wattnet.eu zone code"
+    "OX40 is neither a valid GB postcode outcode nor a wattnet.eu zone code"
     timestamp = datetime.now()
     provider = CompositeProvider()
 
@@ -151,13 +151,13 @@ def test_missing_location_raises_error():
         _ = provider.get_data(timestamp)
 
 
-def test_ambiguous_code_prefers_uk_postcode():
+def test_ambiguous_code_prefers_gb_postcode():
     """
-    'SE1'-'SE4' are both South East London UK postcodes and Swedish
-    wattnet.eu price zones; the UK postcode interpretation always wins.
+    'SE1'-'SE4' are both South East London GB postcodes and Swedish
+    wattnet.eu price zones; the GB postcode interpretation always wins.
     """
     kind, canonical_location = CompositeProvider._detect_location("SE1")
-    assert kind == "uk_postcode"
+    assert kind == "gb_postcode"
     assert canonical_location == "SE1"
 
 
@@ -309,7 +309,7 @@ def test_wattnet_zone_with_partial_signal_support_falls_back_by_default(
 @patch("cats.providers.composite.WattnetEuProvider.get_data")
 def test_gb_zone_code_defaults_to_wattnet_only_signals(mock_wattnet_get_data):
     """
-    'GB' has no ambiguity with a UK postcode (it's not a valid outward code),
+    'GB' has no ambiguity with a GB postcode (it's not a valid outward code),
     so it is unambiguously the wattnet.eu 'GB' zone here, and behaves like
     any other zone with no energy-charts.info price/renewables equivalent.
     """

@@ -2,7 +2,7 @@
 Unified composite provider
 
 Combines signals from carbonintensity.org.uk, octopus.energy, wattnet.eu and
-energy-charts.info, auto-detecting whether the given location is a UK
+energy-charts.info, auto-detecting whether the given location is a GB
 postcode or a wattnet.eu zone code and routing each requested metric to
 whichever portal natively serves it for that kind of location, falling back
 to wattnet.eu (with a logged note) for metrics no other portal has.
@@ -22,7 +22,7 @@ from .base import BaseProvider, LocationGroup, align_to_resolution, fetch_url, p
 from .eu_energycharts import EU_RENEWABLES_COUNTRIES, EnergyChartsProvider
 from .eu_wattnet import WattnetEuProvider
 from .gb_octopus import OctopusAgilePriceProvider
-from .uk_carbonintensity import UKCarbonIntensityProvider
+from .gb_carbonintensity import GBCarbonIntensityProvider
 
 
 def normalise(values: list[float]) -> list[float]:
@@ -108,10 +108,10 @@ ALL_SIGNAL_NAMES: frozenset[str] = frozenset(
     }
 )
 # Signals excluded from the default (no --signal given) combination when the
-# location is a UK postcode: unlike carbon/price/renewables (which come from
+# location is a GB postcode: unlike carbon/price/renewables (which come from
 # carbonintensity.org.uk/octopus.energy, no authentication needed), these
 # three only exist via wattnet.eu and need CATS_WATTNET_EMAIL/
-# CATS_WATTNET_PASSWORD - a plain `--api composite` with a UK postcode and no
+# CATS_WATTNET_PASSWORD - a plain `--api composite` with a GB postcode and no
 # --signal must keep working without wattnet credentials. When the location
 # is a wattnet.eu zone instead, wattnet credentials are already required for
 # `carbon`, so there is no such default-eligibility restriction there.
@@ -239,12 +239,12 @@ class CompositeProvider(BaseProvider):
 
     This can be used by passing the --api='composite' command line argument.
     Unlike the single-portal providers, the location it is given can be
-    *either* a UK postcode outward code (e.g. 'OX1') *or* a wattnet.eu zone
+    *either* a GB postcode outward code (e.g. 'OX1') *or* a wattnet.eu zone
     code (e.g. 'DE', 'IT_NORTH'); which kind is auto-detected by trying to
     validate it against carbonintensity.org.uk's postcode list first, falling
     back to wattnet.eu's zone list. A handful of codes are valid in both
     schemes (e.g. 'SE1'-'SE4' are both South East London postcodes and
-    Swedish wattnet.eu price zones); the UK postcode interpretation always
+    Swedish wattnet.eu price zones); the GB postcode interpretation always
     wins in that case. If you specifically want the wattnet.eu zone in such a
     clash, there is currently no way to force that interpretation.
 
@@ -253,26 +253,26 @@ class CompositeProvider(BaseProvider):
     a logged warning noting the substitution) only when no other portal
     serves that metric at all:
 
-    - carbon: carbonintensity.org.uk for a UK postcode (metric=carbon,
+    - carbon: carbonintensity.org.uk for a GB postcode (metric=carbon,
       postcode-granular, no authentication), wattnet.eu for a wattnet.eu
       zone (metric=carbon, needs CATS_WATTNET_EMAIL/CATS_WATTNET_PASSWORD).
-    - price: octopus.energy for a UK postcode (region letter derived from
+    - price: octopus.energy for a GB postcode (region letter derived from
       the postcode automatically), energy-charts.info for a wattnet.eu zone
       (bidding zone looked up from the wattnet.eu zone, see
       WATTNET_TO_ENERGYCHARTS_ZONE) - not every wattnet.eu zone has an
       energy-charts.info price equivalent.
-    - renewables: carbonintensity.org.uk for a UK postcode (metric=
+    - renewables: carbonintensity.org.uk for a GB postcode (metric=
       renewables, same API call as carbon), energy-charts.info for a
       wattnet.eu zone (country code derived from the wattnet.eu zone, see
       _wattnet_zone_to_renewables_country) - not every wattnet.eu zone has
       an energy-charts.info renewables equivalent.
     - water, water_stress, environmental_score: only wattnet.eu ever serves
       these. For a wattnet.eu zone location, that zone is used
-      directly. For a UK postcode, wattnet.eu's single 'GB' zone is used
+      directly. For a GB postcode, wattnet.eu's single 'GB' zone is used
       instead (wattnet's GB coverage is not postcode-granular) and a
       logged warning notes the substitution; this needs wattnet.eu
       credentials even when the rest of the request (carbon/price/
-      renewables from a UK postcode) would not.
+      renewables from a GB postcode) would not.
 
     Which signals to combine, and their relative weight, is controlled with
     the repeatable --signal NAME=WEIGHT CLI flag, e.g.:
@@ -285,9 +285,9 @@ class CompositeProvider(BaseProvider):
     (e.g. 'price' for a wattnet.eu zone with no energy-charts.info mapping)
     raises a clear error. With no --signal given at all, every *available,
     no-extra-authentication* signal for that location is combined with equal
-    weight: for a UK postcode that means carbon, price and renewables only
+    weight: for a GB postcode that means carbon, price and renewables only
     (water/water_stress/environmental_score need explicit --signal, since
-    they need wattnet.eu credentials the rest of a UK postcode request does
+    they need wattnet.eu credentials the rest of a GB postcode request does
     not); for a wattnet.eu zone it means every signal
     that has a source at all for that zone (wattnet.eu credentials are
     already required there for carbon).
@@ -312,18 +312,18 @@ class CompositeProvider(BaseProvider):
     @staticmethod
     def _detect_location(location: str | None) -> tuple[str, str]:
         """
-        Work out whether `location` is a UK postcode or a wattnet.eu zone
+        Work out whether `location` is a GB postcode or a wattnet.eu zone
 
-        :return: (kind, canonical_location) where kind is "uk_postcode" or "wattnet_zone"
+        :return: (kind, canonical_location) where kind is "gb_postcode" or "wattnet_zone"
         :raises InvalidLocationError: if it matches neither scheme
         """
         if location is None:
             raise InvalidLocationError(
-                "Must provide location (a UK postcode or a wattnet.eu zone code) "
+                "Must provide location (a GB postcode or a wattnet.eu zone code) "
                 "for the composite provider"
             )
         try:
-            return "uk_postcode", UKCarbonIntensityProvider().validate_location(
+            return "gb_postcode", GBCarbonIntensityProvider().validate_location(
                 location
             )
         except InvalidLocationError:
@@ -333,7 +333,7 @@ class CompositeProvider(BaseProvider):
         except InvalidLocationError:
             pass
         raise InvalidLocationError(
-            f"{location}. Not a recognised UK postcode (for carbonintensity.org.uk/"
+            f"{location}. Not a recognised GB postcode (for carbonintensity.org.uk/"
             "octopus.energy) or wattnet.eu zone code."
         )
 
@@ -348,12 +348,12 @@ class CompositeProvider(BaseProvider):
         provider already fetched for this call (served from cache, so this
         costs no extra real HTTP request whenever carbon or renewables is
         also being requested) purely to read its "regionid" field, which is
-        not otherwise exposed by UKCarbonIntensityProvider.get_data().
+        not otherwise exposed by GBCarbonIntensityProvider.get_data().
         """
-        # Must align identically to UKCarbonIntensityProvider.get_data() for
+        # Must align identically to GBCarbonIntensityProvider.get_data() for
         # the cache-sharing described above to actually hit.
         dt = align_to_resolution(
-            timestamp, UKCarbonIntensityProvider().get_temporal_resolution_minutes()
+            timestamp, GBCarbonIntensityProvider().get_temporal_resolution_minutes()
         )
         url = (
             "https://api.carbonintensity.org.uk/regional/intensity/"
@@ -375,11 +375,11 @@ class CompositeProvider(BaseProvider):
         "Only entries that actually have a data source for this location/kind are included"
         wattnet = WattnetEuProvider()
 
-        if kind == "uk_postcode":
+        if kind == "gb_postcode":
             specs: dict[str, SignalSpec] = {
-                "carbon": (UKCarbonIntensityProvider(), "carbon", location, None),
+                "carbon": (GBCarbonIntensityProvider(), "carbon", location, None),
                 "renewables": (
-                    UKCarbonIntensityProvider(),
+                    GBCarbonIntensityProvider(),
                     "renewables",
                     location,
                     None,
@@ -436,10 +436,10 @@ class CompositeProvider(BaseProvider):
         one specific signal (e.g. cats/pricing.py wanting just "price"),
         without needing to know about this class' internal signal registry.
 
-        :param assume_kind: "uk_postcode" or "wattnet_zone" to skip
+        :param assume_kind: "gb_postcode" or "wattnet_zone" to skip
             auto-detecting the location kind and use this one directly.
             For a small number of codes valid under both schemes (e.g.
-            'SE1'-'SE4'), auto-detection always prefers the UK postcode
+            'SE1'-'SE4'), auto-detection always prefers the GB postcode
             interpretation - which is wrong when the caller already knows,
             from a specific single-scheme provider having validated this
             same location string, that it is actually the other kind (e.g.
@@ -447,12 +447,12 @@ class CompositeProvider(BaseProvider):
             Swedish wattnet.eu zone, not the South East London postcode).
         :return: the signal's Timeseries, or None if this location has no
             data source for it at all
-        :raises InvalidLocationError: if `location` matches neither the UK
+        :raises InvalidLocationError: if `location` matches neither the GB
             postcode nor the wattnet.eu zone scheme at all
         """
-        if assume_kind == "uk_postcode":
-            kind = "uk_postcode"
-            canonical_location = UKCarbonIntensityProvider().validate_location(location)
+        if assume_kind == "gb_postcode":
+            kind = "gb_postcode"
+            canonical_location = GBCarbonIntensityProvider().validate_location(location)
         elif assume_kind == "wattnet_zone":
             kind = "wattnet_zone"
             canonical_location = WattnetEuProvider().validate_location(location)
@@ -478,11 +478,11 @@ class CompositeProvider(BaseProvider):
             zones[zone] = "+".join(extras)
         return [
             LocationGroup(
-                "UK postcode outward codes (e.g. 'OX1')",
+                "GB postcode outward codes (e.g. 'OX1')",
                 {},
                 "Same codes as carbonintensity.org.uk, see "
                 "--list-locations carbonintensity.org.uk. Codes valid as both a "
-                "postcode and a zone (e.g. 'SE1') are read as UK postcodes.",
+                "postcode and a zone (e.g. 'SE1') are read as GB postcodes.",
             ),
             LocationGroup(
                 "Wattnet zone codes",
@@ -498,7 +498,7 @@ class CompositeProvider(BaseProvider):
         # the minimum across every provider/metric pair this composite could
         # ever use, regardless of which location kind is eventually given.
         return min(
-            UKCarbonIntensityProvider().get_max_duration_minutes("carbon"),
+            GBCarbonIntensityProvider().get_max_duration_minutes("carbon"),
             OctopusAgilePriceProvider().get_max_duration_minutes("price"),
             WattnetEuProvider().get_max_duration_minutes("carbon"),
             EnergyChartsProvider().get_max_duration_minutes("price"),
@@ -506,7 +506,7 @@ class CompositeProvider(BaseProvider):
         )
 
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
-        # Nominal value for the UK postcode default combination (30 minute
+        # Nominal value for the GB postcode default combination (30 minute
         # settlement periods); a wattnet.eu zone location, or an explicit
         # wattnet.eu signal, uses 15 minute data instead. combine_series()
         # intersects by exact timestamp regardless of what this declares.
@@ -520,10 +520,10 @@ class CompositeProvider(BaseProvider):
         headers: dict[str, str] | None = None,
     ) -> Timeseries:
         """
-        Get combined data across the requested signals for a UK postcode or wattnet.eu zone
+        Get combined data across the requested signals for a GB postcode or wattnet.eu zone
 
         :param timestamp: Timestamp from which to start forecast data retrieval
-        :param location: UK postcode outward code or wattnet.eu zone code
+        :param location: GB postcode outward code or wattnet.eu zone code
         :param metric: Optional, not supported by this provider
         :param headers: Optional, not used by this provider
         :return: Timeseries of normalised composite scores as PointEstimates
@@ -550,7 +550,7 @@ class CompositeProvider(BaseProvider):
         else:
             default_eligible = (
                 ALL_SIGNAL_NAMES - WATTNET_ONLY_SIGNALS
-                if kind == "uk_postcode"
+                if kind == "gb_postcode"
                 else set(specs)
             )
             candidate_names = [n for n in specs if n in default_eligible]
@@ -563,7 +563,7 @@ class CompositeProvider(BaseProvider):
                 logging.warning(note)
 
         # Signals can have different native resolutions (carbon/price/
-        # renewables from a UK postcode use 30 minute periods; wattnet.eu
+        # renewables from a GB postcode use 30 minute periods; wattnet.eu
         # signals use 15). combine_series() intersects by exact timestamp,
         # so if each signal were requested starting from *its own*
         # resolution's boundary, the first timestamp they actually share

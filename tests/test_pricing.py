@@ -13,7 +13,7 @@ from cats.pricing import (
 )
 from cats.providers.composite import CompositeProvider
 from cats.providers.eu_wattnet import WattnetEuProvider
-from cats.providers.uk_carbonintensity import UKCarbonIntensityProvider
+from cats.providers.gb_carbonintensity import GBCarbonIntensityProvider
 
 D = datetime(2026, 1, 1, tzinfo=timezone.utc)
 STEP = timedelta(minutes=30)
@@ -179,9 +179,9 @@ def test_resolve_price_series_passes_assume_kind_for_single_scheme_providers(
         "price", "SE1", D, assume_kind="wattnet_zone"
     )
 
-    resolve_price_series("SE1", D, provider_cls=UKCarbonIntensityProvider)
+    resolve_price_series("SE1", D, provider_cls=GBCarbonIntensityProvider)
     mock_composite_cls.return_value.resolve_signal.assert_called_with(
-        "price", "SE1", D, assume_kind="uk_postcode"
+        "price", "SE1", D, assume_kind="gb_postcode"
     )
 
     # A provider without a single unambiguous location scheme (e.g.

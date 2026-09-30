@@ -20,7 +20,7 @@ from .base import (
 
 # The 14 GB electricity distribution regions, identified by letter, as used
 # by both Octopus Energy tariffs and carbonintensity.org.uk (whose provider
-# maps UK postcodes onto the same 14 areas).
+# maps GB postcodes onto the same 14 areas).
 REGION_NAMES: dict[str, str] = {
     "A": "East England",
     "B": "East Midlands",
@@ -108,7 +108,7 @@ class OctopusAgilePriceProvider(BaseProvider):
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         # Nominal "today + tomorrow" day-ahead window, lop off one 30 min
         # settlement period from the end, matching the convention used by
-        # uk_carbonintensity.py. Actual data availability can be less than
+        # gb_carbonintensity.py. Actual data availability can be less than
         # this until tomorrow's Agile rates are published, typically around
         # 16:00 UK time.
         return 2820
@@ -186,7 +186,7 @@ class OctopusAgilePriceProvider(BaseProvider):
 
         # The "Z" at the end of the format string indicates UTC, however,
         # strptime does not know how to parse this, so we need to add tzinfo
-        # data, matching the pattern used by uk_carbonintensity.py.
+        # data, matching the pattern used by gb_carbonintensity.py.
         datefmt = "%Y-%m-%dT%H:%M:%SZ"
         utc = ZoneInfo("UTC")
         values = [

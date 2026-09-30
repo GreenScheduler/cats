@@ -109,7 +109,7 @@ def raiseLocationError(*args, **kwargs):  # pyright: ignore[reportUnusedParamete
     raise InvalidLocationError
 
 
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_main_failures(get_data):
     get_data.return_value = {}
     get_data.side_effect = raiseLocationError
@@ -234,7 +234,7 @@ def test_max_price_mutually_exclusive_with_max_price_increase_pct():
 
 
 @patch("cats.cli.resolve_price_series")
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_unsatisfiable_price_constraint_reports_error(
     mock_carbon_get_data, mock_resolve_price_series, capsys
 ):
@@ -250,7 +250,7 @@ def test_unsatisfiable_price_constraint_reports_error(
 
 
 @patch("cats.cli.resolve_price_series")
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_price_report_appears_when_price_available(
     mock_carbon_get_data, mock_resolve_price_series, capsys
 ):
@@ -268,7 +268,7 @@ def test_price_report_appears_when_price_available(
 
 
 @patch("cats.cli.resolve_price_series")
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_price_report_absent_when_price_data_out_of_range(
     mock_carbon_get_data, mock_resolve_price_series, capsys
 ):
@@ -303,7 +303,7 @@ def raiseJSONError(*args, **kwargs):  # pyright: ignore[reportUnusedParameter, r
     raise requests.exceptions.JSONDecodeError
 
 
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_main_http_ukci_errors(get_data):
     get_data.return_value = {}
     get_data.side_effect = raiseHTTPError

@@ -105,12 +105,12 @@ below for why blending them together double-counts.
 Composite
 ---------
 
-A single provider that detects whether the location is a UK postcode or
+A single provider that detects whether the location is a GB postcode or
 a wattnet.eu zone, and for each requested signal uses the native source
 for that kind of location.
 
 .. code-block:: console
-   :caption: *Default combination for a UK postcode: the three
+   :caption: *Default combination for a GB postcode: the three
               no-authentication signals.*
 
    $ cats --duration 60 --location OX1 --api composite
@@ -142,7 +142,7 @@ cover (``price``, ``renewables``):
 
 .. code-block:: console
    :caption: *Cross-portal fallback, with a warning: environmental_score
-              combined with price for a UK postcode.*
+              combined with price for a GB postcode.*
 
    $ cats --duration 60 --location OX1 --api composite --signal environmental_score=0.5 --signal price=0.5
    WARNING: 'OX1' has no environmental_score data source; using wattnet.eu's 'GB' zone instead (needs wattnet.eu credentials).
