@@ -1,7 +1,7 @@
 import re
+import shlex
 import subprocess
 from datetime import datetime
-from typing import Optional
 
 from .output import CATSOutput
 
@@ -10,26 +10,81 @@ from .output import CATSOutput
 SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M", "sbatch": "%Y-%m-%dT%H:%M"}
 
 
-def schedule_at(output: CATSOutput, args: list[str]) -> Optional[str]:
+def schedule_at(
+    output: CATSOutput, args: list[str]
+) -> tuple[str | None, str | None]:
+    return schedule_at_start(output.valueOptimal.start, args)
+
+
+def schedule_at_start(
+    start_time: datetime, args: list[str], cwd: str | None = None
+) -> tuple[str | None, str | None]:
     """Schedule job with optimal start time using at(1)
 
-    :return: Error as a string, or None if successful
+    :return: An at job ID and an error, if any
     """
-    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     try:
-        subprocess.check_output(
-            (
+        output = subprocess.check_output(
+            [
                 "at",
                 "-t",
-                output.valueOptimal.start.strftime(SCHEDULER_DATE_FORMAT["at"]),
-            ),
-            stdin=proc.stdout,
+                start_time.strftime(SCHEDULER_DATE_FORMAT["at"]),
+            ],
+            input=shlex.join(args) + "\n",
+            text=True,
+            stderr=subprocess.STDOUT,
+            cwd=cwd,
         )
-        return None
+        match = re.search(r"\bjob\s+(\d+)\b", output, re.IGNORECASE)
+        if match is None:
+            return None, "Could not determine at job ID from at output"
+        return match.group(1), None
     except FileNotFoundError:
-        return "No at command found in PATH, please install one"
+        return None, "No at command found in PATH, please install one"
     except subprocess.CalledProcessError as e:
-        return f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}"
+        return None, f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}"
+
+
+def get_at_job_state(job_id: str) -> str | None:
+    """Return PENDING when an at job is still in the queue."""
+    try:
+        queue_output = subprocess.check_output(
+            ["atq"], text=True, stderr=subprocess.DEVNULL
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+    if any(
+        line.split() and line.split()[0] == job_id
+        for line in queue_output.splitlines()
+    ):
+        return "PENDING"
+    return "NOT_PENDING"
+
+
+def remove_at_job(job_id: str) -> None:
+    subprocess.check_output(["atrm", job_id], stderr=subprocess.STDOUT)
+
+
+def reschedule_at_job(
+    job_id: str,
+    start_time: datetime,
+    args: list[str],
+    cwd: str | None = None,
+) -> tuple[str | None, str | None]:
+    new_job_id, error = schedule_at_start(start_time, args, cwd)
+    if error or new_job_id is None:
+        return None, error or "Could not determine replacement at job ID"
+
+    try:
+        remove_at_job(job_id)
+    except (OSError, subprocess.CalledProcessError) as error:
+        try:
+            remove_at_job(new_job_id)
+        except (OSError, subprocess.CalledProcessError):
+            pass
+        return None, f"Could not remove previous at job {job_id}: {error}"
+    return new_job_id, None
 
 
 def schedule_sbatch(

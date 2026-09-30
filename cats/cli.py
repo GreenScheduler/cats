@@ -36,7 +36,6 @@ from .history import (
 )
 from .output import CATSOutput
 from .plotting import plotplan
-<<<<<<< HEAD
 from .pricing import (
     find_best_within_price_constraint,
     price_at_window,
@@ -44,15 +43,13 @@ from .pricing import (
     resolve_price_series,
 )
 from .providers import get_provider, list_providers
-from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
-=======
 from .schedulers import (
     SCHEDULER_DATE_FORMAT,
+    get_at_job_state,
     get_sbatch_job_state,
     schedule_at,
     schedule_sbatch,
 )
->>>>>>> 0484045 (sqlite added to save cats data and used for dynamic scheduling and reporting)
 from .version import version
 
 
@@ -381,7 +378,7 @@ def parse_arguments():
     parser.add_argument(
         "--dynamic",
         action="store_true",
-        help="Re-evaluate a pending sbatch job over time (requires --scheduler sbatch and CATS_HISTORY_DB).",
+        help="Re-evaluate a pending at or sbatch job over time (requires CATS_HISTORY_DB).",
     )
 
     parser.add_argument(
@@ -599,9 +596,9 @@ def run_cats(arguments: list[str] | None = None):
         raise MissingArgumentError(
             "To run a command or sbatch script with -c / --comand, you must specify scheduler with -s / --scheduler"
         )
-    if args.dynamic and (not args.command or args.scheduler != "sbatch"):
+    if args.dynamic and (not args.command or args.scheduler not in ("at", "sbatch")):
         raise MissingArgumentError(
-            "--dynamic requires --scheduler sbatch and a command passed with --command"
+            "--dynamic requires --scheduler at or sbatch and a command passed with --command"
         )
     if args.dynamic and not os.environ.get("CATS_HISTORY_DB"):
         raise MissingArgumentError(
@@ -657,7 +654,7 @@ def run_cats(arguments: list[str] | None = None):
         max_window_minutes=max_window,
         end_constraint=end_constraint,
     )
-    now_avg = wf[0]
+    now_avg, best_avg = wf[0], min(wf)
 
     #####################################################
     ## Price: constraint (if requested) and reporting  ##
@@ -697,6 +694,14 @@ def run_cats(arguments: list[str] | None = None):
         )
     else:
         best_avg = min(wf)
+
+    if len(wf) == 0:
+        raise ValueError(
+            "No valid forecast windows are available for the requested job duration "
+            "and search window. Try increasing --window or checking that the "
+            "forecast covers the job duration."
+        )
+    
 
     output = CATSOutput(
         forecast.metric,
@@ -767,17 +772,21 @@ def run_cats(arguments: list[str] | None = None):
             _refresh_history_job_states(history_db)
 
         if args.scheduler == "at":
-            err = schedule_at(output, args.command.split())
+            job_id, err = schedule_at(output, shlex.split(args.command))
         elif args.scheduler == "sbatch":
-            job_id, err = schedule_sbatch(output, args.command.split())
+            job_id, err = schedule_sbatch(output, shlex.split(args.command))
         else:  # pragma: no cover - we already check for valid scheduler in parse_arguments
             err = f"Scheduler {args.scheduler} not in supported schedulers: {SCHEDULER_DATE_FORMAT.keys()}"
         if err:
             raise SchedulerError(err)
 
-        if args.scheduler == "sbatch" and job_id and history_db:
+        if job_id and history_db and (args.scheduler == "sbatch" or args.dynamic):
             estimate = output.emmissionEstimate
-            slurm_state = get_sbatch_job_state(job_id) or "PENDING"
+            job_state = (
+                get_at_job_state(job_id)
+                if args.scheduler == "at"
+                else get_sbatch_job_state(job_id)
+            ) or "PENDING"
             try:
                 record_schedule_check(
                     history_db,
@@ -796,11 +805,15 @@ def run_cats(arguments: list[str] | None = None):
                     estimated_emissions_now_g=(estimate.now if estimate else None),
                     estimated_emissions_optimal_g=(estimate.best if estimate else None),
                     active_job_id=job_id,
-                    slurm_state=slurm_state,
+                    slurm_state=job_state,
+                    scheduler=args.scheduler,
+                    command=args.command if args.dynamic else None,
+                    working_directory=os.getcwd() if args.dynamic else None,
                 )
             except (OSError, sqlite3.Error) as error:
                 logging.warning(
-                    "Slurm job %s was submitted, but its CATS history could not be saved: %s",
+                    "%s job %s was submitted, but its CATS history could not be saved: %s",
+                    args.scheduler,
                     job_id,
                     error,
                 )

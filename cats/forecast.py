@@ -116,6 +116,7 @@ class WindowedForecast:
             if d.datetime <= max_data_time:
                 filtered_data.append(d)
             else:
+                filtered_data.append(d)
                 break
 
         if len(filtered_data) < 2:

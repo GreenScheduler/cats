@@ -45,3 +45,22 @@ if ! echo "$job_output" | grep -q "StartTime=$scheduled_start"; then
 fi
 
 echo "✅ Job is correctly delayed until $scheduled_start"
+
+# Verify the local at queue is shared with the dynamic scheduler container.
+at_output=$(docker exec slurmctld bash -lc \
+  "echo 'sleep 120' | at -t \$(date -d '+1 day' +%Y%m%d%H%M)")
+at_job_id=$(printf '%s\n' "$at_output" | awk '/^job / {print $2}')
+if [ -z "$at_job_id" ]; then
+  echo "Could not determine at job ID"
+  echo "$at_output"
+  exit 1
+fi
+
+if ! docker exec catsd atq | grep -q "^${at_job_id}[[:space:]]"; then
+  echo "at job $at_job_id is not visible from catsd"
+  docker exec slurmctld atrm "$at_job_id"
+  exit 1
+fi
+
+docker exec catsd atrm "$at_job_id"
+echo "at job $at_job_id is shared with catsd and can be removed"
