@@ -352,6 +352,36 @@ to also supply ``--duration``:
        max duration: 4305 min, resolution: 15 min
        metrics: carbon (default), environmental_score, water, water_stress
 
+.. _listing-locations:
+
+Listing valid locations
+-----------------------
+
+Each provider uses its own location codes (UK postcode outward codes, GB region
+letters, bidding zones, country codes or wattnet.eu zones), so ``--location``
+values are not interchangeable between providers. To see the valid codes,
+without needing ``--duration``:
+
+.. code-block:: console
+
+   $ cats --list-locations --api octopus.energy
+   octopus.energy
+     GB electricity distribution region letters
+       A  East England
+       B  East Midlands
+       C  London
+       ...
+
+Use ``--api`` (or give the API name directly after ``--list-locations``) to list
+a single provider, or omit it to list all of them.
+Some providers use different codes per metric (``energy-charts.info`` takes
+bidding zones for ``price`` and country codes for ``renewables``), so add
+``--metric`` to restrict the listing:
+
+.. code-block:: console
+
+   $ cats --list-locations --api energy-charts.info --metric renewables
+
 Illustration of estimate with ``--plot``
 ----------------------------------------
 

@@ -12,6 +12,7 @@ from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
 from .base import (
     BaseProvider,
+    LocationGroup,
     align_to_resolution,
     fetch_url,
     provider,
@@ -95,6 +96,16 @@ class OctopusAgilePriceProvider(BaseProvider):
         if location in VALID_REGIONS:
             return location
         raise InvalidLocationError(INVALID_LOCATION_MESSAGE.format(location=location))
+
+    @override
+    def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
+        resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
+        return [
+            LocationGroup(
+                "GB electricity distribution region letters",
+                dict(sorted(REGION_NAMES.items())),
+            )
+        ]
 
     @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:

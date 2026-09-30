@@ -2,7 +2,7 @@
 import datetime
 import os
 import sys
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from argparse import Action, ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional, cast
@@ -31,7 +31,7 @@ from .pricing import (
     price_covers_window,
     resolve_price_series,
 )
-from .providers import CompositeProvider, list_providers
+from .providers import CompositeProvider, get_provider, list_providers
 from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
 
@@ -68,6 +68,44 @@ def print_providers():
                 for m in sorted(instance.SUPPORTED_METRICS)
             )
             print(f"    metrics: {metrics}")
+
+
+def print_locations(api: str | None = None, metric: str | None = None):
+    "Print the valid --location codes of one provider, or of all of them"
+    providers = list_providers()
+    if api:
+        providers = {api: get_provider(api)}
+    for name, provider_cls in sorted(providers.items()):
+        instance = provider_cls()
+        groups = instance.list_locations(metric)
+        print(name)
+        if not groups:
+            print("    (no location list available)")
+        for group in groups:
+            print(f"  {group.heading}")
+            if group.note:
+                print(f"    {group.note}")
+            if group.locations:
+                print(indent_lines(format_locations(group.locations), 4))
+        print()
+
+
+def format_locations(locations: dict[str, str]) -> str:
+    "Format codes in aligned columns, or one per line if they have names"
+    if not locations:
+        return ""
+    if any(locations.values()):
+        width = max(len(code) for code in locations)
+        return "\n".join(
+            f"{code:<{width}}  {name}".rstrip() for code, name in locations.items()
+        )
+    width = max(len(code) for code in locations) + 2
+    columns = max(1, 76 // width)
+    codes = list(locations)
+    return "\n".join(
+        "".join(code.ljust(width) for code in codes[i : i + columns]).rstrip()
+        for i in range(0, len(codes), columns)
+    )
 
 
 def print_banner(disable_colour):
@@ -231,7 +269,8 @@ def parse_arguments():
         "-d",
         "--duration",
         type=int,
-        help="[required, unless --list-providers is given] Expected duration "
+        help="[required, unless --list-providers or --list-locations is given] "
+        "Expected duration "
         "of the job in minutes.",
     )
 
@@ -242,6 +281,17 @@ def parse_arguments():
         action="store_true",
         help="List the registered data providers and their properties, then exit "
         "(no --duration needed).",
+    )
+    parser.add_argument(
+        "--list-locations",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="API",
+        help="List the valid --location codes, then exit (no --duration needed). "
+        "Location codes differ between providers. Use -a / --api (or give an API "
+        "name here) to list only that provider's, otherwise all are listed. Combine with --metric to restrict to one metric, since "
+        "some providers use different codes per metric.",
     )
     parser.add_argument(
         "--metric",
@@ -298,9 +348,18 @@ def parse_arguments():
         help="Pass command using `-c` to scheduler.",
         choices=["at", "sbatch"],
     )
+    class StoreApi(Action):
+        "Store --api and remember it was given, as it has a default value"
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            setattr(namespace, self.dest, values)
+            namespace.api_given = True
+
+    parser.set_defaults(api_given=False)
     parser.add_argument(
         "-a",
         "--api",
+        action=StoreApi,
         type=str,
         default="carbonintensity.org.uk",
         help="API to use to obtain forecasts. Overrides `config.yml`. "
@@ -428,9 +487,15 @@ def run_cats(arguments: list[str] | None = None):
         print_providers()
         return
 
+    if args.list_locations is not None:
+        api = args.list_locations or (args.api if args.api_given else None)
+        print_locations(api, args.metric)
+        return
+
     if args.duration is None:
         raise MissingArgumentError(
-            "-d / --duration is required, unless --list-providers is given"
+            "-d / --duration is required, unless --list-providers or "
+            "--list-locations is given"
         )
 
     if args.command and not args.scheduler:

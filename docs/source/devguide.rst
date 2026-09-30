@@ -166,6 +166,10 @@ which typically builds a request URL (including suitably aligned time and locati
 from ``cats/providers/base.py`` to download the data and convert JSON to python objects, and then places this
 data in ``Timeseries`` of ``PointEstimate`` objects, which are returned.
 
+Providers should also override ``list_locations()``, returning one ``LocationGroup`` per location encoding
+(more than one when the codes depend on the metric), so that users can discover valid codes with
+``--list-locations``. Each code listed must be accepted by ``validate_location()``.
+
 New providers should be listed in ``cats/providers/__init__.py`` and registered using the ``@provider`` decorator
 (the argument of this decorator is used to allow the user to select the provider). Tests should be included.
 

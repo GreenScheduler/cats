@@ -140,6 +140,70 @@ def test_list_providers(capsys):
         assert name in out
 
 
+def test_list_locations_all(capsys):
+    "No --duration needed; every provider's location scheme is shown"
+    assert main(["--list-locations"]) == 0
+    out = capsys.readouterr().out
+    for name in [
+        "carbonintensity.org.uk",
+        "wattnet.eu",
+        "energy-charts.info",
+        "octopus.energy",
+        "composite",
+    ]:
+        assert name in out
+    assert "OX1" in out
+    assert "London" in out
+    assert "DE-LU" in out
+
+
+def test_list_locations_single_provider(capsys):
+    assert main(["--list-locations", "octopus.energy"]) == 0
+    out = capsys.readouterr().out
+    assert "octopus.energy" in out
+    assert "East England" in out
+    assert "wattnet.eu" not in out
+
+
+def test_list_locations_with_api_flag(capsys):
+    assert main(["--list-locations", "--api", "wattnet.eu"]) == 0
+    out = capsys.readouterr().out
+    assert "wattnet.eu" in out
+    assert "octopus.energy" not in out
+    assert "carbonintensity.org.uk" not in out
+
+
+def test_list_locations_metric_filters_energycharts(capsys):
+    assert main(["--list-locations", "energy-charts.info", "--metric", "price"]) == 0
+    out = capsys.readouterr().out
+    assert "DE-LU" in out
+    assert "Country codes" not in out
+    assert main(
+        ["--list-locations", "energy-charts.info", "--metric", "renewables"]
+    ) == 0
+    out = capsys.readouterr().out
+    assert "Country codes" in out
+    assert "DE-LU" not in out
+
+
+def test_list_locations_unknown_provider():
+    assert main(["--list-locations", "nope"]) == 1
+
+
+def test_list_locations_codes_validate():
+    "Every code a provider lists must be accepted by its own validate_location"
+    from cats.providers import list_providers
+
+    for name, cls in list_providers().items():
+        if name == "composite":
+            continue
+        instance = cls()
+        for group in instance.list_locations():
+            assert group.locations, name
+            for code in group.locations:
+                instance.validate_location(code)
+
+
 def _wide_flat_series(metric: str, unit: str, value: float) -> Timeseries:
     "A flat series spanning well beyond any real 'now' at 30 minute resolution"
     start = datetime.now(timezone.utc) - timedelta(hours=2)

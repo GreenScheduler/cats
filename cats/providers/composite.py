@@ -19,7 +19,7 @@ from typing_extensions import override
 
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
-from .base import BaseProvider, align_to_resolution, fetch_url, provider
+from .base import BaseProvider, LocationGroup, align_to_resolution, fetch_url, provider
 from .eu_energycharts import EU_RENEWABLES_COUNTRIES, EnergyChartsProvider
 from .eu_wattnet import WattnetEuProvider
 from .gb_octopus import OctopusAgilePriceProvider
@@ -157,9 +157,6 @@ REGIONID_TO_OCTOPUS_LETTER: dict[int, str] = {
 #   wattnet zone code "GB" specifically lacks a price signal here.
 # - BA, CY, GE, MD, MK, TR, XK: non-EU/EEA zones with no energy-charts.info
 #   day-ahead price equivalent.
-# - DK: wattnet reports a single "DK" zone, but energy-charts splits Denmark
-#   into DK1/DK2 bidding zones with different prices; there is no single
-#   correct mapping, so it is left out rather than guessing.
 # - LU: energy-charts only publishes the merged "DE-LU" bidding zone (Germany
 #   and Luxembourg have been price-coupled since 2018), not standalone
 #   Luxembourg; wattnet's separate DE and LU entries both map to it, which is
@@ -174,6 +171,8 @@ WATTNET_TO_ENERGYCHARTS_ZONE: dict[str, str] = {
     "CH": "CH",
     "CZ": "CZ",
     "DE": "DE-LU",
+    "DK1": "DK1",
+    "DK2": "DK2",
     "EE": "EE",
     "ES": "ES",
     "FI": "FI",
@@ -468,6 +467,33 @@ class CompositeProvider(BaseProvider):
         if note:
             logging.warning(note)
         return provider.get_data(timestamp, provider_location, metric=metric)
+
+    @override
+    def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
+        wattnet_zones = WattnetEuProvider().list_locations()[0].locations
+        zones = {}
+        for zone in sorted(wattnet_zones):
+            extras = []
+            if zone in WATTNET_TO_ENERGYCHARTS_ZONE:
+                extras.append("price")
+            if _wattnet_zone_to_renewables_country(zone):
+                extras.append("renewables")
+            zones[zone] = "+".join(extras)
+        return [
+            LocationGroup(
+                "UK postcode outward codes (e.g. 'OX1')",
+                {},
+                "Same codes as carbonintensity.org.uk, see "
+                "--list-locations carbonintensity.org.uk. Codes valid as both a "
+                "postcode and a zone (e.g. 'SE1') are read as UK postcodes.",
+            ),
+            LocationGroup(
+                "Wattnet zone codes",
+                zones,
+                "The value shown next to a zone lists its extra signals "
+                "beyond carbon, water, water_stress and environmental_score.",
+            ),
+        ]
 
     @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:

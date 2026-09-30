@@ -56,6 +56,8 @@ class Args(Namespace):
     start_window: datetime.datetime | None
     end_window: datetime.datetime | None
     list_providers: bool
+    list_locations: str | None
+    api_given: bool
     metric: str | None
     signal: list[tuple[str, float]] | None
     max_price: float | None

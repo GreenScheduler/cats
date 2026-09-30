@@ -13,6 +13,7 @@ using the ``@provider`` decorator to register the provider.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable, ClassVar
 
@@ -25,6 +26,21 @@ from ..forecast import Timeseries
 from ..version import user_agent
 
 PROVIDERS: dict[str, type[BaseProvider]] = {}
+
+
+@dataclass(frozen=True)
+class LocationGroup:
+    """A set of valid --location codes sharing one encoding
+
+    :param heading: Short description of the encoding, e.g. "Bidding zones"
+    :param locations: Code to human readable name (empty string if none)
+    :param note: Optional extra line shown under the heading
+    """
+
+    heading: str
+    locations: dict[str, str]
+    note: str = ""
+
 
 # Transient failures worth retrying: rate limiting (429) and upstream gateway
 # problems. Plain 500s are not retried since they are usually persistent
@@ -141,6 +157,15 @@ class BaseProvider(ABC):
     @abstractmethod
     def validate_location(self, location: str | None) -> str:
         "Returns location if valid, otherwise raises InvalidLocationError"
+
+    def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
+        """Returns the locations this provider accepts, for --list-locations
+
+        Providers whose location scheme depends on the metric return one group
+        per scheme when `metric` is None, or just the matching group otherwise.
+        The default returns no groups, for providers that do not enumerate them.
+        """
+        return []
 
     @abstractmethod
     def get_max_duration_minutes(self, metric: str | None = None) -> int:

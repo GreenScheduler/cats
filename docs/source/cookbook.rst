@@ -271,4 +271,6 @@ Flag                                    What it does
 ``--max-price-increase-pct N``          Price cap relative to the price right now
 ``--list-providers``                    List providers, metrics and capabilities, without needing
                                          ``--duration``
+``--list-locations``                    List the valid ``--location`` codes of one provider (or all),
+                                         without needing ``--duration``
 ======================================  ===============================================================

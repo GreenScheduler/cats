@@ -11,7 +11,14 @@ from typing_extensions import override
 
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
-from .base import BaseProvider, align_to_resolution, fetch_url, provider, resolve_metric
+from .base import (
+    BaseProvider,
+    LocationGroup,
+    align_to_resolution,
+    fetch_url,
+    provider,
+    resolve_metric,
+)
 
 INVALID_ZONE_MESSAGE = (
     "{location}. The 'price' metric needs an Energy-Charts bidding zone code, "
@@ -172,6 +179,29 @@ class EnergyChartsProvider(BaseProvider):
         return country
 
     @override
+    def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
+        if metric is not None:
+            metric = resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
+        groups: list[LocationGroup] = []
+        if metric in (None, "price"):
+            groups.append(
+                LocationGroup(
+                    "Bidding zones (metric: price)",
+                    dict.fromkeys(sorted(ENERGYCHARTS_ZONES.values()), ""),
+                    "Case-insensitive, e.g. 'DE-LU', 'IT-North'.",
+                )
+            )
+        if metric in (None, "renewables"):
+            groups.append(
+                LocationGroup(
+                    "Country codes (metric: renewables)",
+                    dict.fromkeys(sorted(EU_RENEWABLES_COUNTRIES), ""),
+                    "Lowercase two-letter codes, e.g. 'de', 'fr'.",
+                )
+            )
+        return groups
+
+    @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         metric = resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
         if metric == "price":
@@ -232,9 +262,9 @@ class EnergyChartsProvider(BaseProvider):
             # list above, so a missing/empty "data" field indicates a
             # genuine upstream/availability problem rather than a bad location.
             assert response is not None, "No response from Energy-Charts price request"
-            assert response.get("data"), (
-                "Empty response from Energy-Charts price request"
-            )
+            assert response.get(
+                "data"
+            ), "Empty response from Energy-Charts price request"
             values = [
                 PointEstimate(
                     datetime=datetime.fromisoformat(d["timestamp"]),

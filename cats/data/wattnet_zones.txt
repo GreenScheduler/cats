@@ -6,7 +6,8 @@ CH
 CY
 CZ
 DE
-DK
+DK1
+DK2
 EE
 ES
 FI

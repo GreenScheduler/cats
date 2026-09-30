@@ -12,7 +12,14 @@ from typing_extensions import override
 from ..exceptions import InvalidLocationError, ProviderAuthenticationError
 from ..forecast import PointEstimate, Timeseries
 from ..version import user_agent
-from .base import BaseProvider, align_to_resolution, fetch_url, provider, resolve_metric
+from .base import (
+    BaseProvider,
+    LocationGroup,
+    align_to_resolution,
+    fetch_url,
+    provider,
+    resolve_metric,
+)
 
 # Generated from Wattnet API zones get request piped into jq | grep "zones"
 # and cleaned up.
@@ -229,6 +236,16 @@ class WattnetEuProvider(BaseProvider):
             for t, v in raw_values
         ]
         return Timeseries(METRIC_NAMES[metric], values=values, unit=unit)
+
+    @override
+    def list_locations(self, metric: str | None = None) -> list[LocationGroup]:
+        resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
+        return [
+            LocationGroup(
+                "Wattnet zone codes (e.g. 'GB', 'IT_CALABRIA', 'SE1')",
+                dict.fromkeys(sorted(WATTNET_ZONES), ""),
+            )
+        ]
 
     @override
     def validate_location(self, location: str | None) -> str:
