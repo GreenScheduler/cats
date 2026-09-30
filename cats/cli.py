@@ -387,6 +387,9 @@ def run_cats(arguments: list[str] | None = None):
         history_db = os.environ.get("CATS_HISTORY_DB")
         if not history_db:
             parser.error("CATS_HISTORY_DB is not set; history database path is unknown")
+            raise SystemExit(2)
+        if not history_db:
+            parser.error("CATS_HISTORY_DB is not set; history database path is unknown")
         try:
             _refresh_history_job_states(history_db)
             records = read_schedule_checks(history_db)
