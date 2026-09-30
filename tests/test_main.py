@@ -116,13 +116,14 @@ def test_schedule_at_success(fp):
 
 
 def test_schedule_at_submits_command_script(monkeypatch):
-    with patch(
-        "cats.schedulers.subprocess.check_output",
-        return_value="job 18 at Thu Oct  1 12:00:00 2026",
-    ) as check_output, patch("cats.schedulers.subprocess.Popen") as popen:
-        assert schedule_at_start(
-            now_start, ["sleep", "120"], "/work"
-        ) == ("18", None)
+    with (
+        patch(
+            "cats.schedulers.subprocess.check_output",
+            return_value="job 18 at Thu Oct  1 12:00:00 2026",
+        ) as check_output,
+        patch("cats.schedulers.subprocess.Popen") as popen,
+    ):
+        assert schedule_at_start(now_start, ["sleep", "120"], "/work") == ("18", None)
 
     assert check_output.call_args.kwargs["stderr"] == subprocess.STDOUT
     assert check_output.call_args.args[0][0] == "at"

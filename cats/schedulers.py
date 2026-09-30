@@ -10,9 +10,7 @@ from .output import CATSOutput
 SCHEDULER_DATE_FORMAT = {"at": "%Y%m%d%H%M", "sbatch": "%Y-%m-%dT%H:%M"}
 
 
-def schedule_at(
-    output: CATSOutput, args: list[str]
-) -> tuple[str | None, str | None]:
+def schedule_at(output: CATSOutput, args: list[str]) -> tuple[str | None, str | None]:
     return schedule_at_start(output.valueOptimal.start, args)
 
 
@@ -42,7 +40,10 @@ def schedule_at_start(
     except FileNotFoundError:
         return None, "No at command found in PATH, please install one"
     except subprocess.CalledProcessError as e:
-        return None, f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}"
+        return (
+            None,
+            f"Scheduling with at failed with code {e.returncode}, see output below:\n{e.output}",
+        )
 
 
 def get_at_job_state(job_id: str) -> str | None:
@@ -55,8 +56,7 @@ def get_at_job_state(job_id: str) -> str | None:
         return None
 
     if any(
-        line.split() and line.split()[0] == job_id
-        for line in queue_output.splitlines()
+        line.split() and line.split()[0] == job_id for line in queue_output.splitlines()
     ):
         return "PENDING"
     return "NOT_PENDING"
@@ -109,9 +109,15 @@ def schedule_sbatch(
             return None, "Could not determine Slurm job ID from sbatch output"
         return match.group(1).decode("ascii"), None
     except FileNotFoundError:
-        return None, "No sbatch command found in PATH, ensure slurm is configured correctly"
+        return (
+            None,
+            "No sbatch command found in PATH, ensure slurm is configured correctly",
+        )
     except subprocess.CalledProcessError as e:  # pragma: no cover
-        return None, f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}"
+        return (
+            None,
+            f"Scheduling with sbatch failed with code {e.returncode}, see output below:\n{e.output}",
+        )
 
 
 def get_sbatch_job_state(job_id: str) -> str | None:
