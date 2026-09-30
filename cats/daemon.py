@@ -51,17 +51,39 @@ def process_dynamic_jobs_once(
             continue
 
         try:
+            duration_value = job.get("duration_minutes")
+            if not isinstance(duration_value, (int, str)):
+                raise ValueError("Invalid duration_minutes in schedule history")
+            duration_minutes = int(duration_value)
+
+            window_value = job.get("max_window_minutes")
+            if isinstance(window_value, (int, str)):
+                max_window_minutes = int(window_value or 2820)
+            elif window_value is None:
+                max_window_minutes = 2820
+            else:
+                raise ValueError("Invalid max_window_minutes in schedule history")
+
+            command_value = job.get("command")
+            command = command_value if isinstance(command_value, str) else None
+            working_directory_value = job.get("working_directory")
+            working_directory = (
+                working_directory_value
+                if isinstance(working_directory_value, str)
+                else None
+            )
+
             forecast_output = subprocess.check_output(
                 [
                     cats_executable,
                     "--duration",
-                    str(job["duration_minutes"]),
+                    str(duration_minutes),
                     "--location",
                     str(job["location"]),
                     "--api",
                     str(job.get("api") or DEFAULT_API),
                     "--window",
-                    str(job.get("max_window_minutes") or 2820),
+                    str(max_window_minutes),
                     "--format=json",
                 ],
                 text=True,
@@ -83,7 +105,7 @@ def process_dynamic_jobs_once(
 
             action = "unchanged"
             error_message = None
-            active_job_id = job_id
+            active_job_id: str | None = job_id
             if should_update:
                 try:
                     if scheduler == "at":
@@ -116,19 +138,19 @@ def process_dynamic_jobs_once(
             record_schedule_check(
                 db_path,
                 workload_key=str(job["workload_key"]),
-                duration_minutes=int(job["duration_minutes"]),
+                duration_minutes=duration_minutes,
                 location=str(job["location"]),
                 action=action,
                 dynamic=True,
                 api=str(job.get("api") or DEFAULT_API),
-                max_window_minutes=int(job.get("max_window_minutes") or 2820),
+                max_window_minutes=max_window_minutes,
                 current_ci_g_per_kwh=forecast["valueNow"]["value"],
                 optimal_start_utc=optimal_start.isoformat(),
                 optimal_ci_g_per_kwh=optimal["value"],
                 previous_job_id=job_id,
                 scheduler=scheduler,
-                command=job.get("command"),
-                working_directory=job.get("working_directory"),
+                command=command,
+                working_directory=working_directory,
                 active_job_id=active_job_id,
                 slurm_state="PENDING",
                 error=error_message,
