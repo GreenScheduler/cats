@@ -588,6 +588,7 @@ def run_cats(arguments: list[str] | None = None):
                     action="submitted",
                     dynamic=args.dynamic,
                     api=args.api,
+                    max_window_minutes=max_window,
                     current_ci_g_per_kwh=now_avg.value,
                     optimal_start_utc=output.valueOptimal.start.astimezone(
                         timezone.utc
