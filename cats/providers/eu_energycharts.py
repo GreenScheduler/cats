@@ -7,7 +7,6 @@ from importlib.resources import files
 from typing import Any, ClassVar
 from urllib.parse import quote
 
-
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
 from .base import (
@@ -256,9 +255,9 @@ class EnergyChartsProvider(BaseProvider):
             # list above, so a missing/empty "data" field indicates a
             # genuine upstream/availability problem rather than a bad location.
             assert response is not None, "No response from Energy-Charts price request"
-            assert response.get(
-                "data"
-            ), "Empty response from Energy-Charts price request"
+            assert response.get("data"), (
+                "Empty response from Energy-Charts price request"
+            )
             values = [
                 PointEstimate(
                     datetime=datetime.fromisoformat(d["timestamp"]),

@@ -348,6 +348,7 @@ def parse_arguments():
         help="Pass command using `-c` to scheduler.",
         choices=["at", "sbatch"],
     )
+
     class StoreApi(Action):
         "Store --api and remember it was given, as it has a default value"
 

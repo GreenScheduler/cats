@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
-
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
 from .base import (

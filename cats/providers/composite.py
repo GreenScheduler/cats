@@ -15,14 +15,13 @@ from collections.abc import Iterable
 from datetime import datetime
 from typing import Any, ClassVar
 
-
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
 from .base import BaseProvider, LocationGroup, align_to_resolution, fetch_url, provider
 from .eu_energycharts import EU_RENEWABLES_COUNTRIES, EnergyChartsProvider
 from .eu_wattnet import WattnetEuProvider
-from .gb_octopus import OctopusAgilePriceProvider
 from .gb_carbonintensity import GBCarbonIntensityProvider
+from .gb_octopus import OctopusAgilePriceProvider
 
 
 def normalise(values: list[float]) -> list[float]:

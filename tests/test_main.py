@@ -178,9 +178,9 @@ def test_list_locations_metric_filters_energycharts(capsys):
     out = capsys.readouterr().out
     assert "DE-LU" in out
     assert "Country codes" not in out
-    assert main(
-        ["--list-locations", "energy-charts.info", "--metric", "renewables"]
-    ) == 0
+    assert (
+        main(["--list-locations", "energy-charts.info", "--metric", "renewables"]) == 0
+    )
     out = capsys.readouterr().out
     assert "Country codes" in out
     assert "DE-LU" not in out
