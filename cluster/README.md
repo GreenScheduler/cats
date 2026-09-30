@@ -7,6 +7,8 @@ https://github.com/giovtorres/slurm-docker-cluster with a patched
 Dockerfile that installs jq and uv to make CATS installation easier. Our
 patches are maintained at
 https://github.com/GreenScheduler/slurm-docker-cluster.
+The local image adds the Rocky Linux `at` package. `atd` runs on the
+control node, and the queue is shared with the CATS dynamic scheduler service.
 
 ## Pre-requisites
 
@@ -23,7 +25,7 @@ Clone this repository (GreenScheduler/cats) and then run
 ```
 
 to fetch the `ghcr.io/greenscheduler/slurm-docker-cluster:latest` image
-and start the cluster. You can now install cats locally from the current checkout:
+and build the local image before starting the cluster. You can now install cats locally from the current checkout:
 
 ```shell
 ./cluster/install_cats.sh
@@ -44,6 +46,15 @@ start time of that job while it remains pending:
 cats -d 5 --loc RG1 --scheduler sbatch --command 'sleep 120' --dynamic
 ```
 
+For a local Linux `at` job on the control node:
+
+```shell
+cats -d 5 --loc RG1 --scheduler at --command 'sleep 120' --dynamic
+```
+
+`at` jobs run on the control node, not on a Slurm compute node. Inspect the
+queue with `docker exec slurmctld atq`.
+
 The daemon only changes pending jobs marked dynamic. Follow its logs with:
 
 ```shell
@@ -54,7 +65,8 @@ docker logs -f catsd
 
 An automated testing script is supplied which shows programmatic interaction
 with the slurm cluster. Currently cats schedules a short job, and the slurm
-`scontrol` output is checked to see that the job was scheduled correctly. To
+`scontrol` output is checked, then an `at` job is checked for visibility and
+cancellation from the dynamic scheduler container. To
 run the test:
 
 ```shell

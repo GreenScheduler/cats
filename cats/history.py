@@ -1,9 +1,9 @@
+import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
-import sqlite3
 
-_TERMINAL_SLURM_STATES = (
+_TERMINAL_JOB_STATES = (
     "COMPLETED",
     "FAILED",
     "CANCELLED",
@@ -15,6 +15,8 @@ _TERMINAL_SLURM_STATES = (
     "DEADLINE",
     "REVOKED",
     "SPECIAL_EXIT",
+    "RESCHEDULED",
+    "NOT_PENDING",
 )
 
 
@@ -36,6 +38,9 @@ def record_schedule_check(
     previous_job_id: str | None = None,
     active_job_id: str | None = None,
     slurm_state: str | None = None,
+    scheduler: str = "sbatch",
+    command: str | None = None,
+    working_directory: str | None = None,
     error: str | None = None,
 ) -> int:
     if duration_minutes <= 0:
@@ -69,6 +74,9 @@ def record_schedule_check(
                     previous_job_id TEXT,
                     active_job_id TEXT,
                     slurm_state TEXT,
+                    scheduler TEXT NOT NULL DEFAULT 'sbatch',
+                    command TEXT,
+                    working_directory TEXT,
                     error TEXT
                 )
             """)
@@ -96,8 +104,11 @@ def record_schedule_check(
                     previous_job_id,
                     active_job_id,
                     slurm_state,
+                    scheduler,
+                    command,
+                    working_directory,
                     error
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 workload_key,
                 checked_at_utc,
@@ -115,6 +126,9 @@ def record_schedule_check(
                 previous_job_id,
                 active_job_id,
                 slurm_state,
+                scheduler,
+                command,
+                working_directory,
                 error,
             ))
 
@@ -157,7 +171,7 @@ def summarize_schedule_checks(
         if job_id is None:
             continue
 
-        key = str(job_id)
+        key = f"{record.get('scheduler') or 'sbatch'}:{job_id}"
         job = jobs.get(key)
         if job is None:
             job = {
@@ -190,16 +204,22 @@ def summarize_schedule_checks(
     failed = [
         job
         for job in jobs.values()
-        if str(job["state"] or "").upper() in _TERMINAL_SLURM_STATES
+        if str(job["state"] or "").upper() in _TERMINAL_JOB_STATES
         and str(job["state"] or "").upper() != "COMPLETED"
+        and str(job["state"] or "").upper() != "RESCHEDULED"
+        and str(job["state"] or "").upper() != "NOT_PENDING"
     ]
     active = [
         job
         for job in jobs.values()
         if job["state"] is not None
-        and str(job["state"]).upper() not in _TERMINAL_SLURM_STATES
+        and str(job["state"]).upper() not in _TERMINAL_JOB_STATES
     ]
-    unknown = [job for job in jobs.values() if job["state"] is None]
+    unknown = [
+        job
+        for job in jobs.values()
+        if job["state"] is None or str(job["state"]).upper() == "NOT_PENDING"
+    ]
 
     def savings(job: dict[str, object]) -> float | None:
         now = job["estimated_emissions_now_g"]
@@ -272,22 +292,22 @@ def get_dynamic_schedule_checks(db_path: str | Path) -> list[dict[str, object]]:
                 return []
 
             _ensure_history_columns(connection)
-            placeholders = ", ".join("?" for _ in _TERMINAL_SLURM_STATES)
+            placeholders = ", ".join("?" for _ in _TERMINAL_JOB_STATES)
             rows = connection.execute(
                 """
                 SELECT checks.*
                 FROM schedule_checks AS checks
                 JOIN (
-                    SELECT active_job_id, MAX(id) AS latest_id
+                    SELECT scheduler, active_job_id, MAX(id) AS latest_id
                     FROM schedule_checks
                     WHERE dynamic = 1 AND active_job_id IS NOT NULL
-                    GROUP BY active_job_id
+                    GROUP BY scheduler, active_job_id
                 ) AS latest ON checks.id = latest.latest_id
                 WHERE checks.slurm_state IS NULL
                    OR UPPER(checks.slurm_state) NOT IN (%s)
                 ORDER BY checks.id
                 """ % placeholders,
-                _TERMINAL_SLURM_STATES,
+                _TERMINAL_JOB_STATES,
             )
             records = []
             for row in rows:
@@ -302,24 +322,25 @@ def get_jobs_requiring_state_refresh(db_path: str | Path) -> list[str]:
     if not path.is_file():
         return []
 
-    placeholders = ", ".join("?" for _ in _TERMINAL_SLURM_STATES)
+    placeholders = ", ".join("?" for _ in _TERMINAL_JOB_STATES)
     with closing(sqlite3.connect(path)) as connection:
         with connection:
+            _ensure_history_columns(connection)
             rows = connection.execute(
                 f"""
                 SELECT DISTINCT active_job_id
                 FROM schedule_checks
-                WHERE active_job_id IS NOT NULL
+                WHERE active_job_id IS NOT NULL AND scheduler = 'sbatch'
                   AND (slurm_state IS NULL OR UPPER(slurm_state) NOT IN ({placeholders}))
                 ORDER BY active_job_id
                 """,
-                _TERMINAL_SLURM_STATES,
+                _TERMINAL_JOB_STATES,
             )
             return [row[0] for row in rows]
 
 
 def update_schedule_job_state(
-    db_path: str | Path, job_id: str, state: str
+    db_path: str | Path, job_id: str, state: str, scheduler: str = "sbatch"
 ) -> None:
     path = Path(db_path)
     if not path.is_file():
@@ -328,8 +349,8 @@ def update_schedule_job_state(
     with closing(sqlite3.connect(path)) as connection:
         with connection:
             connection.execute(
-                "UPDATE schedule_checks SET slurm_state = ? WHERE active_job_id = ?",
-                (state, job_id),
+                "UPDATE schedule_checks SET slurm_state = ? WHERE active_job_id = ? AND scheduler = ?",
+                (state, job_id, scheduler),
             )
 
 
@@ -353,4 +374,19 @@ def _ensure_history_columns(connection: sqlite3.Connection) -> None:
             ALTER TABLE schedule_checks
             ADD COLUMN max_window_minutes INTEGER NOT NULL DEFAULT 2820
                 CHECK (max_window_minutes > 0)
+        """)
+    if "scheduler" not in columns:
+        connection.execute("""
+            ALTER TABLE schedule_checks
+            ADD COLUMN scheduler TEXT NOT NULL DEFAULT 'sbatch'
+        """)
+    if "command" not in columns:
+        connection.execute("""
+            ALTER TABLE schedule_checks
+            ADD COLUMN command TEXT
+        """)
+    if "working_directory" not in columns:
+        connection.execute("""
+            ALTER TABLE schedule_checks
+            ADD COLUMN working_directory TEXT
         """)
