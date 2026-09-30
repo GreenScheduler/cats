@@ -26,7 +26,8 @@ def record_schedule_check(
     location: str,
     action: str,
     dynamic: bool = False,
-      api: str = "carbonintensity.org.uk",
+        api: str = "carbonintensity.org.uk",
+        max_window_minutes: int = 2820,
     current_ci_g_per_kwh: float | None = None,
     optimal_start_utc: str | None = None,
     optimal_ci_g_per_kwh: float | None = None,
@@ -63,6 +64,8 @@ def record_schedule_check(
                     dynamic INTEGER NOT NULL DEFAULT 0
                         CHECK (dynamic IN (0, 1)),
                     api TEXT NOT NULL DEFAULT 'carbonintensity.org.uk',
+                    max_window_minutes INTEGER NOT NULL DEFAULT 2820
+                        CHECK (max_window_minutes > 0),
                     previous_job_id TEXT,
                     active_job_id TEXT,
                     slurm_state TEXT,
@@ -89,11 +92,12 @@ def record_schedule_check(
                     action,
                     dynamic,
                     api,
+                    max_window_minutes,
                     previous_job_id,
                     active_job_id,
                     slurm_state,
                     error
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 workload_key,
                 checked_at_utc,
@@ -107,6 +111,7 @@ def record_schedule_check(
                 action,
                 int(dynamic),
                 api,
+                max_window_minutes,
                 previous_job_id,
                 active_job_id,
                 slurm_state,
@@ -342,4 +347,10 @@ def _ensure_history_columns(connection: sqlite3.Connection) -> None:
         connection.execute("""
             ALTER TABLE schedule_checks
             ADD COLUMN api TEXT NOT NULL DEFAULT 'carbonintensity.org.uk'
+        """)
+    if "max_window_minutes" not in columns:
+        connection.execute("""
+            ALTER TABLE schedule_checks
+            ADD COLUMN max_window_minutes INTEGER NOT NULL DEFAULT 2820
+                CHECK (max_window_minutes > 0)
         """)

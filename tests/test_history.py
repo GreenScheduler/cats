@@ -152,12 +152,22 @@ def test_cli_records_successful_sbatch_submission(monkeypatch, tmp_path):
                 """
                 SELECT workload_key, duration_minutes, location,
                        current_ci_g_per_kwh, optimal_ci_g_per_kwh,
-                       action, dynamic, active_job_id
+                      action, dynamic, active_job_id, max_window_minutes
                 FROM schedule_checks
                 """
             ).fetchone()
 
-    assert row == ("script.sh", 5, "OX1", 100.0, 50.0, "submitted", 1, "123456")
+    assert row == (
+        "script.sh",
+        5,
+        "OX1",
+        100.0,
+        50.0,
+        "submitted",
+        1,
+        "123456",
+        2820,
+    )
 
 
 def test_record_schedule_check_creates_database_and_record(tmp_path):
@@ -234,3 +244,4 @@ def test_read_schedule_checks_migrates_dynamic_column(tmp_path):
     records = read_schedule_checks(db_path)
 
     assert records[0]["dynamic"] is False
+    assert records[0]["max_window_minutes"] == 2820
