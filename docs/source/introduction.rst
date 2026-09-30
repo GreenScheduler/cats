@@ -36,7 +36,7 @@ environmentally-conscious developers.
 Scope
 -----
 
-Currently CATS only works in the UK with experimental support
+Currently CATS only works in Great Britain with experimental support
 elsewhere in Europe. If you are aware of APIs for
 realtime grid carbon intensity data in other locations, please
 `open an issue <GitHubrepoissues_>`_ to let us know.

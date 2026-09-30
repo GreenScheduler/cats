@@ -109,7 +109,7 @@ def raiseLocationError(*args, **kwargs):  # pyright: ignore[reportUnusedParamete
     raise InvalidLocationError
 
 
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_main_failures(get_data):
     get_data.return_value = {}
     get_data.side_effect = raiseLocationError
@@ -132,7 +132,7 @@ def raiseJSONError(*args, **kwargs):  # pyright: ignore[reportUnusedParameter, r
     raise requests.exceptions.JSONDecodeError
 
 
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_main_http_ukci_errors(get_data):
     get_data.return_value = {}
     get_data.side_effect = raiseHTTPError

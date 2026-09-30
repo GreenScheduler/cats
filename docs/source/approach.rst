@@ -70,7 +70,7 @@ over the duration of the computation.
    Carbon intensity at optimal time          = 1.66 gCO2eq/kWh
 
 
-At the moment, CATS is available for the UK through the National Grid's API which provides
+At the moment, CATS is available for Great Britain through the National Grid's API which provides
 postcode-specific 48 hour forecasts broken down into 30 minute periods. This granular data contains
 regional distribution networks making use of a parameterised model of the power distribution system
 in Great Britain, weather forecasts and historical generation data. A brief overview of the forecast
