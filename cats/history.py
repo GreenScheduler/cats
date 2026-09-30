@@ -1,7 +1,7 @@
+import sqlite3
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
-import sqlite3
 
 _TERMINAL_SLURM_STATES = (
     "COMPLETED",
@@ -119,33 +119,6 @@ def record_schedule_check(
                 slurm_state,
                 error,
             ))
-=======
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                (
-                    workload_key,
-                    checked_at_utc,
-                    duration_minutes,
-                    location,
-                    current_ci_g_per_kwh,
-                    optimal_start_utc,
-                    optimal_ci_g_per_kwh,
-                    estimated_emissions_now_g,
-                    estimated_emissions_optimal_g,
-                    action,
-                    int(dynamic),
-                    api,
-                    max_window_minutes,
-                    previous_job_id,
-                    active_job_id,
-                    slurm_state,
-                    scheduler,
-                    command,
-                    working_directory,
-                    error,
-                ),
-            )
->>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
 
             return cursor.lastrowid
 
@@ -309,7 +282,6 @@ def get_dynamic_schedule_checks(db_path: str | Path) -> list[dict[str, object]]:
                 WHERE checks.slurm_state IS NULL
                    OR UPPER(checks.slurm_state) NOT IN (%s)
                 ORDER BY checks.id
-<<<<<<< HEAD
                 """ % placeholders,
                 _TERMINAL_SLURM_STATES,
 =======
@@ -347,9 +319,7 @@ def get_jobs_requiring_state_refresh(db_path: str | Path) -> list[str]:
             return [row[0] for row in rows]
 
 
-def update_schedule_job_state(
-    db_path: str | Path, job_id: str, state: str
-) -> None:
+def update_schedule_job_state(db_path: str | Path, job_id: str, state: str) -> None:
     path = Path(db_path)
     if not path.is_file():
         return
@@ -384,21 +354,3 @@ def _ensure_history_columns(connection: sqlite3.Connection) -> None:
                 CHECK (max_window_minutes > 0)
 <<<<<<< HEAD
         """)
-=======
-        """)
-    if "scheduler" not in columns:
-        connection.execute("""
-            ALTER TABLE schedule_checks
-            ADD COLUMN scheduler TEXT NOT NULL DEFAULT 'sbatch'
-        """)
-    if "command" not in columns:
-        connection.execute("""
-            ALTER TABLE schedule_checks
-            ADD COLUMN command TEXT
-        """)
-    if "working_directory" not in columns:
-        connection.execute("""
-            ALTER TABLE schedule_checks
-            ADD COLUMN working_directory TEXT
-        """)
->>>>>>> a17a830f1a070c5390a7e28631c2ee88089ecac5
