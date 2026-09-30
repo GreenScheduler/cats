@@ -31,6 +31,7 @@ from .history import (
     get_jobs_requiring_state_refresh,
     read_schedule_checks,
     record_schedule_check,
+    summarize_schedule_checks,
     update_schedule_job_state,
 )
 from .output import CATSOutput
@@ -370,12 +371,17 @@ def parse_arguments():
     parser.add_argument(
         "--show-data",
         action="store_true",
-        help="Display all saved CATS scheduling history as JSON.",
+        help="Display all saved CATS scheduling history as JSON (requires CATS_HISTORY_DB).",
+    )
+    parser.add_argument(
+        "--report",
+        action="store_true",
+        help="Summarize tracked jobs and estimated CO2 savings (requires CATS_HISTORY_DB).",
     )
     parser.add_argument(
         "--dynamic",
         action="store_true",
-        help="Mark this sbatch job for dynamic rescheduling.",
+        help="Re-evaluate a pending sbatch job over time (requires --scheduler sbatch and CATS_HISTORY_DB).",
     )
 
     parser.add_argument(
@@ -507,7 +513,9 @@ def run_cats(arguments: list[str] | None = None):
     "Main CLI runner, raises exceptions"
     parser = parse_arguments()
     parsed_args = parser.parse_args(arguments)
-    if parsed_args.show_data:
+    if parsed_args.show_data or parsed_args.report:
+        if parsed_args.show_data and parsed_args.report:
+            parser.error("--show-data and --report cannot be used together")
         history_db = os.environ.get("CATS_HISTORY_DB")
         if not history_db:
             parser.error("CATS_HISTORY_DB is not set; history database path is unknown")
@@ -516,7 +524,51 @@ def run_cats(arguments: list[str] | None = None):
             records = read_schedule_checks(history_db)
         except (OSError, sqlite3.Error) as error:
             parser.error(f"Could not read CATS history database: {error}")
-        if records:
+        if parsed_args.report:
+            report = summarize_schedule_checks(records)
+            if parsed_args.format == "json":
+                print(json.dumps(report, indent=2, sort_keys=True))
+            else:
+                print("CATS scheduling report")
+                print(f"60{report['schedule_checks']}")
+                print(f"Tracked jobs: {report['tracked_jobs']}")
+                print(
+                    "Job states: "
+                    f"{report['completed_jobs']} completed, "
+                    f"{report['active_jobs']} active, "
+                    f"{report['failed_jobs']} failed, "
+                    f"{report['unknown_state_jobs']} unknown"
+                )
+                print(f"Dynamic jobs: {report['dynamic_jobs']}")
+                print(
+                    "Scheduled runtime of completed jobs: "
+                    f"{report['completed_runtime_hours']:.2f} hours"
+                )
+                completed_savings = report[
+                    "estimated_co2_saved_g_completed_jobs"
+                ]
+                print(
+                    "Estimated CO2 savings for completed jobs: "
+                    f"{completed_savings:.2f} g "
+                    f"({completed_savings / 1000:.3f} kg; "
+                    f"{report['completed_jobs_with_emissions_estimate']} of "
+                    f"{report['completed_jobs']} jobs have footprint estimates)"
+                )
+                print(
+                    "Estimated CO2 savings for all tracked jobs: "
+                    f"{report['estimated_co2_saved_g_all_tracked_jobs']:.2f} g "
+                    f"({report['jobs_with_emissions_estimate']} jobs with estimates)"
+                )
+                if report["completed_jobs_by_location"]:
+                    print("Completed jobs by location:")
+                    for location, totals in sorted(
+                        report["completed_jobs_by_location"].items()
+                    ):
+                        print(
+                            f"  {location}: {totals['completed_jobs']} jobs, "
+                            f"{totals['estimated_co2_saved_g']:.2f} g estimated CO2 saved"
+                        )
+        elif records:
             print(json.dumps(records, indent=2))
         else:
             print("No CATS history records found.")
@@ -734,6 +786,7 @@ def run_cats(arguments: list[str] | None = None):
                     location=location,
                     action="submitted",
                     dynamic=args.dynamic,
+                    api=args.api,
                     current_ci_g_per_kwh=now_avg.value,
                     optimal_start_utc=output.valueOptimal.start.astimezone(
                         timezone.utc

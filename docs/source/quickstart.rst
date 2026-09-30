@@ -392,6 +392,25 @@ Use --format=json to get this in machine readable format
    cats --duration 480
 
 
+Reporting tracked jobs and estimated savings
+--------------------------------------------
+
+When CATS records Slurm submissions in a SQLite history database, you can
+summarize completed jobs and their estimated carbon savings with:
+
+.. code-block:: console
+
+   $ export CATS_HISTORY_DB=/path/to/cats-history.sqlite3
+   $ cats --report
+
+Use ``cats --report --format json`` for machine-readable output. The report
+counts each Slurm job once, including jobs with dynamic scheduling checks, and
+groups completed jobs by location and workload. CO2 savings are estimates from
+the forecast and hardware profile supplied when scheduling; they are available
+only for jobs submitted with ``--footprint``. The report does not measure actual
+energy use or emissions. Slurm job states are refreshed when the report runs.
+
+
 Displaying carbon footprint estimates
 -------------------------------------
 
