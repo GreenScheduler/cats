@@ -178,6 +178,24 @@ class TestValidateWindowConstraints:
 class TestConstrainedWindowedForecast:
     """Test the ConstrainedWindowedForecast class."""
 
+    def test_short_window_retains_interpolation_sample(self):
+        """Test that coarse forecast data can cover a short search window."""
+        utc = ZoneInfo("UTC")
+        start = datetime(2024, 1, 1, 12, 0, tzinfo=utc)
+        data = [
+            PointEstimate(datetime=start, value=100),
+            PointEstimate(datetime=start + timedelta(minutes=30), value=80),
+            PointEstimate(datetime=start + timedelta(minutes=60), value=60),
+        ]
+
+        forecast = WindowedForecast(
+            data, duration=5, start=start, max_window_minutes=5
+        )
+
+        assert len(forecast) == 1
+        assert forecast[0].start == start
+        assert forecast[0].end == start + timedelta(minutes=5)
+
     def test_basic_functionality_without_constraints(
         self, sample_data: list[PointEstimate]
     ):
@@ -315,6 +333,36 @@ class TestConstrainedWindowedForecast:
 
 class TestMainIntegration:
     """Integration tests for main function with window constraints."""
+
+    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
+    @patch("cats.configure.get_runtime_config")
+    def test_main_reports_when_forecast_has_no_valid_windows(
+        self, mock_config: MagicMock, mock_forecast: MagicMock, capsys
+    ):
+        """Test that an empty forecast window is reported without a traceback."""
+        mock_config.return_value = (
+            UKCarbonIntensityProvider,
+            "OX1",
+            5,
+            None,
+            None,
+        )
+
+        utc = ZoneInfo("UTC")
+        base_time = datetime.now(utc) - timedelta(minutes=1)
+        mock_forecast.return_value = Timeseries(
+            "Carbon intensity",
+            [
+                PointEstimate(datetime=base_time - timedelta(minutes=5), value=100),
+                PointEstimate(datetime=base_time + timedelta(minutes=5), value=90),
+            ],
+            "gCO2eq/kWh",
+        )
+
+        result = main(["-d", "5", "--loc", "OX1", "--window", "5"])
+
+        assert result == 1
+        assert "No valid forecast windows are available" in capsys.readouterr().out
 
     @patch("cats.providers.UKCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")

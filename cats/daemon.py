@@ -1,8 +1,9 @@
-"""Background worker for dynamically scheduled Slurm jobs."""
+"""Background worker for dynamically scheduled jobs."""
 
 import json
 import logging
 import os
+import shlex
 import shutil
 import subprocess
 import time
@@ -14,8 +15,10 @@ from .history import (
     update_schedule_job_state,
 )
 from .schedulers import (
+    get_at_job_state,
     get_sbatch_job_start_time,
     get_sbatch_job_state,
+    reschedule_at_job,
     update_sbatch_job_start_time,
 )
 
@@ -33,12 +36,17 @@ def process_dynamic_jobs_once(
 
     for job in get_dynamic_schedule_checks(db_path):
         job_id = str(job["active_job_id"])
-        state = get_sbatch_job_state(job_id)
+        scheduler = str(job.get("scheduler") or "sbatch")
+        state = (
+            get_at_job_state(job_id)
+            if scheduler == "at"
+            else get_sbatch_job_state(job_id)
+        )
         if state is None:
-            logging.warning("Could not read state for dynamic Slurm job %s", job_id)
+            logging.warning("Could not read state for dynamic %s job %s", scheduler, job_id)
             continue
 
-        update_schedule_job_state(db_path, job_id, state)
+        update_schedule_job_state(db_path, job_id, state, scheduler=scheduler)
         if state != "PENDING":
             continue
 
@@ -61,7 +69,13 @@ def process_dynamic_jobs_once(
             forecast = json.loads(forecast_output)
             optimal = forecast["valueOptimal"]
             optimal_start = datetime.fromisoformat(optimal["start"]).astimezone()
-            current_start = get_sbatch_job_start_time(job_id)
+            current_start = (
+                get_sbatch_job_start_time(job_id)
+                if scheduler == "sbatch"
+                else datetime.fromisoformat(str(job["optimal_start_utc"])).astimezone()
+                if job.get("optimal_start_utc")
+                else None
+            )
             should_update = (
                 current_start is None
                 or abs((optimal_start - current_start).total_seconds()) >= 60
@@ -69,15 +83,34 @@ def process_dynamic_jobs_once(
 
             action = "unchanged"
             error_message = None
+            active_job_id = job_id
             if should_update:
                 try:
-                    update_sbatch_job_start_time(job_id, optimal_start)
+                    if scheduler == "at":
+                        active_job_id, error_message = reschedule_at_job(
+                            job_id,
+                            optimal_start,
+                            shlex.split(str(job["command"])),
+                            str(job["working_directory"])
+                            if job.get("working_directory")
+                            else None,
+                        )
+                        if error_message or active_job_id is None:
+                            raise RuntimeError(error_message or "at rescheduling failed")
+                        update_schedule_job_state(
+                            db_path, job_id, "RESCHEDULED", scheduler="at"
+                        )
+                    else:
+                        update_sbatch_job_start_time(job_id, optimal_start)
                     action = "rescheduled"
-                except (OSError, subprocess.CalledProcessError) as error:
+                except (OSError, RuntimeError, subprocess.CalledProcessError) as error:
                     action = "update_failed"
                     error_message = str(error)
                     logging.warning(
-                        "Could not update dynamic Slurm job %s: %s", job_id, error
+                        "Could not update dynamic %s job %s: %s",
+                        scheduler,
+                        job_id,
+                        error,
                     )
 
             record_schedule_check(
@@ -93,7 +126,10 @@ def process_dynamic_jobs_once(
                 optimal_start_utc=optimal_start.isoformat(),
                 optimal_ci_g_per_kwh=optimal["value"],
                 previous_job_id=job_id,
-                active_job_id=job_id,
+                scheduler=scheduler,
+                command=job.get("command"),
+                working_directory=job.get("working_directory"),
+                active_job_id=active_job_id,
                 slurm_state="PENDING",
                 error=error_message,
             )
