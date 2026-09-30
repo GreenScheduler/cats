@@ -168,3 +168,85 @@ data in ``Timeseries`` of ``PointEstimate`` objects, which are returned.
 
 New providers should be listed in ``cats/providers/__init__.py`` and registered using the ``@provider`` decorator
 (the argument of this decorator is used to allow the user to select the provider). Tests should be included.
+
+``cats/providers/eu_energycharts.py`` and ``cats/providers/gb_octopus.py`` are further no-auth examples,
+returning a different metric (day-ahead electricity price rather than carbon intensity) instead of a
+different region. Two gotchas found while writing them, worth checking for any new provider:
+
+- The ``PointEstimate`` list returned by ``get_data()`` must be sorted in ascending order by ``datetime``;
+  not every upstream API returns data in chronological order (Octopus Energy's API returns most-recent-first).
+- When aligning the request timestamp down to the provider's native resolution for cache-friendliness, round
+  down to the exact boundary of the current interval rather than a minute or so into it. Some APIs filter on
+  "interval start >= requested start", so requesting a time a minute after the boundary can exclude the
+  currently in-progress interval and leave a gap between "now" and the first returned data point. Use
+  ``align_to_resolution()`` from ``cats/providers/base.py`` for this rather than writing the rounding
+  arithmetic again: it is shared by every bundled provider, so a fix to it fixes this class of bug everywhere
+  at once, rather than needing to be independently rediscovered and patched per provider.
+
+A single provider can serve more than one metric from the same API portal, selected by the caller via the
+``metric`` parameter threaded through ``get_data()``, ``get_max_duration_minutes()`` and
+``get_temporal_resolution_minutes()`` (exposed on the CLI as ``--metric``). A provider opts into this by
+declaring ``SUPPORTED_METRICS`` (a ``frozenset`` of valid metric names) and ``DEFAULT_METRIC`` as class
+attributes, then calling ``resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)`` at the
+start of each of those three methods; this validates the requested metric (raising ``InvalidMetricError``
+for an unknown one) and falls back to the default when the caller passes ``None``. A provider that only
+ever serves one implicit metric can leave ``SUPPORTED_METRICS`` at its empty default and ignore the
+``metric`` parameter entirely.
+
+``cats/providers/uk_carbonintensity.py`` (``carbon``, ``renewables``) and ``cats/providers/eu_wattnet.py``
+(``carbon``, ``water``, ``water_stress``, ``environmental_score``) are worked examples. The
+carbonintensity.org.uk case is the simplest: both metrics come from a single API call (the response
+already includes both "intensity" and "generationmix" for every period), so ``get_data()`` makes the same
+request regardless of ``metric`` and only changes which field it extracts; requesting both metrics in the
+same run (e.g. via the ``composite`` provider) costs only one real HTTP request, the second being served
+from the shared ``fetch_url()`` cache. wattnet.eu is the more general case: each metric maps to a genuinely
+different endpoint (not just a different query parameter on one endpoint), so the provider keeps a small
+``metric -> (path, query_params)`` table and dispatches the URL build and the parsed ``Timeseries.metric``
+name from it, while still sharing one parsing routine since all three endpoints return the same
+series/values response shape. Two further things worth checking for any new multi-metric provider:
+
+- Don't assume every value an API's own parameter-validation error message lists as "accepted" actually
+  has real data behind it - the Energy-Charts ``/v2/signal`` endpoint (used for ``energy-charts.info``'s
+  ``renewables`` metric) accepts several country codes (``uk``, ``ba``, ``cy``, ``ge``, ``ie``, ``md``,
+  ``rs``, ``ua``, ``xk``) that return an empty ``data: []``. Confirm live data point counts per value you
+  plan to support, not just which values the API's own validation lets through.
+- If different metrics on the same provider need different location encodings (``energy-charts.info``'s
+  ``price`` needs a bidding zone like ``DE-LU``, its ``renewables`` needs a plain country code like
+  ``de``), ``validate_location()`` itself has no ``metric`` parameter to disambiguate against, so it can
+  only apply a best-effort check (e.g. accept whichever scheme matches). Do the metric-specific, strict
+  check inside ``get_data()`` instead, once ``metric`` is known there.
+- If a metric's own polarity is undocumented by the upstream API (e.g. no stated "higher/lower is
+  better"), confirm it rather than guessing, and document the confirmed polarity explicitly in both
+  the docstring and a comment at the point of inversion.
+
+A provider does not have to call an external API directly at all. ``cats/providers/composite.py`` instead
+wraps a *registry* of named signals (``carbon``, ``price``, ``renewables``, ``water``,
+``water_stress``, ``environmental_score``), built per request from a ``(provider instance, metric,
+location, optional note)`` tuple per signal - the same provider instance can back two different signals on
+two different metrics, as ``carbon`` and ``renewables`` both do on ``UKCarbonIntensityProvider`` for a UK
+postcode. Unlike a single-portal multi-metric provider, ``composite``'s location can be either of two
+different kinds (a UK postcode outward code or a wattnet.eu zone code); ``_detect_location()`` tries the UK
+postcode scheme first, falling back to the wattnet.eu zone scheme, so a code valid under both (``SE1``-
+``SE4``, which collide between South East London postcodes and Swedish wattnet.eu price zones) is always
+interpreted as the UK postcode. ``_signal_specs()`` then builds the registry appropriate to that location
+kind: for a UK postcode, the three wattnet-only signals fall back to wattnet.eu's fixed ``GB`` zone (with a
+note logged via ``logging.warning()`` at the point they're used, since this substitutes a country-wide
+value for what looks like a postcode-specific request); for a wattnet.eu zone, ``price`` and ``renewables``
+are only included when a static lookup table (for price) or a derivation rule with explicit exceptions
+(for renewables) actually has an ``energy-charts.info`` equivalent for that zone, since the two portals'
+zone/country naming schemes differ and neither response exposes the other's encoding directly. Prefer
+deriving a location translation live where possible (as the UK postcode's Octopus region letter is,
+from a field already present in carbonintensity.org.uk's own API response), and fall back to an explicit,
+documented table or rule (including *why* any zones are left unmapped) rather than guessing.
+
+The normalise-and-combine logic (independently min-max normalising each selected signal over the fetched
+window, then a configurable weighted sum) lives alongside it as a handful of pure functions
+(``normalise()``, ``resolve_weights()``, ``combine_series()``) at the top of ``composite.py``, kept free of
+any location/routing concerns so they stay easy to reason about in isolation. This is a useful pattern for
+combining metrics without touching the scheduling algorithm itself, and generalises
+beyond a fixed set: the CLI's repeatable ``--signal NAME=WEIGHT`` lets the user pick any subset of the
+signals available for their location. When a signal isn't available for a given location at all, fail
+loudly (``InvalidLocationError``) if the user explicitly asked for that signal via ``--signal``, but
+silently exclude it from the default (unrequested) combination rather than breaking locations that never
+had it; separately, an entirely unrecognised signal *name* (not a valid signal at all, regardless of
+location) should always fail loudly with ``ValueError`` when explicitly requested via ``--signal``.

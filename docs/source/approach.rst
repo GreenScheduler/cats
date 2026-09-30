@@ -83,9 +83,74 @@ We have designed CATS in a modular way to enable future integration of other API
 straightforward manner and also currently support the experimental API provided by the
 https://wattnet.eu/ project for locations across Europe. We note that this API requires
 authentication and for users to register an email address and obtain a password. The wattnet.eu
-API provides data for about 60 zones across Europe (inside and outside the EU) with 96 hour
+API provides data for about 60 zones across Europe (inside and outside the EU) with 72 hour
 forecasts broken down into 15 minute periods. New APIs can be added by creating new implementations
 of the `cats.providers.BaseProvider` abstract base class and registering these as documented elsewhere.
+
+A single provider represents one API portal, which can serve more than one metric: which metric to
+request is chosen with ``--metric`` (each provider declares a default, so a command that never
+passes ``--metric`` is unaffected). ``wattnet.eu`` serves four metrics from three separate endpoints
+of its own API: ``carbon`` (the default carbon intensity metric described above),
+``water`` (life-cycle water footprint, l/kWh), ``water_stress`` (water-stress-weighted
+footprint, stress-l/kWh, accounting for local water scarcity rather than plain volume), and
+``environmental_score`` (wattnet's own composite score, where higher is better; CATS inverts it,
+consistent with every other metric CATS reports).
+
+Beyond carbon intensity, CATS also supports scheduling to minimise electricity *cost* rather than
+carbon, via a ``price`` metric on two further providers returning day-ahead electricity price
+forecasts: the ``energy-charts.info`` provider (Fraunhofer ISE, 54 European bidding zones, excluding
+Great Britain, which is outside the EU single day-ahead market coupling this data is sourced from)
+and the ``octopus.energy`` provider (the Agile Octopus tariff, tracking the GB wholesale day-ahead
+price, covering the same 14 GB distribution regions as the NESO carbon intensity provider). Both
+require no authentication. Since lower price is "better" in the same way lower carbon intensity is,
+this metric reuses the same minimisation logic described above unmodified; only the metric name and
+unit returned differ.
+
+A further metric is renewable generation share, served as ``renewables`` on ``energy-charts.info``
+(continental Europe) and on ``carbonintensity.org.uk`` (Great Britain, derived from the same
+regional API response that provider already fetches for ``carbon``, requiring no extra external
+API). Maximising renewable share does not always coincide with minimising carbon intensity (nuclear
+generation is low-carbon but not renewable) or price, making it a genuinely different scheduling
+signal. Since "higher renewable share is better" is the opposite polarity to the "lower is better"
+assumption built into the scheduler, this metric instead reports *non-renewable* share (100 minus
+the renewable percentage), so the same minimisation logic applies unmodified here too.
+
+CATS also has a single ``composite`` provider that trades off any combination of the signals above
+rather than optimising for a single one, across both Great Britain and continental Europe. It
+auto-detects whether the location it is given is a UK postcode outward code or a wattnet.eu zone
+code, and for each requested signal picks whichever portal natively serves it for that kind of
+location (e.g. for a UK postcode, ``carbon`` and ``renewables`` come from ``carbonintensity.org.uk``
+and ``price`` from ``octopus.energy``; for a wattnet.eu zone, ``carbon`` comes from ``wattnet.eu``
+and ``price``/``renewables`` from ``energy-charts.info``), falling back to wattnet.eu's ``GB`` zone,
+with a logged warning, only for the three wattnet-only signals (``water``,
+``water_stress``, ``environmental_score``) when given a UK postcode. It independently min-max
+normalises each selected series over the fetched forecast window, and combines them into a single
+score with configurable weights, set via the repeatable ``--signal NAME=WEIGHT`` option (e.g.
+``--signal carbon=0.4 --signal price=0.3 --signal renewables=0.3``; weights are normalised
+automatically and don't need to sum to 1). With no ``--signal`` given, every signal available for
+that location that needs no extra authentication is combined with equal weight. Because the result
+is still an ordinary ``Timeseries`` of normalised scores where lower is better, the same
+minimisation logic applies unmodified; no changes were needed to the scheduling algorithm itself to
+support this trade-off, only to the composite provider combining the signals that feed into it.
+
+Blending ``price`` into that weighted score, however, still lets price dominate the outcome if given
+enough weight, which risks drifting away from CATS' climate-aware purpose entirely (e.g. a
+``carbon=0.05``/``price=0.95`` blend would be a cost optimiser wearing a climate-aware label). As a
+safer default, ``cats/pricing.py`` lets price act as a **constraint** instead of a blended weight:
+whichever metric is actually being optimised (single-provider or composite) keeps being optimised for,
+but candidate start times are restricted to those whose price does not exceed a cap, set via
+``--max-price`` (an absolute cap) or ``--max-price-increase-pct`` (a cap relative to the price of
+running the job right now). This works for any provider or metric, not just ``composite``, by
+resolving a price series for the location independently of what is actually being optimised, reusing
+``CompositeProvider``'s existing location-aware price routing rather than duplicating it. If no
+candidate window both satisfies the cap and falls within whatever forecast horizon price data
+currently covers - which is often considerably shorter than the metric being optimised, since
+day-ahead prices are typically only published a matter of hours to a couple of days ahead - CATS
+raises a clear error rather than silently falling back to the unconstrained optimum or picking an
+unverified window. Independently of whether either flag is given, CATS also reports the price impact
+of the chosen schedule whenever price data covers both the "now" and the chosen start time, so the
+cost consequence of an environmental-metric-only optimisation is always visible without price ever
+silently influencing that optimisation itself.
 
 With the carbon intensity forecast and duration of the proposed computation in hand, the next task
 is to locate the start time (within the valid forecast period) that minimises the integrated carbon
