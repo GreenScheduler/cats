@@ -1,5 +1,6 @@
 import re
 import subprocess
+from datetime import datetime
 from typing import Optional
 
 from .output import CATSOutput
@@ -93,3 +94,36 @@ def get_sbatch_job_state(job_id: str) -> str | None:
             state = fields[1].strip().split()[0].rstrip("+").upper()
             return state or None
     return None
+
+
+def get_sbatch_job_start_time(job_id: str) -> datetime | None:
+    try:
+        output = subprocess.check_output(
+            ["scontrol", "show", "job", "-o", job_id],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+    match = re.search(r"(?:^|\s)StartTime=([^\s]+)", output)
+    if match is None or match.group(1) in {"Unknown", "N/A"}:
+        return None
+
+    try:
+        return datetime.fromisoformat(match.group(1)).astimezone()
+    except ValueError:
+        return None
+
+
+def update_sbatch_job_start_time(job_id: str, start_time: datetime) -> None:
+    subprocess.check_output(
+        [
+            "scontrol",
+            "update",
+            f"JobId={job_id}",
+            f"StartTime={start_time.astimezone().strftime('%Y-%m-%dT%H:%M:%S')}",
+        ],
+        text=True,
+        stderr=subprocess.STDOUT,
+    )

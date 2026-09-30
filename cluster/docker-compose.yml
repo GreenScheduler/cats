@@ -49,6 +49,37 @@ services:
     networks:
       - slurm-network
 
+  catsd:
+    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
+    container_name: catsd
+    command:
+      - bash
+      - -lc
+      - |
+        set -e
+        gosu munge /usr/sbin/munged
+        source_dir=$(mktemp -d /tmp/cats-source.XXXXXX)
+        cp /opt/cats/pyproject.toml "$$source_dir/"
+        cp -a /opt/cats/cats "$$source_dir/"
+        uv tool install --reinstall "$$source_dir"
+        rm -rf "$$source_dir"
+        until scontrol ping >/dev/null 2>&1; do sleep 5; done
+        exec /root/.local/bin/catsd
+    environment:
+      CATS_HISTORY_DB: /var/lib/cats/history.sqlite3
+      CATS_DAEMON_INTERVAL_SECONDS: "3600"
+      CATS_EXECUTABLE: /root/.local/bin/cats
+    volumes:
+      - ../:/opt/cats:ro
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - cats_data:/var/lib/cats
+    depends_on:
+      - slurmctld
+    restart: unless-stopped
+    networks:
+      - slurm-network
+
   c1:
     image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
     command: ["slurmd"]
