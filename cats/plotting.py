@@ -154,45 +154,74 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     optimal_value = output.valueOptimal.value
     units = PRETTY_UNITS.get(forecast.unit, forecast.unit)
 
-    ax.text(
-        0.5,
-        1.05,
-        f"Projected {forecast.metric} ({units}) mean...",
-        ha="center",
-        va="bottom",
-        fontsize=14,
-        transform=ax.transAxes,
+    # Some providers (e.g. the composite provider, whose metric name lists
+    # every active signal and its weight) produce a much longer title than
+    # the plain "Carbon intensity" case this fontsize was tuned for, which
+    # would otherwise run off the left/right edges of the figure. Shrink the
+    # font to fit rather than letting it overflow.
+    title_text = f"Projected {forecast.metric} ({units}) mean..."
+    base_fontsize = 14
+    max_chars_at_base_fontsize = 55
+    title_fontsize = (
+        base_fontsize
+        if len(title_text) <= max_chars_at_base_fontsize
+        else max(8, int(base_fontsize * max_chars_at_base_fontsize / len(title_text)))
     )
-    ax.text(
-        0.45,
-        1.0,
-        f"...if job started now: {now_value:.2f}",
-        ha="right",
-        va="bottom",
-        color=now_colour,
-        fontsize=14,
-        transform=ax.transAxes,
+
+    # Collected so they can be passed to savefig(bbox_extra_artists=...): text
+    # placed above the axes via ax.transAxes is not otherwise accounted for
+    # when computing a tight bounding box, so long text here (e.g. a
+    # composite provider's long metric name) would otherwise be silently
+    # clipped by the saved image's edges rather than expanding it.
+    header_texts = []
+
+    header_texts.append(
+        ax.text(
+            0.5,
+            1.05,
+            title_text,
+            ha="center",
+            va="bottom",
+            fontsize=title_fontsize,
+            transform=ax.transAxes,
+        )
+    )
+    header_texts.append(
+        ax.text(
+            0.45,
+            1.0,
+            f"...if job started now: {now_value:.2f}",
+            ha="right",
+            va="bottom",
+            color=now_colour,
+            fontsize=14,
+            transform=ax.transAxes,
+        )
     )
     # Separator to divide the two described figures ('now' and 'optimal')
-    ax.text(
-        0.5,
-        1.0,
-        r"$\to$",
-        ha="center",
-        va="bottom",
-        color="black",
-        fontsize=14,
-        transform=ax.transAxes,
+    header_texts.append(
+        ax.text(
+            0.5,
+            1.0,
+            r"$\to$",
+            ha="center",
+            va="bottom",
+            color="black",
+            fontsize=14,
+            transform=ax.transAxes,
+        )
     )
-    ax.text(
-        0.55,
-        1.0,
-        f"...at optimal time: {optimal_value:.2f}",
-        ha="left",
-        va="bottom",
-        color=optimal_colour,
-        fontsize=14,
-        transform=ax.transAxes,
+    header_texts.append(
+        ax.text(
+            0.55,
+            1.0,
+            f"...at optimal time: {optimal_value:.2f}",
+            ha="left",
+            va="bottom",
+            color=optimal_colour,
+            fontsize=14,
+            transform=ax.transAxes,
+        )
     )
 
     # For a nice illustration of CI saved, plot the lines corresponding to
@@ -211,6 +240,15 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
         alpha=0.4,
         label="Mean for optimal window",
     )
+
+    # Compute the absolute and percentage saving between running now and
+    # running at the optimal time. This works for any metric (carbon
+    # intensity, day-ahead price, ...) since it is just now_value - optimal_value.
+    # Shown as the legend title, rather than a floating annotation, so it
+    # never overlaps the plotted data or the legend itself.
+    saving = now_value - optimal_value
+    saving_pct = (saving / now_value * 100) if now_value else float("nan")
+    legend_title = f"Saving: {saving:.2f} {units}  ({saving_pct:.1f}%)"
 
     # Include subtle markers at each data point, in case it helps to
     # distinguish forecast points from the trend (esp. useful if there)
@@ -251,17 +289,30 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     # bit cut off due to the length of some datetime x labels
     ax.set_xlabel(r"Time ($\mathbf{yy\text{-}mm\text{-}dd}$ hh:mm)")
     ax.xaxis.set_major_formatter(FuncFormatter(readable_datetime_tick_formatter))
-    ax.set_ylabel(rf"Forecast {forecast.metric} ({units})")
+    # The full metric name already appears once, in the title above the axes
+    # (see title_text); repeating it here too was especially cramped for the
+    # composite provider, whose metric name lists every active signal and
+    # its weight, so the axis label carries only the units.
+    ax.set_ylabel(units)
     ax.label_outer()
 
     ax.grid(True)
-    ax.legend()
+    ax.legend(title=legend_title, title_fontsize=10)
 
     fig.autofmt_xdate()
-    ax.set_ylim(bottom=0)  # start y-axis at 0, negative CI not possible!
+    if forecast.metric == "Carbon intensity" or all(
+        v.value >= 0 for v in forecast.values
+    ):
+        # Start y-axis at 0. Not valid for e.g. day-ahead electricity price,
+        # which can legitimately go negative during high renewable output.
+        ax.set_ylim(bottom=0)
 
     plt.subplots_adjust(bottom=0.20)
     if filename is None:
         plt.show()
     else:
-        plt.savefig(filename)
+        # bbox_inches="tight" (with the header text passed as extra artists,
+        # since text placed above the axes via ax.transAxes isn't otherwise
+        # considered) expands the saved image to fit long titles/labels
+        # instead of letting them clip against a fixed figure size.
+        plt.savefig(filename, bbox_inches="tight", bbox_extra_artists=header_texts)
