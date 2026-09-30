@@ -5,6 +5,10 @@ class InvalidLocationError(Exception):
     "Location passed was invalid for chosen provider"
 
 
+class InvalidMetricError(Exception):
+    "Metric passed was invalid for chosen provider"
+
+
 class UnsupportedProviderError(Exception):
     "Provider is unsupported"
 
