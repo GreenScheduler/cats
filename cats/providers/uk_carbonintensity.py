@@ -7,8 +7,6 @@ from importlib.resources import files
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
-from typing_extensions import override
-
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
 from .base import BaseProvider, fetch_url, provider
@@ -39,7 +37,6 @@ class UKCarbonIntensityProvider(BaseProvider):
 
     BASE_URL: ClassVar[str] = "https://api.carbonintensity.org.uk"
 
-    @override
     def validate_location(self, location: str | None) -> str:
         if location is None:
             raise InvalidLocationError(
@@ -53,15 +50,12 @@ class UKCarbonIntensityProvider(BaseProvider):
             return location
         raise InvalidLocationError(INVALID_LOCATION_MESSAGE.format(location=location))
 
-    @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         return 2820
 
-    @override
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         return 30
 
-    @override
     def get_data(
         self,
         timestamp: datetime,
