@@ -2,11 +2,12 @@
 import datetime
 import os
 import sys
-import requests
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Optional, cast
+
+import requests
 
 from .carbonFootprint import get_footprint_reduction_estimate
 from .configure import Args, get_runtime_config

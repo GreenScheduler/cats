@@ -1,10 +1,10 @@
 # Tests main() function
-import requests
 import subprocess
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
+import requests
 
 from cats.cli import main, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
