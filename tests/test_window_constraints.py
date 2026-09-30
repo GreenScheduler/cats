@@ -188,9 +188,7 @@ class TestConstrainedWindowedForecast:
             PointEstimate(datetime=start + timedelta(minutes=60), value=60),
         ]
 
-        forecast = WindowedForecast(
-            data, duration=5, start=start, max_window_minutes=5
-        )
+        forecast = WindowedForecast(data, duration=5, start=start, max_window_minutes=5)
 
         assert len(forecast) == 1
         assert forecast[0].start == start
