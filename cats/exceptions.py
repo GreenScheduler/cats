@@ -27,3 +27,7 @@ class DurationExceedsWindowError(Exception):
 
 class SchedulerError(Exception):
     "Error occurred while scheduling job"
+
+
+class PriceConstraintUnsatisfiableError(Exception):
+    "No candidate start time satisfies the given price constraint"

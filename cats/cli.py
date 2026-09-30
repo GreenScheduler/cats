@@ -7,7 +7,7 @@ from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional, cast
 
-from .carbonFootprint import get_footprint_reduction_estimate
+from .carbonFootprint import Estimates, get_footprint_reduction_estimate
 from .configure import Args, get_runtime_config
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .exceptions import (
@@ -15,6 +15,7 @@ from .exceptions import (
     InvalidLocationError,
     InvalidMetricError,
     MissingArgumentError,
+    PriceConstraintUnsatisfiableError,
     ProviderAuthenticationError,
     SchedulerError,
     UnsupportedProviderError,
@@ -22,6 +23,12 @@ from .exceptions import (
 from .forecast import WindowedForecast
 from .output import CATSOutput
 from .plotting import plotplan
+from .pricing import (
+    find_best_within_price_constraint,
+    price_at_window,
+    price_covers_window,
+    resolve_price_series,
+)
 from .providers import CompositeProvider, list_providers
 from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
@@ -259,6 +266,28 @@ def parse_arguments():
         "for that location is combined with equal weight. Ignored by all other "
         "providers.",
     )
+    price_constraint_group = parser.add_mutually_exclusive_group()
+    price_constraint_group.add_argument(
+        "--max-price",
+        type=float,
+        help="Restrict the job start time search to windows whose average day-ahead "
+        "price does not exceed this absolute cap (GBP/MWh for a UK postcode, "
+        "EUR/MWh for a wattnet.eu zone). Works with any --api/--metric, not just "
+        "'composite': price is fetched separately for the location regardless of "
+        "which metric is being optimised. The search is also implicitly capped to "
+        "whatever forecast horizon price data currently covers, which is often "
+        "shorter than the chosen metric's own horizon. Raises an error if no "
+        "candidate start time satisfies the cap. Mutually exclusive with "
+        "--max-price-increase-pct.",
+    )
+    price_constraint_group.add_argument(
+        "--max-price-increase-pct",
+        type=float,
+        help="Restrict the job start time search to windows whose average day-ahead "
+        "price is not more than this many percent above the price if the job "
+        "started right now. Same location/horizon behaviour as --max-price; "
+        "mutually exclusive with it.",
+    )
 
     parser.add_argument(
         "-s",
@@ -434,9 +463,8 @@ def run_cats(arguments: list[str] | None = None):
     ########################
     ## Obtain CI forecast ##
     ########################
-    forecast = provider.get_data(
-        datetime.datetime.now(timezone.utc), location, metric=args.metric
-    )
+    now_utc = datetime.datetime.now(timezone.utc)
+    forecast = provider.get_data(now_utc, location, metric=args.metric)
 
     #############################
     ## Find optimal start time ##
@@ -460,7 +488,48 @@ def run_cats(arguments: list[str] | None = None):
         max_window_minutes=max_window,
         end_constraint=end_constraint,
     )
-    now_avg, best_avg = wf[0], min(wf)
+    now_avg = wf[0]
+
+    #####################################################
+    ## Price: constraint (if requested) and reporting  ##
+    #####################################################
+
+    # Reused for both the constrained search below and the always-on price
+    # report: price is fetched for the location independently of whichever
+    # metric/provider is actually being optimised (see cats/pricing.py). A
+    # location composite doesn't recognise (neither a UK postcode nor a
+    # wattnet.eu zone code, e.g. energy-charts.info's own native zone codes
+    # used directly rather than through composite) is treated the same as
+    # "no price signal available" for the best-effort report, but as a hard
+    # error when a price constraint was explicitly requested.
+    price_constraint_requested = (
+        args.max_price is not None or args.max_price_increase_pct is not None
+    )
+    try:
+        price_series = resolve_price_series(
+            location, now_utc, provider_cls=provider_cls
+        )
+    except InvalidLocationError:
+        if price_constraint_requested:
+            raise
+        price_series = None
+
+    if price_constraint_requested:
+        if price_series is None:
+            raise InvalidLocationError(
+                f"{location}. No day-ahead price data available for this location; "
+                "cannot use --max-price/--max-price-increase-pct here."
+            )
+        best_avg = find_best_within_price_constraint(
+            wf,
+            price_series.values,
+            duration,
+            args.max_price,
+            args.max_price_increase_pct,
+        )
+    else:
+        best_avg = min(wf)
+
     output = CATSOutput(
         forecast.metric,
         now_avg,
@@ -470,6 +539,16 @@ def run_cats(arguments: list[str] | None = None):
         unit=forecast.unit,
         colour=not colour_output,
     )
+
+    if (
+        price_series is not None
+        and price_covers_window(price_series.values, now_avg.start, now_avg.end)
+        and price_covers_window(price_series.values, best_avg.start, best_avg.end)
+    ):
+        price_now = price_at_window(price_series.values, now_avg.start, duration)
+        price_best = price_at_window(price_series.values, best_avg.start, duration)
+        output.priceEstimate = Estimates(price_now, price_best, price_now - price_best)
+        output.priceUnit = price_series.unit
 
     ################################
     ## Calculate carbon footprint ##
@@ -540,6 +619,8 @@ def main(arguments: list[str] | None = None):
         print(f"One or more arguments missing: {e}")
     except DurationExceedsWindowError as e:
         print(f"Duration exceeds limit: {e}")
+    except PriceConstraintUnsatisfiableError as e:
+        print(f"Price constraint not satisfiable: {e}")
     except SchedulerError as e:
         print(f"Scheduler error: {e}")
     except ValueError as e:

@@ -339,6 +339,23 @@ def test_bad_zone():
         _ = provider.get_data(timestamp, "NOT_A_ZONE")
 
 
+def test_resolve_signal():
+    """
+    resolve_signal() is the single-signal accessor used e.g. by
+    cats/pricing.py. OX1's price signal routes to octopus.energy (no auth
+    needed); XK (Kosovo) has no price signal at all, detected from the
+    static WATTNET_TO_ENERGYCHARTS_ZONE lookup without any network call.
+    """
+    provider = CompositeProvider()
+    timestamp = datetime.now()
+
+    price = provider.resolve_signal("price", "OX1", timestamp)
+    assert price is not None
+    assert price.metric == "Day-ahead electricity price"
+
+    assert provider.resolve_signal("price", "XK", timestamp) is None
+
+
 @pytest.mark.skipif(
     not has_auth_env_setup(),
     reason="No wattnet.eu authentication token found in environment",

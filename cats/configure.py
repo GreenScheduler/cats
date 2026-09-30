@@ -58,6 +58,8 @@ class Args(Namespace):
     list_providers: bool
     metric: str | None
     signal: list[tuple[str, float]] | None
+    max_price: float | None
+    max_price_increase_pct: float | None
 
 
 def get_runtime_config(

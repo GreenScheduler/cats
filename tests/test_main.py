@@ -1,6 +1,6 @@
 # Tests main() function
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
@@ -8,7 +8,7 @@ import pytest
 from cats.cli import main, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.exceptions import InvalidLocationError
-from cats.forecast import AverageEstimate
+from cats.forecast import AverageEstimate, PointEstimate, Timeseries
 from cats.output import CATSOutput
 from cats.schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 
@@ -137,3 +137,94 @@ def test_list_providers(capsys):
         "composite",
     ]:
         assert name in out
+
+
+def _wide_flat_series(metric: str, unit: str, value: float) -> Timeseries:
+    "A flat series spanning well beyond any real 'now' at 30 minute resolution"
+    start = datetime.now(timezone.utc) - timedelta(hours=2)
+    return Timeseries(
+        metric,
+        values=[
+            PointEstimate(value=value, datetime=start + timedelta(minutes=30 * i))
+            for i in range(100)  # 2h before "now" through ~48h after
+        ],
+        unit=unit,
+    )
+
+
+def test_max_price_mutually_exclusive_with_max_price_increase_pct():
+    with pytest.raises(SystemExit):
+        main(
+            [
+                "-d",
+                "30",
+                "--loc",
+                "OX1",
+                "--max-price",
+                "100",
+                "--max-price-increase-pct",
+                "10",
+            ]
+        )
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+def test_unsatisfiable_price_constraint_reports_error(
+    mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = _wide_flat_series(
+        "Day-ahead electricity price", "GBP/MWh", 100.0
+    )
+
+    assert main(["-d", "30", "--loc", "OX1", "--max-price", "1"]) == 1
+    assert "Price constraint not satisfiable" in capsys.readouterr().out
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+def test_price_report_appears_when_price_available(
+    mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = _wide_flat_series(
+        "Day-ahead electricity price", "GBP/MWh", 150.0
+    )
+
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    out = capsys.readouterr().out
+    assert "Price if job started now" in out
+    assert "150.00 GBP/MWh" in out
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+def test_price_report_absent_when_price_data_out_of_range(
+    mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    # Price data exists but is nowhere near the present, so it cannot cover
+    # either the "now" or the chosen window: the report must be omitted
+    # entirely rather than shown with a stale/misleading comparison.
+    mock_resolve_price_series.return_value = Timeseries(
+        "Day-ahead electricity price",
+        values=[
+            PointEstimate(
+                value=100.0, datetime=datetime(2020, 1, 1, tzinfo=timezone.utc)
+            ),
+            PointEstimate(
+                value=100.0, datetime=datetime(2020, 1, 1, 1, tzinfo=timezone.utc)
+            ),
+        ],
+        unit="GBP/MWh",
+    )
+
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    assert "Price if job started now" not in capsys.readouterr().out

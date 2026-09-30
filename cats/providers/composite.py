@@ -424,6 +424,51 @@ class CompositeProvider(BaseProvider):
             )
         return specs
 
+    def resolve_signal(
+        self,
+        name: str,
+        location: str,
+        timestamp: datetime,
+        assume_kind: str | None = None,
+    ) -> Timeseries | None:
+        """
+        Fetch one named composite signal for this location
+
+        Independent of whichever combination (if any) is actually being
+        requested via --signal - useful for a caller that only ever wants
+        one specific signal (e.g. cats/pricing.py wanting just "price"),
+        without needing to know about this class' internal signal registry.
+
+        :param assume_kind: "uk_postcode" or "wattnet_zone" to skip
+            auto-detecting the location kind and use this one directly.
+            For a small number of codes valid under both schemes (e.g.
+            'SE1'-'SE4'), auto-detection always prefers the UK postcode
+            interpretation - which is wrong when the caller already knows,
+            from a specific single-scheme provider having validated this
+            same location string, that it is actually the other kind (e.g.
+            `--api wattnet.eu --location SE1` unambiguously means the
+            Swedish wattnet.eu zone, not the South East London postcode).
+        :return: the signal's Timeseries, or None if this location has no
+            data source for it at all
+        :raises InvalidLocationError: if `location` matches neither the UK
+            postcode nor the wattnet.eu zone scheme at all
+        """
+        if assume_kind == "uk_postcode":
+            kind = "uk_postcode"
+            canonical_location = UKCarbonIntensityProvider().validate_location(location)
+        elif assume_kind == "wattnet_zone":
+            kind = "wattnet_zone"
+            canonical_location = WattnetEuProvider().validate_location(location)
+        else:
+            kind, canonical_location = self._detect_location(location)
+        specs = self._signal_specs(kind, canonical_location, timestamp)
+        if name not in specs:
+            return None
+        provider, metric, provider_location, note = specs[name]
+        if note:
+            logging.warning(note)
+        return provider.get_data(timestamp, provider_location, metric=metric)
+
     @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         # Location-independent nominal capability (used e.g. by
