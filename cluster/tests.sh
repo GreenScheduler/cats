@@ -49,7 +49,7 @@ echo "✅ Job is correctly delayed until $scheduled_start"
 # Verify the local at queue is shared with the dynamic scheduler container.
 at_output=$(docker exec slurmctld bash -lc \
   "echo 'sleep 120' | at -t \$(date -d '+1 day' +%Y%m%d%H%M)")
-at_job_id=$(printf '%s\n' "$at_output" | awk '/^job / {print $2}')
+at_job_id=$(printf '%s\n' "$at_output" | grep -Eo 'job[[:space:]]+[0-9]+' | awk '{print $2}' | tail -n 1)
 if [ -z "$at_job_id" ]; then
   echo "Could not determine at job ID"
   echo "$at_output"
