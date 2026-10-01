@@ -24,6 +24,8 @@ class CATSOutput:
     countryISO3: str
     unit: str
     emmissionEstimate: Optional[Estimates] = None
+    priceEstimate: Optional[Estimates] = None
+    priceUnit: Optional[str] = None
     colour: bool = False
 
     def __str__(self) -> str:
@@ -47,15 +49,70 @@ class CATSOutput:
             col_ee_now = ""
             col_ee_opt = ""
 
-        out = f"""
-Best job start time                       = {col_dt_opt}{self.valueOptimal.start:%Y-%m-%d %H:%M:%S}{col_normal}
-{self.metric} if job started now       = {col_ci_now}{self.valueNow.value:.2f} {self.unit}{col_normal}
-{self.metric} at optimal time          = {col_ci_opt}{self.valueOptimal.value:.2f} {self.unit}{col_normal}"""
+        # Labels vary a lot in length depending on which metric/provider is in
+        # use (e.g. "Carbon intensity" vs "Day-ahead electricity price"), so
+        # the "=" column is aligned dynamically rather than to hardcoded
+        # whitespace tuned for one particular metric name. Capped so one
+        # pathologically long label doesn't drag every other line's padding
+        # out with it; a label past the cap just gets a single space instead.
+        lines: list[tuple[str, str]] = [
+            (
+                "Best job start time",
+                f"{col_dt_opt}{self.valueOptimal.start:%Y-%m-%d %H:%M:%S}{col_normal}",
+            ),
+            (
+                f"{self.metric} if job started now",
+                f"{col_ci_now}{self.valueNow.value:.2f} {self.unit}{col_normal}",
+            ),
+            (
+                f"{self.metric} at optimal time",
+                f"{col_ci_opt}{self.valueOptimal.value:.2f} {self.unit}{col_normal}",
+            ),
+        ]
 
         if self.emmissionEstimate:
-            out += f"""
-Estimated emissions if job started now    = {col_ee_now}{self.emmissionEstimate.now}{col_normal}
-Estimated emissions at optimal time       = {col_ee_opt}{self.emmissionEstimate.best} (- {self.emmissionEstimate.savings}){col_normal}"""
+            lines.append(
+                (
+                    "Estimated emissions if job started now",
+                    f"{col_ee_now}{self.emmissionEstimate.now}{col_normal}",
+                )
+            )
+            lines.append(
+                (
+                    "Estimated emissions at optimal time",
+                    f"{col_ee_opt}{self.emmissionEstimate.best} "
+                    f"(- {self.emmissionEstimate.savings}){col_normal}",
+                )
+            )
+
+        if self.priceEstimate:
+            # Deliberately "at chosen start time", not "at optimal time": price is
+            # reported here, not optimised for - the job start time above was chosen
+            # for self.metric, not for lowest price. Unlike emmissionEstimate.savings
+            # (always >= 0, since that metric is what's being optimised for),
+            # priceEstimate.savings can be negative - the whole point of this report
+            # is that optimising for another metric can make price *worse* - so show
+            # an explicit sign instead of a literal "(- -71.24)".
+            price_change = self.priceEstimate.savings
+            sign = "-" if price_change >= 0 else "+"
+            lines.append(
+                (
+                    "Price if job started now",
+                    f"{col_ee_now}{self.priceEstimate.now:.2f} {self.priceUnit}{col_normal}",
+                )
+            )
+            lines.append(
+                (
+                    "Price at chosen start time",
+                    f"{col_ee_opt}{self.priceEstimate.best:.2f} {self.priceUnit} "
+                    f"({sign} {abs(price_change):.2f}){col_normal}",
+                )
+            )
+
+        max_label_width = 50
+        label_width = min(max(len(label) for label, _ in lines), max_label_width)
+        body = "\n".join(f"{label:<{label_width}} = {value}" for label, value in lines)
+        out = f"\n{body}"
 
         logging.info("Use '--format=json' to get this in machine readable format")
         return out

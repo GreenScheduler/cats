@@ -2,20 +2,22 @@
 import datetime
 import os
 import sys
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from argparse import Action, ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Optional, cast
 
 import requests
 
-from .carbonFootprint import get_footprint_reduction_estimate
+from .carbonFootprint import Estimates, get_footprint_reduction_estimate
 from .configure import Args, get_runtime_config
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from .exceptions import (
     DurationExceedsWindowError,
     InvalidLocationError,
+    InvalidMetricError,
     MissingArgumentError,
+    PriceConstraintUnsatisfiableError,
     ProviderAuthenticationError,
     SchedulerError,
     UnsupportedProviderError,
@@ -23,6 +25,13 @@ from .exceptions import (
 from .forecast import WindowedForecast
 from .output import CATSOutput
 from .plotting import plotplan
+from .pricing import (
+    find_best_within_price_constraint,
+    price_at_window,
+    price_covers_window,
+    resolve_price_series,
+)
+from .providers import get_provider, list_providers
 from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
 
@@ -37,6 +46,66 @@ def is_headless() -> bool:
 
 def indent_lines(lines, spaces):
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
+
+
+def print_providers():
+    "Print the registered data providers and their properties"
+    for name, provider_cls in sorted(list_providers().items()):
+        instance = provider_cls()
+        docstring = (provider_cls.__doc__ or "").strip().splitlines()
+        summary = docstring[0].strip() if docstring else ""
+        print(f"{name}")
+        print(f"    {summary}")
+        print(
+            "    max duration: "
+            f"{instance.get_max_duration_minutes()} min, "
+            "resolution: "
+            f"{instance.get_temporal_resolution_minutes()} min"
+        )
+        if instance.SUPPORTED_METRICS:
+            metrics = ", ".join(
+                f"{m} (default)" if m == instance.DEFAULT_METRIC else m
+                for m in sorted(instance.SUPPORTED_METRICS)
+            )
+            print(f"    metrics: {metrics}")
+
+
+def print_locations(api: str | None = None, metric: str | None = None):
+    "Print the valid --location codes of one provider, or of all of them"
+    providers = list_providers()
+    if api:
+        providers = {api: get_provider(api)}
+    for name, provider_cls in sorted(providers.items()):
+        instance = provider_cls()
+        groups = instance.list_locations(metric)
+        print(name)
+        if not groups:
+            print("    (no location list available)")
+        for group in groups:
+            print(f"  {group.heading}")
+            if group.note:
+                print(f"    {group.note}")
+            if group.locations:
+                print(indent_lines(format_locations(group.locations), 4))
+        print()
+
+
+def format_locations(locations: dict[str, str]) -> str:
+    "Format codes in aligned columns, or one per line if they have names"
+    if not locations:
+        return ""
+    if any(locations.values()):
+        width = max(len(code) for code in locations)
+        return "\n".join(
+            f"{code:<{width}}  {name}".rstrip() for code, name in locations.items()
+        )
+    width = max(len(code) for code in locations) + 2
+    columns = max(1, 76 // width)
+    codes = list(locations)
+    return "\n".join(
+        "".join(code.ljust(width) for code in codes[i : i + columns]).rstrip()
+        for i in range(0, len(codes), columns)
+    )
 
 
 def print_banner(disable_colour):
@@ -188,11 +257,60 @@ def parse_arguments():
         "-d",
         "--duration",
         type=int,
-        required=True,
-        help="[required] Expected duration of the job in minutes.",
+        help="[required, unless --list-providers or --list-locations is given] "
+        "Expected duration "
+        "of the job in minutes.",
     )
 
     ### Optional
+
+    parser.add_argument(
+        "--list-providers",
+        action="store_true",
+        help="List the registered data providers and their properties, then exit "
+        "(no --duration needed).",
+    )
+    parser.add_argument(
+        "--list-locations",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="API",
+        help="List the valid --location codes, then exit (no --duration needed). "
+        "Location codes differ between providers. Use -a / --api (or give an API "
+        "name here) to list only that provider's, otherwise all are listed. Combine with --metric to restrict to one metric, since "
+        "some providers use different codes per metric.",
+    )
+    parser.add_argument(
+        "--metric",
+        type=str,
+        help="Which metric to request from the chosen provider, for providers that "
+        "serve more than one. Run --list-providers to see each provider's "
+        "supported metrics and its default. Ignored by providers that only serve "
+        "a single metric.",
+    )
+    price_constraint_group = parser.add_mutually_exclusive_group()
+    price_constraint_group.add_argument(
+        "--max-price",
+        type=float,
+        help="Restrict the job start time search to windows whose average day-ahead "
+        "price does not exceed this absolute cap (GBP/MWh for a GB postcode, "
+        "EUR/MWh for a wattnet.eu zone). Works with any --api/--metric: price is "
+        "fetched separately for the location regardless of which metric is being "
+        "optimised. The search is also implicitly capped to "
+        "whatever forecast horizon price data currently covers, which is often "
+        "shorter than the chosen metric's own horizon. Raises an error if no "
+        "candidate start time satisfies the cap. Mutually exclusive with "
+        "--max-price-increase-pct.",
+    )
+    price_constraint_group.add_argument(
+        "--max-price-increase-pct",
+        type=float,
+        help="Restrict the job start time search to windows whose average day-ahead "
+        "price is not more than this many percent above the price if the job "
+        "started right now. Same location/horizon behaviour as --max-price; "
+        "mutually exclusive with it.",
+    )
 
     parser.add_argument(
         "-s",
@@ -201,15 +319,24 @@ def parse_arguments():
         help="Pass command using `-c` to scheduler.",
         choices=["at", "sbatch"],
     )
+
+    class StoreApi(Action):
+        "Store --api and remember it was given, as it has a default value"
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            setattr(namespace, self.dest, values)
+            namespace.api_given = True
+
+    parser.set_defaults(api_given=False)
     parser.add_argument(
         "-a",
         "--api",
+        action=StoreApi,
         type=str,
         default="carbonintensity.org.uk",
-        help="API to use to obtain carbon intensity forecasts. Overrides `config.yml`. "
-        "There is a choice of `carbonintensity.org.uk` (only forecasts in Great Britain)"
-        "or `wattnet.eu` (experimental, for forecasts across Europe). "
-        "Default: `carbonintensity.org.uk`.",
+        help="API to use to obtain forecasts. Overrides `config.yml`. "
+        "Run --list-providers to see the available APIs, their metrics and "
+        "location formats. Default: `carbonintensity.org.uk`.",
     )
     parser.add_argument(
         "-c", "--command", help="Command to schedule, requires --scheduler to be set"
@@ -316,6 +443,21 @@ def run_cats(arguments: list[str] | None = None):
     args = cast(Args, parser.parse_args(arguments))
     colour_output = args.no_colour or args.no_color
 
+    if args.list_providers:
+        print_providers()
+        return
+
+    if args.list_locations is not None:
+        api = args.list_locations or (args.api if args.api_given else None)
+        print_locations(api, args.metric)
+        return
+
+    if args.duration is None:
+        raise MissingArgumentError(
+            "-d / --duration is required, unless --list-providers or "
+            "--list-locations is given"
+        )
+
     if args.command and not args.scheduler:
         raise MissingArgumentError(
             "To run a command or sbatch script with -c / --comand, you must specify scheduler with -s / --scheduler"
@@ -332,7 +474,7 @@ def run_cats(arguments: list[str] | None = None):
     except ValueError as e:
         raise ValueError(f"Error in window constraints: {e}")
     # Check against both API limit and user-specified window
-    max_duration_minutes = provider.get_max_duration_minutes()
+    max_duration_minutes = provider.get_max_duration_minutes(metric=args.metric)
     effective_max_duration = min(max_duration_minutes, max_window)
     if duration > effective_max_duration:
         if max_window < max_duration_minutes:
@@ -345,7 +487,8 @@ def run_cats(arguments: list[str] | None = None):
     ########################
     ## Obtain CI forecast ##
     ########################
-    forecast = provider.get_data(datetime.datetime.now(timezone.utc), location)
+    now_utc = datetime.datetime.now(timezone.utc)
+    forecast = provider.get_data(now_utc, location, metric=args.metric)
 
     #############################
     ## Find optimal start time ##
@@ -369,7 +512,47 @@ def run_cats(arguments: list[str] | None = None):
         max_window_minutes=max_window,
         end_constraint=end_constraint,
     )
-    now_avg, best_avg = wf[0], min(wf)
+    now_avg = wf[0]
+
+    #####################################################
+    ## Price: constraint (if requested) and reporting  ##
+    #####################################################
+
+    # Reused for both the constrained search below and the always-on price
+    # report: price is fetched for the location independently of whichever
+    # metric/provider is actually being optimised (see cats/pricing.py). A
+    # location that is neither a GB postcode nor a wattnet.eu zone code
+    # (e.g. energy-charts.info's own native zone codes) is treated the same as
+    # "no price signal available" for the best-effort report, but as a hard
+    # error when a price constraint was explicitly requested.
+    price_constraint_requested = (
+        args.max_price is not None or args.max_price_increase_pct is not None
+    )
+    try:
+        price_series = resolve_price_series(
+            location, now_utc, provider_cls=provider_cls
+        )
+    except InvalidLocationError:
+        if price_constraint_requested:
+            raise
+        price_series = None
+
+    if price_constraint_requested:
+        if price_series is None:
+            raise InvalidLocationError(
+                f"{location}. No day-ahead price data available for this location; "
+                "cannot use --max-price/--max-price-increase-pct here."
+            )
+        best_avg = find_best_within_price_constraint(
+            wf,
+            price_series.values,
+            duration,
+            args.max_price,
+            args.max_price_increase_pct,
+        )
+    else:
+        best_avg = min(wf)
+
     output = CATSOutput(
         forecast.metric,
         now_avg,
@@ -379,6 +562,16 @@ def run_cats(arguments: list[str] | None = None):
         unit=forecast.unit,
         colour=not colour_output,
     )
+
+    if (
+        price_series is not None
+        and price_covers_window(price_series.values, now_avg.start, now_avg.end)
+        and price_covers_window(price_series.values, best_avg.start, best_avg.end)
+    ):
+        price_now = price_at_window(price_series.values, now_avg.start, duration)
+        price_best = price_at_window(price_series.values, best_avg.start, duration)
+        output.priceEstimate = Estimates(price_now, price_best, price_now - price_best)
+        output.priceUnit = price_series.unit
 
     ################################
     ## Calculate carbon footprint ##
@@ -439,6 +632,8 @@ def main(arguments: list[str] | None = None):
         return 0
     except InvalidLocationError as e:
         print(f"Invalid location: {e}")
+    except InvalidMetricError as e:
+        print(f"Invalid metric: {e}")
     except UnsupportedProviderError as e:
         print(f"Unsupported provider: {e}")
     except ProviderAuthenticationError as e:
@@ -447,6 +642,8 @@ def main(arguments: list[str] | None = None):
         print(f"One or more arguments missing: {e}")
     except DurationExceedsWindowError as e:
         print(f"Duration exceeds limit: {e}")
+    except PriceConstraintUnsatisfiableError as e:
+        print(f"Price constraint not satisfiable: {e}")
     except SchedulerError as e:
         print(f"Scheduler error: {e}")
     except requests.exceptions.JSONDecodeError as e:

@@ -42,6 +42,8 @@ should be transparent to cluster users.
 It will display the time to start the job on standard out and optionally
 some information about the carbon intensity on standard error.
 
+.. _locations-outside-gb:
+
 Locations outside Great Britain
 -------------------------------
 
@@ -53,11 +55,12 @@ it is possible to specify a different experimental data source provided by
 the https://wattnet.eu/ project. This provides data at coarser spatial resolution
 (approximately 60 zones across Europe including one representing Great Britain
 compared to 14 areas provided by the NESO) but at finer time resolution (15
-compared to 30 minutes) and for a longer duration (4 days rather than 2 days).
+compared to 30 minutes) and for a longer duration (72 hours rather than 48 hours).
 To use https://wattnet.eu/ the `--location` argument **must** be provided and must be the
 name of a zone. In addition the `--api` argument needs to have the value "wattnet.eu"
 and your personal wattnet password and email address combination must be provided via
-environment variables. The example above is thus changed to:
+environment variables. See https://docs.wattnet.eu for details on registering for an
+account and obtaining these credentials. The example above is thus changed to:
 
 .. code-block:: console
    :caption: *A basic command to run CATS using wattnet data.*
@@ -82,6 +85,222 @@ environment variables. The example above is thus changed to:
 The best start time from wattnet may not match the best start time from NESO's
 service. All other arguments below are supported by both providers, and it
 may be instructive to plot the forecasts.
+
+Multi-metric providers: cost and renewable share
+---------------------------------------------------
+
+Beyond carbon intensity, several providers can serve more than one metric
+from the same underlying API portal. Which metric to request is selected
+with ``--metric``; each provider has a default so existing commands that
+never pass ``--metric`` keep working unchanged. Run ``cats --list-providers``
+at any time to see each provider's supported metrics and its default (see
+:ref:`listing-providers` below).
+
+``energy-charts.info`` (continental Europe, excluding Great Britain) and
+``octopus.energy`` (Great Britain) serve day-ahead electricity **price**
+(the default metric for both), letting CATS schedule jobs to minimise
+electricity *cost* instead of carbon. Both are free and require no
+authentication. Lower price is treated as "better", the same way lower
+carbon intensity is, so no other arguments change:
+
+.. code-block:: console
+   :caption: *Using energy-charts.info for cost-aware scheduling in Germany/Luxembourg.*
+
+   $ cats --duration 180 --location DE-LU --api energy-charts.info
+   ...
+
+   Best job start time                       = 2026-09-29 21:00:00
+   Day-ahead electricity price if job started now       = 89.40 EUR/MWh
+   Day-ahead electricity price at optimal time          = 80.34 EUR/MWh
+
+.. code-block:: console
+   :caption: *Using octopus.energy for cost-aware scheduling in Great Britain (region C, London).*
+
+   $ cats --duration 180 --location C --api octopus.energy
+   ...
+
+   Best job start time                       = 2026-09-29 21:00:00
+   Day-ahead electricity price if job started now       = 163.64 GBP/MWh
+   Day-ahead electricity price at optimal time          = 135.21 GBP/MWh
+
+The same two providers also serve a ``renewables`` metric: the share of
+electricity generation that is renewable. Maximising renewable share does
+not always coincide with minimising carbon intensity (nuclear generation is
+low-carbon but not renewable) or price, which is what makes it a genuinely
+different scheduling signal. ``carbonintensity.org.uk`` (Great Britain) also
+serves ``renewables``, derived from the same regional API response it
+already fetches for ``carbon`` - no extra API call is needed. All three
+report **non-renewable share** rather than renewable share directly (100
+minus the renewable percentage), so that "lower is better" still holds and
+no changes were needed to the scheduler itself:
+
+.. code-block:: console
+   :caption: *energy-charts.info's renewables metric, for Germany.*
+
+   $ cats --duration 180 --location de --api energy-charts.info --metric renewables
+   ...
+
+   Best job start time                       = 2026-09-29 19:39:41
+   Non-renewable share if job started now       = 41.09 %
+   Non-renewable share at optimal time          = 31.42 %
+
+.. code-block:: console
+   :caption: *carbonintensity.org.uk's renewables metric, for a GB postcode.*
+
+   $ cats --duration 180 --location OX1 --api carbonintensity.org.uk --metric renewables
+   ...
+
+   Best job start time                       = 2026-09-30 04:39:41
+   Non-renewable share if job started now       = 47.70 %
+   Non-renewable share at optimal time          = 28.83 %
+
+Note this value can occasionally go negative for the ``energy-charts.info``
+provider: renewable generation can briefly exceed 100% of domestic load
+around midday in high-solar/wind countries (the surplus is exported), which
+is real data, not a bug, and still scores correctly (more negative is still
+"better"). ``uk`` is a country code the underlying API accepts but has no
+real data for; use ``carbonintensity.org.uk --metric renewables`` for Great
+Britain instead.
+
+``--footprint`` has no effect with any of the price or renewables metrics,
+since it is specific to the ``Carbon intensity`` metric.
+
+Sustainability metrics from wattnet.eu
+-----------------------------------------
+
+``wattnet.eu`` (see :ref:`locations-outside-gb` above) serves four metrics
+from three separate endpoints of its own API, confirmed live against the
+real service: ``carbon`` (the default; the carbon intensity metric
+described above), ``water`` (life-cycle water footprint, in L/kWh),
+``water_stress`` (water-stress-weighted footprint, in stress-L/kWh -
+accounts for local water scarcity rather than plain volume), and
+``environmental_score`` (wattnet's own composite score, where higher is
+better; CATS negates it so that lower is better, like every other metric CATS reports).
+
+.. code-block:: console
+   :caption: *wattnet.eu's water metric, for Germany.*
+
+   $ cats --duration 180 --location DE --api wattnet.eu --metric water
+   ...
+
+   Best job start time                       = 2026-09-30 10:24:43
+   Water footprint if job started now       = 18.10 L/kWh
+   Water footprint at optimal time          = 11.24 L/kWh
+
+Constraining, rather than optimising for, price
+-------------------------------------------------
+
+Optimising for price directly can drift away from CATS' climate-aware
+purpose. As a safer default, CATS can instead treat price as a hard
+**constraint** on top of whichever metric is actually being optimised
+(``carbon``, ``renewables``, ``environmental_score``, ...): keep optimising
+for that metric, but only consider job start times whose price does not
+exceed a cap.
+
+``--max-price-increase-pct N`` caps price at N% above running the job right
+now; ``--max-price N`` caps it at an absolute value (GBP/MWh for a GB
+postcode, EUR/MWh for a wattnet.eu zone). They are mutually exclusive, and
+work with *any* provider or metric - price is fetched for the location
+independently of what is actually being optimised:
+
+.. code-block:: console
+   :caption: *Optimise for carbon, but never accept a price increase over
+              running the job right now, for a GB postcode.*
+
+   $ cats --duration 60 --location OX1 --api carbonintensity.org.uk --max-price-increase-pct 0
+   ...
+
+   Best job start time                       = 2026-09-30 11:46:45
+   Carbon intensity if job started now       = 72.71 gCO2eq/kWh
+   Carbon intensity at optimal time          = 72.71 gCO2eq/kWh
+   Price if job started now                  = 137.65 GBP/MWh
+   Price at chosen start time                 = 137.65 GBP/MWh (- 0.00)
+
+Without the ``--max-price-increase-pct`` constraint above, the same command
+picks a genuinely lower-carbon window (64.01 gCO2eq/kWh) that happens to be
+considerably *more* expensive (229.45 GBP/MWh, a saving of -91.80, i.e. a
+price *increase*) - exactly the trade-off this feature exists to let you
+control explicitly rather than accept implicitly.
+
+If no candidate start time both satisfies the cap and falls within however
+far ahead price data currently reaches (day-ahead prices are typically only
+published a matter of hours to a couple of days ahead, often considerably
+less than e.g. wattnet.eu's own 72 hour forecast horizon), CATS raises a
+clear error rather than silently ignoring the constraint or picking an
+unverified window.
+
+Whether or not either flag is given, CATS also reports the price impact of
+the chosen schedule whenever price data is available for the location (as
+seen in the example above) - so you always see the cost consequence of an
+environmental-metric-only optimisation, without price ever silently
+influencing that optimisation itself. This report is only shown when price
+data actually covers *both* the "now" and the chosen start time; if the
+chosen window falls outside price data's current horizon, the report is
+omitted entirely rather than showing a partial or misleading comparison.
+
+.. _listing-providers:
+
+Listing available providers
+----------------------------
+
+To see all registered providers, their coverage, their forecast properties
+and (where relevant) their supported metrics and default, without needing
+to also supply ``--duration``:
+
+.. code-block:: console
+
+   $ cats --list-providers
+   carbonintensity.org.uk
+       Provider for the National Energy System Operator's carbonintensity.org.uk API
+       max duration: 2820 min, resolution: 30 min
+       metrics: carbon (default), renewables
+   energy-charts.info
+       Provider for the Fraunhofer ISE Energy-Charts API
+       max duration: 2265 min, resolution: 15 min
+       metrics: price (default), renewables
+   octopus.energy
+       Provider for the Octopus Energy Agile tariff API
+       max duration: 2250 min, resolution: 30 min
+       metrics: price (default)
+   wattnet.eu
+       Experimental provider for the wattnet.eu project API
+       max duration: 4305 min, resolution: 15 min
+       metrics: carbon (default), environmental_score, water, water_stress
+
+The maximum duration of ``energy-charts.info`` and ``octopus.energy`` depends
+on the time of day, since their data runs to the end of tomorrow (or, for the
+``energy-charts.info`` ``renewables`` metric, the end of today). The values
+above are from 10:00 local time.
+
+.. _listing-locations:
+
+Listing valid locations
+-----------------------
+
+Each provider uses its own location codes (GB postcode outward codes, GB region
+letters, bidding zones, country codes or wattnet.eu zones), so ``--location``
+values are not interchangeable between providers. To see the valid codes,
+without needing ``--duration``:
+
+.. code-block:: console
+
+   $ cats --list-locations --api octopus.energy
+   octopus.energy
+     GB electricity distribution region letters
+       A  East England
+       B  East Midlands
+       C  London
+       ...
+
+Use ``--api`` (or give the API name directly after ``--list-locations``) to list
+a single provider, or omit it to list all of them.
+Some providers use different codes per metric (``energy-charts.info`` takes
+bidding zones for ``price`` and country codes for ``renewables``), so add
+``--metric`` to restrict the listing:
+
+.. code-block:: console
+
+   $ cats --list-locations --api energy-charts.info --metric renewables
 
 Illustration of estimate with ``--plot``
 ----------------------------------------
@@ -116,7 +335,10 @@ compared to at the optimal time. For example:
   :align: center
 
 The optimal window is where the area under the curve is minimised, as
-highlighted in the plot ('Optimal job window').
+highlighted in the plot ('Optimal job window'). The legend title shows the
+absolute and percentage saving between the 'now' and 'optimal' means, for
+whichever metric and unit the chosen provider returns (carbon intensity,
+price or non-renewable share).
 
 .. _configuration-file:
 

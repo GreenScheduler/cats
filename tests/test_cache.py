@@ -162,3 +162,27 @@ def test_fetch_url_uses_cache(tmp_path: Path, mock_get):
     # user agent is always sent
     assert user_agent.items() <= mock_get.call_args.kwargs["headers"].items()
     assert (tmp_path / CACHE_NAME).is_dir()
+
+
+def test_get_retries_transient_errors(cache: Cache, mock_get):
+    mock_get.side_effect = [make_response(503), make_response(429), make_response()]
+    with patch("cats.cache.time.sleep") as sleep:
+        response = cache.get(URL)
+    assert response.ok
+    assert mock_get.call_count == 3
+    assert sleep.call_count == 2
+
+
+def test_get_does_not_retry_500(cache: Cache, mock_get):
+    mock_get.return_value = make_response(500)
+    with patch("cats.cache.time.sleep") as sleep:
+        assert cache.get(URL).status_code == 500
+    assert mock_get.call_count == 1
+    sleep.assert_not_called()
+
+
+def test_get_gives_up_after_max_retries(cache: Cache, mock_get):
+    mock_get.return_value = make_response(503)
+    with patch("cats.cache.time.sleep"):
+        assert cache.get(URL).status_code == 503
+    assert mock_get.call_count == 4

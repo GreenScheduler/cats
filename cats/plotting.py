@@ -212,6 +212,15 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
         label="Mean for optimal window",
     )
 
+    # Compute the absolute and percentage saving between running now and
+    # running at the optimal time. This works for any metric (carbon
+    # intensity, day-ahead price, ...) since it is just now_value - optimal_value.
+    # Shown as the legend title, rather than a floating annotation, so it
+    # never overlaps the plotted data or the legend itself.
+    saving = now_value - optimal_value
+    saving_pct = (saving / now_value * 100) if now_value else float("nan")
+    legend_title = f"Saving: {saving:.2f} {units}  ({saving_pct:.1f}%)"
+
     # Include subtle markers at each data point, in case it helps to
     # distinguish forecast points from the trend (esp. useful if there)
     # is a similar trend across/for 1 hour or more i.e. 3+ data points
@@ -255,10 +264,15 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     ax.label_outer()
 
     ax.grid(True)
-    ax.legend()
+    ax.legend(title=legend_title, title_fontsize=10)
 
     fig.autofmt_xdate()
-    ax.set_ylim(bottom=0)  # start y-axis at 0, negative CI not possible!
+    if forecast.metric == "Carbon intensity" or all(
+        v.value >= 0 for v in forecast.values
+    ):
+        # Start y-axis at 0. Not valid for e.g. day-ahead electricity price,
+        # which can legitimately go negative during high renewable output.
+        ax.set_ylim(bottom=0)
 
     plt.subplots_adjust(bottom=0.20)
     if filename is None:

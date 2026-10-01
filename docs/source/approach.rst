@@ -83,9 +83,25 @@ We have designed CATS in a modular way to enable future integration of other API
 straightforward manner and also currently support the experimental API provided by the
 https://wattnet.eu/ project for locations across Europe. We note that this API requires
 authentication and for users to register an email address and obtain a password. The wattnet.eu
-API provides data for about 60 zones across Europe (inside and outside the EU) with 96 hour
+API provides data for about 60 zones across Europe (inside and outside the EU) with 72 hour
 forecasts broken down into 15 minute periods. New APIs can be added by creating new implementations
 of the `cats.providers.BaseProvider` abstract base class and registering these as documented elsewhere.
+
+A provider represents one API portal and can serve several metrics, chosen with ``--metric`` (each
+provider has a default, so existing commands are unaffected). Besides carbon intensity, CATS can
+minimise water footprint, water stress and wattnet.eu's environmental score (``wattnet.eu``),
+day-ahead electricity price (``energy-charts.info`` for continental Europe, ``octopus.energy`` for
+Great Britain) and non-renewable share (``energy-charts.info`` and ``carbonintensity.org.uk``). The
+scheduler always looks for the lowest average value, so metrics where higher is better are
+reported with the opposite sign or as their complement: the environmental score is negated and the
+renewable share is reported as non-renewable share (100 minus the renewable percentage). Run
+``cats --list-providers`` to see every provider with its metrics.
+
+Price can also act as a constraint rather than as the metric being minimised: ``--max-price`` and
+``--max-price-increase-pct`` keep the chosen metric as what is minimised, but
+only over start times whose price satisfies the cap. This works with any provider. If no start time within the available price forecast satisfies the cap, CATS reports
+an error. Whenever price data is available, CATS also reports the price of the chosen schedule
+against starting now.
 
 With the carbon intensity forecast and duration of the proposed computation in hand, the next task
 is to locate the start time (within the valid forecast period) that minimises the integrated carbon
