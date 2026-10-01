@@ -202,8 +202,7 @@ ever serves one implicit metric can leave ``SUPPORTED_METRICS`` at its empty def
 carbonintensity.org.uk case is the simplest: both metrics come from a single API call (the response
 already includes both "intensity" and "generationmix" for every period), so ``get_data()`` makes the same
 request regardless of ``metric`` and only changes which field it extracts; requesting both metrics in the
-same run (e.g. via the ``composite`` provider) costs only one real HTTP request, the second being served
-from the shared ``fetch_url()`` cache. wattnet.eu is the more general case: each metric maps to a genuinely
+same run costs only one real HTTP request, the second being served from the shared ``fetch_url()`` cache. wattnet.eu is the more general case: each metric maps to a genuinely
 different endpoint (not just a different query parameter on one endpoint), so the provider keeps a small
 ``metric -> (path, query_params)`` table and dispatches the URL build and the parsed ``Timeseries.metric``
 name from it, while still sharing one parsing routine since all three endpoints return the same
@@ -223,34 +222,3 @@ series/values response shape. Two further things worth checking for any new mult
   better"), confirm it rather than guessing, and document the confirmed polarity explicitly in both
   the docstring and a comment at the point of inversion.
 
-A provider does not have to call an external API directly at all. ``cats/providers/composite.py`` instead
-wraps a *registry* of named signals (``carbon``, ``price``, ``renewables``, ``water``,
-``water_stress``, ``environmental_score``), built per request from a ``(provider instance, metric,
-location, optional note)`` tuple per signal - the same provider instance can back two different signals on
-two different metrics, as ``carbon`` and ``renewables`` both do on ``GBCarbonIntensityProvider`` for a GB
-postcode. Unlike a single-portal multi-metric provider, ``composite``'s location can be either of two
-different kinds (a GB postcode outward code or a wattnet.eu zone code); ``_detect_location()`` tries the GB
-postcode scheme first, falling back to the wattnet.eu zone scheme, so a code valid under both (``SE1``-
-``SE4``, which collide between South East London postcodes and Swedish wattnet.eu price zones) is always
-interpreted as the GB postcode. ``_signal_specs()`` then builds the registry appropriate to that location
-kind: for a GB postcode, the three wattnet-only signals fall back to wattnet.eu's fixed ``GB`` zone (with a
-note logged via ``logging.warning()`` at the point they're used, since this substitutes a country-wide
-value for what looks like a postcode-specific request); for a wattnet.eu zone, ``price`` and ``renewables``
-are only included when a static lookup table (for price) or a derivation rule with explicit exceptions
-(for renewables) actually has an ``energy-charts.info`` equivalent for that zone, since the two portals'
-zone/country naming schemes differ and neither response exposes the other's encoding directly. Prefer
-deriving a location translation live where possible (as the GB postcode's Octopus region letter is,
-from a field already present in carbonintensity.org.uk's own API response), and fall back to an explicit,
-documented table or rule (including *why* any zones are left unmapped) rather than guessing.
-
-The normalise-and-combine logic (independently min-max normalising each selected signal over the fetched
-window, then a configurable weighted sum) lives alongside it as a handful of pure functions
-(``normalise()``, ``resolve_weights()``, ``combine_series()``) at the top of ``composite.py``, kept free of
-any location/routing concerns so they stay easy to reason about in isolation. This is a useful pattern for
-combining metrics without touching the scheduling algorithm itself, and generalises
-beyond a fixed set: the CLI's repeatable ``--signal NAME=WEIGHT`` lets the user pick any subset of the
-signals available for their location. When a signal isn't available for a given location at all, fail
-loudly (``InvalidLocationError``) if the user explicitly asked for that signal via ``--signal``, but
-silently exclude it from the default (unrequested) combination rather than breaking locations that never
-had it; separately, an entirely unrecognised signal *name* (not a valid signal at all, regardless of
-location) should always fail loudly with ``ValueError`` when explicitly requested via ``--signal``.

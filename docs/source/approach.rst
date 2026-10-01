@@ -97,15 +97,9 @@ reported with the opposite sign or as their complement: the environmental score 
 renewable share is reported as non-renewable share (100 minus the renewable percentage). Run
 ``cats --list-providers`` to see every provider with its metrics.
 
-The ``composite`` provider combines several of these signals into one normalised score, with
-weights set through repeated ``--signal NAME=WEIGHT`` options. It works out whether the location is
-a GB postcode or a wattnet.eu zone and uses the right data source for each signal. Because the
-result is an ordinary time series where lower is better, the scheduling algorithm is unchanged.
-
-Rather than blending price into that score, where it could end up dominating the decision,
-``--max-price`` and ``--max-price-increase-pct`` use price as a constraint: the chosen metric is
-still what is minimised, but only over start times whose price satisfies the cap. This works with
-any provider. If no start time within the available price forecast satisfies the cap, CATS reports
+Price can also act as a constraint rather than a goal: ``--max-price`` and
+``--max-price-increase-pct`` keep the chosen metric as what is minimised, but
+only over start times whose price satisfies the cap. This works with any provider. If no start time within the available price forecast satisfies the cap, CATS reports
 an error. Whenever price data is available, CATS also reports the price of the chosen schedule
 against starting now.
 

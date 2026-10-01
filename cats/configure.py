@@ -56,7 +56,6 @@ class Args(Namespace):
     list_locations: str | None
     api_given: bool
     metric: str | None
-    signal: list[tuple[str, float]] | None
     max_price: float | None
     max_price_increase_pct: float | None
 

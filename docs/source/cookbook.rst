@@ -3,7 +3,7 @@
 Cookbook
 ========
 
-Recipes for common things you might want to do with CATS beyond the default carbon-aware scheduling: choosing a different goal such as price or water use, balancing several goals at once, and keeping your costs under control. The outputs shown are examples from one run and will differ on yours.
+Recipes for common things you might want to do with CATS beyond the default carbon-aware scheduling: choosing a different goal such as price or water use, and keeping your costs under control. The outputs shown are examples from one run and will differ on yours.
 
 Run ``cats --list-providers`` to see which data sources (``--api``) and goals (``--metric``) are available, and ``cats --list-locations`` to see the valid ``--location`` codes for each.
 
@@ -78,41 +78,6 @@ Note that a price comparison is only shown when price data covers both the start
 
 ``environmental_score`` is wattnet.eu's own combination of the carbon, water and water stress measures. Use it instead of combining those three yourself.
 
-.. _cookbook-composite:
-
-Balance several goals at once
------------------------------
-
-Use ``--api composite`` to trade off several goals, giving each a weight with ``--signal NAME=WEIGHT``. Weights do not need to add up to 1. CATS works out whether your location is a GB postcode or a wattnet.eu zone and picks the right data source for each goal.
-
-.. code-block:: console
-
-   $ cats --duration 60 --location OX1 --api composite --signal carbon=0.5 --signal renewables=0.5
-
-With no ``--signal`` options, every goal that needs no registration and is available for your location is weighted equally.
-
-.. code-block:: console
-
-   $ cats --duration 60 --location OX1 --api composite
-
-   Composite score (carbon=0.33, price=0.33, renewables=0.33) if job started now = 0.04 0-1, lower=better
-   Composite score (carbon=0.33, price=0.33, renewables=0.33) at optimal time    = 0.04 0-1, lower=better
-
-The score is a number between 0 and 1 where lower is better, so it is only meaningful for comparing start times in the same run.
-
-Because ``environmental_score`` already includes carbon, water and water stress, combine it only with goals it does not cover, such as ``price`` and ``renewables``.
-
-.. code-block:: console
-
-   $ cats --duration 60 --location DE --api composite --signal environmental_score=0.34 --signal price=0.33 --signal renewables=0.33
-
-Some goals are not available everywhere. If you ask for one that has no data for your location CATS tells you which are available, and an unknown goal name lists the valid ones.
-
-.. code-block:: console
-
-   $ cats --duration 60 --location XK --api composite --signal price=1.0
-   Invalid location: Signal(s) ['price'] have no data source for location 'XK' (wattnet_zone); available here: ['carbon', 'environmental_score', 'water', 'water_stress']
-
 .. _cookbook-price-constraint:
 
 Keep your costs under control
@@ -129,7 +94,7 @@ The cleanest time to run is not always the cheapest, and it can cost more than s
    Price if job started now            = 153.39 GBP/MWh
    Price at chosen start time          = 219.20 GBP/MWh (+ 65.81)
 
-Rather than mixing price into a composite score, where it could take over the decision, you can set a price limit. CATS then picks the best start time among those within the limit. Use ``--max-price-increase-pct`` to limit how much more than starting now you are willing to pay, with ``0`` meaning never more.
+Rather than making price your goal, you can set a price limit. CATS then picks the best start time among those within the limit. Use ``--max-price-increase-pct`` to limit how much more than starting now you are willing to pay, with ``0`` meaning never more.
 
 .. code-block:: console
 
@@ -164,7 +129,6 @@ Options at a glance
 Option                                  What it does
 ======================================  ===============================================================
 ``--metric NAME``                       What to minimise, for APIs that offer more than one goal
-``--signal NAME=WEIGHT``                Repeatable. Goal and weight to combine with ``--api composite``
 ``--max-price N``                       Absolute price limit, in the unit of your location
 ``--max-price-increase-pct N``          Price limit relative to the price of starting now
 ``--list-providers``                    List the APIs and their goals, without needing ``--duration``

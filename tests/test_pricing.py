@@ -11,9 +11,9 @@ from cats.pricing import (
     price_covers_window,
     resolve_price_series,
 )
-from cats.providers.composite import CompositeProvider
 from cats.providers.eu_wattnet import WattnetEuProvider
 from cats.providers.gb_carbonintensity import GBCarbonIntensityProvider
+from cats.providers.gb_octopus import OctopusAgilePriceProvider
 
 D = datetime(2026, 1, 1, tzinfo=timezone.utc)
 STEP = timedelta(minutes=30)
@@ -158,58 +158,66 @@ def test_now_without_price_coverage_is_unsatisfiable_for_relative_cap():
         )
 
 
-@patch("cats.pricing.CompositeProvider")
-def test_resolve_price_series_returns_none_when_no_price_signal(mock_composite_cls):
-    mock_composite_cls.return_value.resolve_signal.return_value = None
+PRICE_TS = Timeseries(
+    "Day-ahead electricity price",
+    values=[PointEstimate(value=100.0, datetime=D)],
+    unit="EUR/MWh",
+)
+
+
+@patch("cats.pricing.EnergyChartsProvider")
+def test_resolve_price_series_returns_none_when_no_price_signal(mock_ec_cls):
+    # XK is a valid wattnet.eu zone with no energy-charts.info price equivalent
     assert resolve_price_series("XK", D) is None
-    mock_composite_cls.return_value.resolve_signal.assert_called_once_with(
-        "price", "XK", D, assume_kind=None
+    mock_ec_cls.return_value.get_data.assert_not_called()
+
+
+@patch("cats.pricing.EnergyChartsProvider")
+def test_resolve_price_series_wattnet_zone_uses_energycharts(mock_ec_cls):
+    mock_ec_cls.return_value.get_data.return_value = PRICE_TS
+
+    assert resolve_price_series("DE", D) is PRICE_TS
+    # wattnet.eu's "DE" is energy-charts.info's "DE-LU"
+    mock_ec_cls.return_value.get_data.assert_called_once_with(
+        D, "DE-LU", metric="price"
     )
 
 
-@patch("cats.pricing.CompositeProvider")
-def test_resolve_price_series_fetches_price_signal(mock_composite_cls):
-    price_ts = Timeseries(
-        "Day-ahead electricity price",
-        values=[PointEstimate(value=100.0, datetime=D)],
-        unit="EUR/MWh",
-    )
-    mock_composite_cls.return_value.resolve_signal.return_value = price_ts
+@patch("cats.pricing.fetch_url", return_value={"data": {"regionid": 13}})
+@patch("cats.pricing.OctopusAgilePriceProvider")
+def test_resolve_price_series_gb_postcode_uses_octopus(mock_octopus_cls, _mock_fetch):
+    mock_octopus_cls.return_value.get_data.return_value = PRICE_TS
 
-    result = resolve_price_series("DE", D)
-
-    assert result is price_ts
-    mock_composite_cls.return_value.resolve_signal.assert_called_once_with(
-        "price", "DE", D, assume_kind=None
+    assert resolve_price_series("OX1", D) is PRICE_TS
+    # NESO region 13 (London) is Octopus region letter C
+    mock_octopus_cls.return_value.get_data.assert_called_once_with(
+        D, "C", metric="price"
     )
 
 
-@patch("cats.pricing.CompositeProvider")
-def test_resolve_price_series_passes_assume_kind_for_single_scheme_providers(
-    mock_composite_cls,
+@patch("cats.pricing.EnergyChartsProvider")
+@patch("cats.pricing.fetch_url", return_value={"data": {"regionid": 13}})
+@patch("cats.pricing.OctopusAgilePriceProvider")
+def test_resolve_price_series_uses_provider_location_kind(
+    mock_octopus_cls, _mock_fetch, mock_ec_cls
 ):
     """
     'SE1' is valid both as a South East London postcode and as a Swedish
     wattnet.eu zone. When the primary provider is WattnetEuProvider (which
     only ever accepts wattnet.eu zone codes), price must be resolved for the
-    same zone, not composite's own postcode-priority guess.
+    same zone, not the postcode-priority guess.
     """
-    mock_composite_cls.return_value.resolve_signal.return_value = None
-
     resolve_price_series("SE1", D, provider_cls=WattnetEuProvider)
-    mock_composite_cls.return_value.resolve_signal.assert_called_with(
-        "price", "SE1", D, assume_kind="wattnet_zone"
-    )
+    mock_ec_cls.return_value.get_data.assert_called_once_with(D, "SE1", metric="price")
+    mock_octopus_cls.return_value.get_data.assert_not_called()
 
     resolve_price_series("SE1", D, provider_cls=GBCarbonIntensityProvider)
-    mock_composite_cls.return_value.resolve_signal.assert_called_with(
-        "price", "SE1", D, assume_kind="gb_postcode"
+    mock_octopus_cls.return_value.get_data.assert_called_once_with(
+        D, "C", metric="price"
     )
 
-    # A provider without a single unambiguous location scheme (e.g.
-    # composite itself, or octopus.energy's own region-letter scheme) falls
-    # back to plain auto-detection, unchanged.
-    resolve_price_series("SE1", D, provider_cls=CompositeProvider)
-    mock_composite_cls.return_value.resolve_signal.assert_called_with(
-        "price", "SE1", D, assume_kind=None
-    )
+    # A provider without a single unambiguous location scheme falls back to
+    # plain auto-detection, which prefers the postcode interpretation
+    mock_octopus_cls.return_value.get_data.reset_mock()
+    resolve_price_series("SE1", D, provider_cls=OctopusAgilePriceProvider)
+    mock_octopus_cls.return_value.get_data.assert_called_once()

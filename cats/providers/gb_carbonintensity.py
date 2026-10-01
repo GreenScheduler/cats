@@ -59,8 +59,8 @@ class GBCarbonIntensityProvider(BaseProvider):
       compatible with --footprint, which only applies when forecast.metric == "Carbon intensity".
 
     Both metrics come from a single API call (the response already includes both "intensity" and
-    "generationmix" for every period), so requesting both in the same run - e.g. via the composite
-    provider - costs only one real HTTP request; the second is served from the shared fetch_url() cache.
+    "generationmix" for every period), so requesting both in the same run costs only one real HTTP
+    request; the second is served from the shared fetch_url() cache.
     """
 
     BASE_URL: ClassVar[str] = "https://api.carbonintensity.org.uk"
