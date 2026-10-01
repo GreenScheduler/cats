@@ -42,8 +42,33 @@ should be transparent to cluster users.
 It will display the time to start the job on standard out and optionally
 some information about the carbon intensity on standard error.
 
-.. _locations-outside-gb:
 
+Restricting the search window
+----------------------------
+
+If you need to limit when the job may start, you can set a maximum search
+window or explicit start/end bounds.
+
+- ``--window``: the maximum time to search for a suitable start, in minutes
+  (default: 2820, i.e. 47 hours).
+- ``--start-window``: the earliest time the job may start. This accepts ISO
+  datetimes such as ``2026-01-22T09:00`` or a time-only value such as
+  ``09:00``.
+- ``--end-window``: the latest time the job may start, using the same format.
+
+For example, to search only between 09:00 and 17:00 on a given day:
+
+.. code-block:: console
+
+   $ cats --duration 180 --location "OX1" --window 240 \
+         --start-window 2026-01-22T09:00 --end-window 2026-01-22T17:00
+
+This keeps the scheduler within the allowed time range while still finding the
+lowest-carbon start time inside that window. If no valid window remains, CATS
+returns a clear error instead of silently choosing a bad start time.
+
+
+.. _locations-outside-gb:
 Locations outside Great Britain
 -------------------------------
 
