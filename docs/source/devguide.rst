@@ -221,4 +221,3 @@ series/values response shape. Two further things worth checking for any new mult
 - If a metric's own polarity is undocumented by the upstream API (e.g. no stated "higher/lower is
   better"), confirm it rather than guessing, and document the confirmed polarity explicitly in both
   the docstring and a comment at the point of inversion.
-
