@@ -187,21 +187,103 @@ better; CATS negates it so that lower is better, like every other metric CATS re
    Water footprint if job started now       = 18.10 L/kWh
    Water footprint at optimal time          = 11.24 L/kWh
 
+Trading off multiple signals with the composite provider
+-------------------------------------------------------------
+
+Rather than optimising for a single signal, CATS can optimise a weighted
+trade-off between any combination of them, via the ``composite`` provider.
+Its location can be either a GB postcode outward code (e.g. ``OX1``) or a
+wattnet.eu zone code (e.g. ``DE``, ``IT_NORTH``); which kind is detected
+automatically. For each requested signal, ``composite`` then picks whichever
+portal natively serves it for that kind of location:
+
+- for a GB postcode: ``carbon`` and ``renewables`` from
+  ``carbonintensity.org.uk``, ``price`` from ``octopus.energy`` (region
+  letter derived from the postcode automatically);
+- for a wattnet.eu zone: ``carbon`` from ``wattnet.eu``, ``price`` and
+  ``renewables`` from ``energy-charts.info`` (zone/country derived from the
+  wattnet.eu zone; not every zone has an equivalent for these two).
+
+``water``, ``water_stress`` and ``environmental_score`` only ever
+come from ``wattnet.eu``. For a wattnet.eu zone location they use that zone
+directly; for a GB postcode they fall back to wattnet.eu's single ``GB``
+zone instead (wattnet's GB coverage is not postcode-granular), and CATS
+prints a warning noting the substitution. This fallback needs the same
+``CATS_WATTNET_EMAIL``/``CATS_WATTNET_PASSWORD`` environment variables as
+``wattnet.eu`` itself, even when the rest of a GB postcode request (carbon,
+price, renewables) does not.
+
+Each selected signal's series is independently min-max normalised to a 0-1
+scale over the fetched forecast window, then combined into a single score.
+
+Which signals to combine, and their relative weight, is controlled with the
+repeatable ``--signal NAME=WEIGHT`` option (valid names: ``carbon``,
+``price``, ``renewables``, ``water``, ``water_stress``,
+``environmental_score``; weights don't need to sum to 1, they are
+normalised automatically):
+
+.. code-block:: console
+   :caption: *Combining carbon and renewables only, equally weighted, for a
+              GB postcode.*
+
+   $ cats --duration 180 --location OX1 --api composite --signal carbon=0.5 --signal renewables=0.5
+   ...
+
+   Best job start time                       = 2026-09-30 10:59:06
+   Composite score (carbon=0.50, renewables=0.50) if job started now       = 0.20 0-1, lower=better
+   Composite score (carbon=0.50, renewables=0.50) at optimal time          = 0.03 0-1, lower=better
+
+.. code-block:: console
+   :caption: *Combining wattnet.eu's environmental_score with price, for a
+              GB postcode: environmental_score falls back to wattnet.eu's
+              'GB' zone, with a warning noting the substitution.*
+
+   $ cats --duration 180 --location OX1 --api composite --signal environmental_score=0.5 --signal price=0.5
+   WARNING:root:'OX1' has no environmental_score data source; using wattnet.eu's 'GB' zone instead (needs wattnet.eu credentials).
+   ...
+
+   Best job start time                       = 2026-09-29 15:35:47
+   Composite score (environmental_score=0.50, price=0.50) if job started now       = 0.38 0-1, lower=better
+   Composite score (environmental_score=0.50, price=0.50) at optimal time          = 0.38 0-1, lower=better
+
+With no ``--signal`` given at all, every signal available for that location
+that needs no *extra* authentication is combined with equal weight. For a GB
+postcode that is always ``carbon``, ``price`` and ``renewables`` (the three
+``water``/``water_stress``/``environmental_score`` signals need
+explicit ``--signal``, since they need wattnet.eu credentials the rest of a
+GB postcode request does not). For a wattnet.eu zone it is every signal that
+has a source at all for that zone (wattnet.eu credentials are already
+required there, for ``carbon``); not every wattnet.eu zone has an
+``energy-charts.info`` price or renewables equivalent (see
+``WATTNET_TO_ENERGYCHARTS_ZONE`` in ``cats/pricing.py`` and
+``_wattnet_zone_to_renewables_country`` in ``cats/providers/composite.py``
+for the details), so those zones are silently combined using only the
+signals that *are* available. Explicitly requesting an unavailable signal
+with ``--signal``, on the other hand, raises a clear error rather than
+silently dropping it. As with the plain price and renewables providers,
+``--footprint`` has no effect with the composite provider.
+
+A handful of codes are valid both as a GB postcode outward code and as a
+wattnet.eu zone code (``SE1``-``SE4``: South East London postcodes and
+Swedish wattnet.eu price zones); the GB postcode interpretation always wins
+in that case.
+
 Constraining, rather than optimising for, price
 -------------------------------------------------
 
-Optimising for price directly can drift away from CATS' climate-aware
-purpose. As a safer default, CATS can instead treat price as a hard
-**constraint** on top of whichever metric is actually being optimised
-(``carbon``, ``renewables``, ``environmental_score``, ...): keep optimising
-for that metric, but only consider job start times whose price does not
-exceed a cap.
+Blending ``price`` into a weighted composite score (as above) still lets
+price dominate the schedule if given enough weight, which drifts away from
+CATS' climate-aware purpose. For a safer default, CATS can instead treat
+price as a hard **constraint** on top of whichever metric is actually being
+optimised (``carbon``, ``renewables``, ``environmental_score``, a
+non-price composite blend, ...): keep optimising for that metric, but only
+consider job start times whose price does not exceed a cap.
 
 ``--max-price-increase-pct N`` caps price at N% above running the job right
 now; ``--max-price N`` caps it at an absolute value (GBP/MWh for a GB
 postcode, EUR/MWh for a wattnet.eu zone). They are mutually exclusive, and
-work with *any* provider or metric - price is fetched for the location
-independently of what is actually being optimised:
+work with *any* provider or metric, not just ``composite`` - price is
+fetched for the location independently of what is actually being optimised:
 
 .. code-block:: console
    :caption: *Optimise for carbon, but never accept a price increase over
@@ -254,6 +336,9 @@ to also supply ``--duration``:
        Provider for the National Energy System Operator's carbonintensity.org.uk API
        max duration: 2820 min, resolution: 30 min
        metrics: carbon (default), renewables
+   composite
+       Unified composite provider: picks the right portal per metric and location
+       max duration: 1425 min, resolution: 30 min
    energy-charts.info
        Provider for the Fraunhofer ISE Energy-Charts API
        max duration: 2265 min, resolution: 15 min
@@ -338,7 +423,7 @@ The optimal window is where the area under the curve is minimised, as
 highlighted in the plot ('Optimal job window'). The legend title shows the
 absolute and percentage saving between the 'now' and 'optimal' means, for
 whichever metric and unit the chosen provider returns (carbon intensity,
-price or non-renewable share).
+price, non-renewable share, or a composite score).
 
 .. _configuration-file:
 

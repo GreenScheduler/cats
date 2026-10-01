@@ -3,7 +3,7 @@
 Cookbook
 ========
 
-Recipes for common things you might want to do with CATS beyond the default carbon-aware scheduling: choosing a different metric such as price or water use, and keeping your costs under control. The outputs shown are examples from one run and will differ on yours.
+Recipes for common things you might want to do with CATS beyond the default carbon-aware scheduling: choosing a different metric such as price or water use, balancing several metrics at once, and keeping your costs under control. The outputs shown are examples from one run and will differ on yours.
 
 Run ``cats --list-providers`` to see which data sources (``--api``) and metrics (``--metric``) are available, and ``cats --list-locations`` to see the valid ``--location`` codes for each.
 
@@ -78,6 +78,41 @@ Note that a price comparison is only shown when price data covers both the start
 
 ``environmental_score`` is wattnet.eu's own combination of the carbon, water and water stress measures. Use it instead of combining those three yourself.
 
+.. _cookbook-composite:
+
+Balance several metrics at once
+-------------------------------
+
+Use ``--api composite`` to trade off several metrics, giving each a weight with ``--signal NAME=WEIGHT``. Weights do not need to add up to 1. CATS works out whether your location is a GB postcode or a wattnet.eu zone and picks the right data source for each metric.
+
+.. code-block:: console
+
+   $ cats --duration 60 --location OX1 --api composite --signal carbon=0.5 --signal renewables=0.5
+
+With no ``--signal`` options, every metric that needs no registration and is available for your location is weighted equally.
+
+.. code-block:: console
+
+   $ cats --duration 60 --location OX1 --api composite
+
+   Composite score (carbon=0.33, price=0.33, renewables=0.33) if job started now = 0.04 0-1, lower=better
+   Composite score (carbon=0.33, price=0.33, renewables=0.33) at optimal time    = 0.04 0-1, lower=better
+
+The score is a number between 0 and 1 where lower is better, so it is only meaningful for comparing start times in the same run.
+
+Because ``environmental_score`` already includes carbon, water and water stress, combine it only with metrics it does not cover, such as ``price`` and ``renewables``.
+
+.. code-block:: console
+
+   $ cats --duration 60 --location DE --api composite --signal environmental_score=0.34 --signal price=0.33 --signal renewables=0.33
+
+Some metrics are not available everywhere. If you ask for one that has no data for your location CATS tells you which are available, and an unknown metric name lists the valid ones.
+
+.. code-block:: console
+
+   $ cats --duration 60 --location XK --api composite --signal price=1.0
+   Invalid location: Signal(s) ['price'] have no data source for location 'XK' (wattnet_zone); available here: ['carbon', 'environmental_score', 'water', 'water_stress']
+
 .. _cookbook-price-constraint:
 
 Keep your costs under control
@@ -129,6 +164,7 @@ Options at a glance
 Option                                  What it does
 ======================================  ===============================================================
 ``--metric NAME``                       What to minimise, for APIs that offer more than one metric
+``--signal NAME=WEIGHT``                Repeatable. Metric and weight to combine with ``--api composite``
 ``--max-price N``                       Absolute price limit, in the unit of your location
 ``--max-price-increase-pct N``          Price limit relative to the price of starting now
 ``--list-providers``                    List the APIs and their metrics, without needing ``--duration``
