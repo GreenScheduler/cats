@@ -8,13 +8,15 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 from .base import BaseProvider, fetch_url, provider
-from ..exceptions import ProviderAuthenticationError
+from ..exceptions import ProviderResponseError
 from ..forecast import Timeseries, PointEstimate
 
 def utc_to_local(timestamp: datetime):
 
     """
-        Corrects a known UTC datestamp into a local timezone. Only used at the moment to convert from UTC to BST
+        Corrects a known UTC datestamp into a local timezone. Currently unused. 
+        
+        Was used to convert from UTC to BST
 
         :param timestamp: Timestamp to convert from UTC to local, should follow "%Y-%m-%dT%H:%M:%S" format  
     """
@@ -31,8 +33,10 @@ def utc_to_local(timestamp: datetime):
 def futurehours(timestamps: pd.Series[datetime | str]) -> pd.Series:
 
     """
-        Determines number of hours in the future in 30 minute increments for a given series of Timestamps that are 
-        also at 30 minute intervals
+        Determines number of hours in the future in 30 minute increments for a given series of datetime objects, or strings that
+        that are in format of %Y-%m-%dT%H%M, that are also at 30 minute intervals.
+
+        Currently unused.
 
         :param timestamps: Series of timestamp to calculate futures from, should follow "%Y-%m-%dT%H:%M" format  
     """
@@ -68,6 +72,15 @@ class UKGenerationDemandProvider(BaseProvider):
     @override
     def get_data(self) -> Timeseries:
 
+        """
+        Generates a `Timeseries` of `PointEstimate` scaled (0-1) generation demand forecast
+
+         - first forecast is 0030 for the first day after tomorrow
+         - last forecast is 0000 for 14 days from tomorrow (i.e. really the end of the day 2 weeks today)
+         - this gives 13 * (2 * 24) data points = 624, and that's magically the number of rows in the returned data ✨
+
+        """
+
         url = (
              f"{self.BASE_URL}"
              "/api/3/action/"
@@ -76,10 +89,8 @@ class UKGenerationDemandProvider(BaseProvider):
             )
         response: dict[str, Any] | None = fetch_url(url)
 
-        # we should create a new error class for this scenario
         if response is None:
-            raise ProviderAuthenticationError
-
+            raise ProviderResponseError
         
         data = response.json()["result"]["records"]
         all_data = pd.DataFrame.from_dict(data) # todo: limit fields
