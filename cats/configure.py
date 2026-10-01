@@ -156,7 +156,7 @@ def get_location_from_config_or_args(args: Args, config: Mapping[str, Any]) -> s
         logging.info(f"Using location provided from command line: {location}")
         return location
     if "location" in config.keys():
-        location = config["location"]
+        location = str(config["location"])
         logging.info(f"Using location from config file: {location}")
         return location
 
@@ -168,7 +168,7 @@ def get_location_from_config_or_args(args: Args, config: Mapping[str, Any]) -> s
             + f"{r.json()['message']}"
         )
         sys.exit(1)
-    location = r.json()["postal"]
+    location = str(r.json()["postal"])
     assert location
     logging.warning(
         f"location not provided. Estimating location from IP address: {location}."
@@ -176,7 +176,7 @@ def get_location_from_config_or_args(args: Args, config: Mapping[str, Any]) -> s
     return location
 
 
-def read_device_config(args: Args, key: str, config: Mapping[str, Any]):
+def read_device_config(args: Args, key: str, config: Mapping[str, Any]) -> tuple[Any, Any]:
     if not (nunits := getattr(args, key.lower()) or config.get("nunits")):
         logging.error(f"No number of units specified for device {key}")
     try:

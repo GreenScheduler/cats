@@ -25,7 +25,7 @@ except ImportError:
 PRETTY_UNITS = {"gCO2eq/kWh": r"$\mathrm{g\,CO_{2}\,eq\;kWh^{-1}}$"}
 
 
-def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = None):
+def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = None) -> None:
     """
     Plot the metric forecast and optimised plan
     """
@@ -95,7 +95,7 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
 
     # Filling under curves for the forecast, run now time and optimal run time
     ax.fill_between(
-        date2num(times),
+        date2num(times),  # type: ignore[no-untyped-call]
         0.0,
         values,
         alpha=0.2,
@@ -105,7 +105,7 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     )
     # Show 'now' window in red with black hatch lines for contrast
     ax.fill_between(
-        date2num(now_times),
+        date2num(now_times),  # type: ignore[no-untyped-call]
         0.0,
         now_values,
         alpha=0.6,
@@ -118,7 +118,7 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     # but also in black: for any overlapping regions on the two windows, this
     # therefore results in a distinguishable cross-hatch pattern
     ax.fill_between(
-        date2num(opt_times),
+        date2num(opt_times),  # type: ignore[no-untyped-call]
         0.0,
         opt_values,
         alpha=0.6,
@@ -215,11 +215,11 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
     # Include subtle markers at each data point, in case it helps to
     # distinguish forecast points from the trend (esp. useful if there)
     # is a similar trend across/for 1 hour or more i.e. 3+ data points
-    ax.scatter(date2num(times), values, color=forecast_colour, s=8, alpha=0.3)
-    ax.scatter(date2num(now_times), now_values, color=now_colour, s=8, alpha=0.3)
-    ax.scatter(date2num(opt_times), opt_values, color=optimal_colour, s=8, alpha=0.3)
+    ax.scatter(date2num(times), values, color=forecast_colour, s=8, alpha=0.3)  # type: ignore[no-untyped-call]
+    ax.scatter(date2num(now_times), now_values, color=now_colour, s=8, alpha=0.3)  # type: ignore[no-untyped-call]
+    ax.scatter(date2num(opt_times), opt_values, color=optimal_colour, s=8, alpha=0.3)  # type: ignore[no-untyped-call]
 
-    def readable_datetime_tick_formatter(x: float, _):
+    def readable_datetime_tick_formatter(x: float, _: float) -> str:
         """Format datetimes so the x-axis labels become more readable.
 
         Namely, only show the full 'yy-mm-dd hh:mm' format date at the start
@@ -228,7 +228,7 @@ def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = No
         makes it much quicker for a reader to parse the date and time
         axis span and partitioning.
         """
-        dt: datetime = mdates.num2date(x)
+        dt: datetime = mdates.num2date(x)  # type: ignore[no-untyped-call]
 
         # Would otherwise always full date at the first tick, as well as
         # at every point we get to a new day i.e. 00:00 (every four major
