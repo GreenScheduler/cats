@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
+import requests
 
 from cats.cli import main, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
@@ -177,7 +178,7 @@ def raiseLocationError(*args, **kwargs):  # pyright: ignore[reportUnusedParamete
     raise InvalidLocationError
 
 
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_main_failures(get_data):
     get_data.return_value = {}
     get_data.side_effect = raiseLocationError
@@ -190,3 +191,41 @@ def test_main_failures(get_data):
 
     # Duration larger than API maximum
     assert main(["-d", "5000", "--loc", "OX1"]) == 1
+
+
+def raiseHTTPError(*args, **kwargs):  # pyright: ignore[reportUnusedParameter, reportUnknownParameterType]
+    raise requests.exceptions.HTTPError
+
+
+def raiseJSONError(*args, **kwargs):  # pyright: ignore[reportUnusedParameter, reportUnknownParameterType]
+    raise requests.exceptions.JSONDecodeError
+
+
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_main_http_ukci_errors(get_data):
+    get_data.return_value = {}
+    get_data.side_effect = raiseHTTPError
+
+    # CATS should return 1 when we get an HTTP error
+    assert main(["-c", "ls", "-d", "5"]) == 1
+
+    get_data.return_value = {}
+    get_data.side_effect = raiseJSONError
+
+    # CATS should return 1 when we get an JSON error
+    assert main(["-c", "ls", "-d", "5"]) == 1
+
+
+@patch("cats.providers.WattnetEuProvider.get_data")
+def test_main_http_wattnet_errors(get_data):
+    get_data.return_value = {}
+    get_data.side_effect = raiseHTTPError
+
+    # CATS should return 1 when we get an HTTP error
+    assert main(["-c", "ls", "-d", "5"]) == 1
+
+    get_data.return_value = {}
+    get_data.side_effect = raiseJSONError
+
+    # CATS should return 1 when we get an JSON error
+    assert main(["-c", "ls", "-d", "5"]) == 1

@@ -11,6 +11,8 @@ from datetime import timedelta, timezone
 from pathlib import Path
 from typing import Optional, cast
 
+import requests
+
 from .carbonFootprint import get_footprint_reduction_estimate
 from .configure import Args, get_runtime_config
 from .constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
@@ -641,6 +643,10 @@ def main(arguments: list[str] | None = None):
         print(f"Duration exceeds limit: {e}")
     except SchedulerError as e:
         print(f"Scheduler error: {e}")
+    except requests.exceptions.JSONDecodeError as e:
+        print(f"Failed to decode JSON from data provider: {e}")
+    except requests.exceptions.HTTPError as e:
+        print(f"Failed to connect to HTTP server from data provider: {e}")
     except ValueError as e:
         print(f"Value error: {e}")
     except Exception:

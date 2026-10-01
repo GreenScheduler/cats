@@ -7,7 +7,6 @@ from typing import ClassVar
 from zoneinfo import ZoneInfo
 
 import requests
-from typing_extensions import override
 
 from ..exceptions import InvalidLocationError, ProviderAuthenticationError
 from ..forecast import PointEstimate, Timeseries
@@ -76,15 +75,12 @@ class WattnetEuProvider(BaseProvider):
             result["expires_at"]
         )
 
-    @override
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         return 5745  # Looks like 4 days of data, lop off 15 mins from the end
 
-    @override
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         return 15  # Looks like 15 min resolution
 
-    @override
     def get_data(
         self,
         timestamp: datetime.datetime,
@@ -173,7 +169,6 @@ class WattnetEuProvider(BaseProvider):
         ]
         return Timeseries("Carbon intensity", values=values, unit="gCO2eq/kWh")
 
-    @override
     def validate_location(self, location: str | None) -> str:
         """
         Check that Wattnet location data matches the list of supported locations

@@ -157,7 +157,7 @@ are cached and have the CATS HTTP header included. In order to optimize this cac
 align the time of requests for forecast data such that repeated requests in a short time period are served from
 the local cache rather than as a series of slightly different hits on the remote server.
 
-The best way to add a new provider is to use ``cats/providers/uk_carbonintensity.py`` (which does not
+The best way to add a new provider is to use ``cats/providers/gb_carbonintensity.py`` (which does not
 involve authentication) or ``cats/providers/eu_wattnet.py`` (which does) as a starting point and modify
 for your needs. Important things to consider are the structure of any returned JSON objects, the duration
 of the forecast and the frequency of data points, issues around authentication and data validation, and the

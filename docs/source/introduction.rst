@@ -1,7 +1,7 @@
 .. _introduction:
 
 .. The list below references links that may be used in more than one place
-.. _SSIsite: https://www.software.ac.uk/
+.. _TheInsitutesite: https://www.software.ac.uk/
 .. _CW23page: https://software.ac.uk/cw23
 .. _CW23HackDaypage: https://www.software.ac.uk/cw23/hack-day
 .. _NationalGridESO: https://www.neso.energy/
@@ -36,12 +36,12 @@ environmentally-conscious developers.
 Scope
 -----
 
-Currently CATS only works in the UK with experimental support
+Currently CATS only works in Great Britain with experimental support
 elsewhere in Europe. If you are aware of APIs for
 realtime grid carbon intensity data in other locations, please
 `open an issue <GitHubrepoissues_>`_ to let us know.
 
-CATS is currently tested with Python versions 3.10-3.14 running
+CATS is currently tested with Python versions 3.11-3.14 running
 on Linux, Windows and MacOS.
 
 Background
@@ -50,7 +50,7 @@ Background
 CATS is described in a paper published in the Journal
 of Open Source Software (`doi:10.21105/joss.08251 <https://doi.org/10.21105/joss.08251>`_)
 and was created as part of the
-`Software Sustainability Institute’s <SSIsite_>`_
+`Institute for Research Software’s <TheInsitutesite_>`_
 `Collaborations Workshop 2023 <CW23page_>`_
 `Hack Day <CW23HackDaypage_>`_.
 
