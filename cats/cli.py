@@ -574,9 +574,6 @@ def run_cats(arguments: list[str] | None = None):
             print("No CATS history records found.")
         return
 
-    if parsed_args.duration is None:
-        parser.error("the following arguments are required: -d/--duration")
-
     args = cast(Args, parsed_args)
     colour_output = args.no_colour or args.no_color
 
@@ -588,6 +585,9 @@ def run_cats(arguments: list[str] | None = None):
         api = args.list_locations or (args.api if args.api_given else None)
         print_locations(api, args.metric)
         return
+
+    if parsed_args.duration is None:
+        raise MissingArgumentError("the following arguments are required: -d/--duration")
 
     if args.duration is None:
         raise MissingArgumentError(
@@ -618,8 +618,13 @@ def run_cats(arguments: list[str] | None = None):
         )
     except ValueError as e:
         raise ValueError(f"Error in window constraints: {e}")
-    # Check against both API limit and user-specified window
-    max_duration_minutes = provider.get_max_duration_minutes(metric=args.metric)
+    # Check against both API limit and user-specified window. Some older
+    # provider implementations do not accept the optional metric keyword, so
+    # fall back to the no-argument form for compatibility.
+    try:
+        max_duration_minutes = provider.get_max_duration_minutes(metric=args.metric)
+    except TypeError:
+        max_duration_minutes = provider.get_max_duration_minutes()
     effective_max_duration = min(max_duration_minutes, max_window)
     if duration > effective_max_duration:
         if max_window < max_duration_minutes:
@@ -633,7 +638,10 @@ def run_cats(arguments: list[str] | None = None):
     ## Obtain CI forecast ##
     ########################
     now_utc = datetime.datetime.now(timezone.utc)
-    forecast = provider.get_data(now_utc, location, metric=args.metric)
+    try:
+        forecast = provider.get_data(now_utc, location, metric=args.metric)
+    except TypeError:
+        forecast = provider.get_data(now_utc, location)
 
     #############################
     ## Find optimal start time ##
@@ -657,6 +665,12 @@ def run_cats(arguments: list[str] | None = None):
         max_window_minutes=max_window,
         end_constraint=end_constraint,
     )
+    if len(wf) == 0:
+        raise ValueError(
+            "No valid forecast windows are available for the requested job duration "
+            "and search window. Try increasing --window or checking that the "
+            "forecast covers the job duration."
+        )
     now_avg, best_avg = wf[0], min(wf)
 
     #####################################################
@@ -697,13 +711,6 @@ def run_cats(arguments: list[str] | None = None):
         )
     else:
         best_avg = min(wf)
-
-    if len(wf) == 0:
-        raise ValueError(
-            "No valid forecast windows are available for the requested job duration "
-            "and search window. Try increasing --window or checking that the "
-            "forecast covers the job duration."
-        )
 
     output = CATSOutput(
         forecast.metric,

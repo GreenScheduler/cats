@@ -69,6 +69,7 @@ returns a clear error instead of silently choosing a bad start time.
 
 
 .. _locations-outside-gb:
+
 Locations outside Great Britain
 -------------------------------
 
