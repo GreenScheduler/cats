@@ -25,7 +25,9 @@ except ImportError:
 PRETTY_UNITS = {"gCO2eq/kWh": r"$\mathrm{g\,CO_{2}\,eq\;kWh^{-1}}$"}
 
 
-def plotplan(forecast: Timeseries, output: CATSOutput, filename: str | None = None) -> None:
+def plotplan(
+    forecast: Timeseries, output: CATSOutput, filename: str | None = None
+) -> None:
     """
     Plot the metric forecast and optimised plan
     """

@@ -176,7 +176,9 @@ def get_location_from_config_or_args(args: Args, config: Mapping[str, Any]) -> s
     return location
 
 
-def read_device_config(args: Args, key: str, config: Mapping[str, Any]) -> tuple[Any, Any]:
+def read_device_config(
+    args: Args, key: str, config: Mapping[str, Any]
+) -> tuple[Any, Any]:
     if not (nunits := getattr(args, key.lower()) or config.get("nunits")):
         logging.error(f"No number of units specified for device {key}")
     try:

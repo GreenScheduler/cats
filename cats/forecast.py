@@ -66,6 +66,7 @@ class WindowedForecast:
                 if d.datetime > t:
                     return i - 1
             return len(data) - 1
+
         # bisect_right(data, start) returns the index of the first
         # data point with datetime value immediately preceding the job
         # start time
