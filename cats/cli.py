@@ -704,7 +704,6 @@ def run_cats(arguments: list[str] | None = None):
             "and search window. Try increasing --window or checking that the "
             "forecast covers the job duration."
         )
-    
 
     output = CATSOutput(
         forecast.metric,

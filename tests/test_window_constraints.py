@@ -396,7 +396,6 @@ class TestMainIntegration:
         result = main(["-d", "60", "--loc", "OX1", "--window", "480"])
         assert result == 0
 
-
     @patch("cats.providers.GBCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_time_window_constraints(
