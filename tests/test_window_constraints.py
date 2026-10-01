@@ -339,7 +339,7 @@ class TestMainIntegration:
     ):
         """Test that an empty forecast window is reported without a traceback."""
         mock_config.return_value = (
-            UKCarbonIntensityProvider,
+            GBCarbonIntensityProvider,
             "OX1",
             5,
             None,
@@ -362,7 +362,7 @@ class TestMainIntegration:
         assert result == 1
         assert "No valid forecast windows are available" in capsys.readouterr().out
 
-    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
+    @patch("cats.providers.GBCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_window_constraint(
         self, mock_config: MagicMock, mock_forecast: MagicMock
