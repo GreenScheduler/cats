@@ -36,13 +36,6 @@ from .history import (
 )
 from .output import CATSOutput
 from .plotting import plotplan
-from .schedulers import (
-    SCHEDULER_DATE_FORMAT,
-    get_at_job_state,
-    get_sbatch_job_state,
-    schedule_at,
-    schedule_sbatch,
-)
 from .pricing import (
     find_best_within_price_constraint,
     price_at_window,
@@ -50,7 +43,13 @@ from .pricing import (
     resolve_price_series,
 )
 from .providers import get_provider, list_providers
-from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
+from .schedulers import (
+    SCHEDULER_DATE_FORMAT,
+    get_at_job_state,
+    get_sbatch_job_state,
+    schedule_at,
+    schedule_sbatch,
+)
 from .version import version
 
 
@@ -103,6 +102,8 @@ def _refresh_history_job_states(history_db: str) -> None:
                 job_id,
                 error,
             )
+
+
 def print_providers():
     "Print the registered data providers and their properties"
     for name, provider_cls in sorted(list_providers().items()):
