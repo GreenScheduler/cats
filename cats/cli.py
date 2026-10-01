@@ -334,6 +334,8 @@ def parse_arguments():
         "--dynamic",
         action="store_true",
         help="Re-evaluate a pending at or sbatch job over time (requires CATS_HISTORY_DB).",
+    )
+    parser.add_argument(
         "--list-providers",
         action="store_true",
         help="List the registered data providers and their properties, then exit "
