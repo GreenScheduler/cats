@@ -30,9 +30,7 @@ def test_price_at_window_averages_over_the_given_window():
     # With duration == the data's own step size, the window spans exactly one
     # consecutive pair of points, so the average is their simple mean.
     prices = series([100.0, 100.0, 200.0])
-    assert price_at_window(prices, D, duration_minutes=DURATION) == pytest.approx(
-        100.0
-    )
+    assert price_at_window(prices, D, duration_minutes=DURATION) == pytest.approx(100.0)
 
 
 def test_price_covers_window():
