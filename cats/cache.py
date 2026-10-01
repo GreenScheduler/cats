@@ -22,6 +22,13 @@ from requests.structures import CaseInsensitiveDict
 CACHE_NAME = "cats"
 CACHE_SUFFIX = ".json"
 
+# Transient failures worth retrying: rate limiting (429) and upstream gateway
+# problems. Plain 500s are not retried since they are usually persistent
+# (e.g. an unsupported location) and would only slow down the failure.
+RETRY_STATUSES = (429, 502, 503, 504)
+MAX_RETRIES = 3
+BACKOFF_FACTOR = 1  # seconds, doubled after each attempt
+
 
 def serialise(response: requests.Response) -> str:
     "Serialise a response to a JSON string for storage in the cache"
@@ -98,6 +105,30 @@ class Cache:
         except FileNotFoundError:
             return False
 
+    @staticmethod
+    def _request(url: str, headers: dict[str, Any]) -> requests.Response:
+        """GET a URL, retrying transient failures with exponential backoff
+
+        Retries connection errors and RETRY_STATUSES up to MAX_RETRIES times,
+        honouring a numeric Retry-After header. The last response (or
+        exception) is returned (or raised) if all attempts fail.
+        """
+        for attempt in range(MAX_RETRIES + 1):
+            delay = BACKOFF_FACTOR * 2**attempt
+            try:
+                response = requests.get(url, headers=headers)
+            except requests.exceptions.ConnectionError:
+                if attempt == MAX_RETRIES:
+                    raise
+            else:
+                if response.status_code not in RETRY_STATUSES or attempt == MAX_RETRIES:
+                    return response
+                retry_after = response.headers.get("Retry-After", "")
+                if retry_after.isdigit():
+                    delay = int(retry_after)
+            time.sleep(delay)
+        raise AssertionError("unreachable")  # pragma: no cover
+
     def get(self, url: str, headers: dict[str, Any] | None = None) -> requests.Response:
         """Return the response for a URL, from the cache if present and not expired
 
@@ -111,7 +142,7 @@ class Cache:
         except (FileNotFoundError, ValueError, KeyError):
             # missing, or corrupt cache entry: fall through and refetch
             pass
-        response = requests.get(url, headers=headers or {})
+        response = self._request(url, headers or {})
         if response.ok:
             self._write(path, serialise(response))
         return response

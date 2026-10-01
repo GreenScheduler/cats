@@ -22,7 +22,9 @@ The Climate-Aware Task Scheduler is a lightweight Python package designed to sch
 ![CATS animated usage example](docs/source/_static/cats.gif)
 
 > [!NOTE]
-> Currently CATS only works by default in the Great Britain (using National Grid data) or elsewhere in Europe using data from the wattnet.eu project. If you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know.
+> Currently CATS only works by default in the Great Britain (using National Grid data) or elsewhere in Europe using data from the wattnet.eu project. If you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know. Several providers also serve other metrics, selected with `--metric`: energy-charts.info and octopus.energy can schedule for lowest electricity *cost* instead of carbon, carbonintensity.org.uk and energy-charts.info can schedule for highest renewable share, and wattnet.eu also serves a water footprint, a water stress footprint and an environmental score. Run `cats --list-providers` to see all available providers and their metrics.
+>
+> Rather than blending price into that weighted score, where it could dominate the schedule if given enough weight, CATS can instead treat price as a hard constraint on top of whichever metric is actually being optimised, via `--max-price` (absolute cap) or `--max-price-increase-pct` (cap relative to running the job right now), and always reports the price impact of the chosen schedule when price data is available, whether or not either flag is given.
 
 
 ## Features
