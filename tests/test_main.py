@@ -177,7 +177,7 @@ def raiseLocationError(*args, **kwargs):  # pyright: ignore[reportUnusedParamete
     raise InvalidLocationError
 
 
-@patch("cats.providers.UKCarbonIntensityProvider.get_data")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
 def test_main_failures(get_data):
     get_data.return_value = {}
     get_data.side_effect = raiseLocationError

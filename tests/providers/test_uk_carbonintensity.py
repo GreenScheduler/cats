@@ -4,7 +4,7 @@ import pytest
 
 from cats.exceptions import InvalidLocationError
 from cats.forecast import PointEstimate
-from cats.providers import UKCarbonIntensityProvider
+from cats.providers import GBCarbonIntensityProvider
 
 
 def test_get_data():
@@ -16,9 +16,9 @@ def test_get_data():
     """
 
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
     response = provider.get_data(timestamp, "OX1")
-    response_full_postcode = UKCarbonIntensityProvider().get_data(timestamp, "OX1 3QD")
+    response_full_postcode = GBCarbonIntensityProvider().get_data(timestamp, "OX1 3QD")
 
     assert response == response_full_postcode
     assert isinstance(response.values, list)
@@ -31,7 +31,7 @@ def test_get_data():
 
 def test_bad_postcode():
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
 
     with pytest.raises(InvalidLocationError):
         _ = provider.get_data(timestamp, "OX40")
@@ -42,6 +42,6 @@ def test_bad_postcode():
 
 def test_missing_location_raises_error():
     timestamp = datetime.now()
-    provider = UKCarbonIntensityProvider()
+    provider = GBCarbonIntensityProvider()
     with pytest.raises(InvalidLocationError):
         _ = provider.get_data(timestamp)

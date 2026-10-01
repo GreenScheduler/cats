@@ -14,7 +14,7 @@ from ..forecast import PointEstimate, Timeseries
 from .base import BaseProvider, fetch_url, provider
 
 INVALID_LOCATION_MESSAGE = (
-    "{location}. UKCarbonIntensityProvider only supports UK postcodes, "
+    "{location}. GBCarbonIntensityProvider only supports UK postcodes, "
     + "specified as the outward code, for example 'OX1' for postcode 'OX1 3QD'"
 )
 # This file is generated using scripts/uk_outcodes.py:
@@ -27,7 +27,7 @@ UK_OUTCODES: set[str] = set(
 
 
 @provider("carbonintensity.org.uk")
-class UKCarbonIntensityProvider(BaseProvider):
+class GBCarbonIntensityProvider(BaseProvider):
     """
     Default provider for the National Energy System Operator's carbonintensity.org.uk API
 
