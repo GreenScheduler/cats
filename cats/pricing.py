@@ -71,18 +71,21 @@ def price_covers_window(
 
 
 def price_at_window(
-    price_values: list[PointEstimate], window_start: datetime, duration: int
+    price_values: list[PointEstimate], window_start: datetime, duration_minutes: int
 ) -> float:
-    "Average price over one arbitrary [window_start, window_start + duration] window"
+    "Average price over one [window_start, window_start + duration_minutes] window"
     return WindowedForecast(
-        price_values, duration, start=window_start, max_window_minutes=duration
+        price_values,
+        duration_minutes,
+        start=window_start,
+        max_window_minutes=duration_minutes,
     )[0].value
 
 
 def find_best_within_price_constraint(
     wf: WindowedForecast,
     price_values: list[PointEstimate],
-    duration: int,
+    duration_minutes: int,
     max_price: float | None,
     max_price_increase_pct: float | None,
 ) -> AverageEstimate:
@@ -109,14 +112,14 @@ def find_best_within_price_constraint(
                 "No price data available for the current window; "
                 "--max-price-increase-pct needs a price for 'now' to compare against"
             )
-        price_now = price_at_window(price_values, now.start, duration)
+        price_now = price_at_window(price_values, now.start, duration_minutes)
         cap = price_now * (1 + max_price_increase_pct / 100)
 
     eligible = [
         estimate
         for estimate in wf
         if price_covers_window(price_values, estimate.start, estimate.end)
-        and price_at_window(price_values, estimate.start, duration) <= cap
+        and price_at_window(price_values, estimate.start, duration_minutes) <= cap
     ]
     if not eligible:
         raise PriceConstraintUnsatisfiableError(

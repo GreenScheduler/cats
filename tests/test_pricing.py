@@ -30,7 +30,9 @@ def test_price_at_window_averages_over_the_given_window():
     # With duration == the data's own step size, the window spans exactly one
     # consecutive pair of points, so the average is their simple mean.
     prices = series([100.0, 100.0, 200.0])
-    assert price_at_window(prices, D, duration=DURATION) == pytest.approx(100.0)
+    assert price_at_window(prices, D, duration_minutes=DURATION) == pytest.approx(
+        100.0
+    )
 
 
 def test_price_covers_window():
@@ -61,7 +63,11 @@ def test_max_price_excludes_the_global_carbon_optimum():
     assert unconstrained.start == D + timedelta(minutes=90)
 
     best = find_best_within_price_constraint(
-        wf, price_ts, duration=DURATION, max_price=150, max_price_increase_pct=None
+        wf,
+        price_ts,
+        duration_minutes=DURATION,
+        max_price=150,
+        max_price_increase_pct=None,
     )
     assert best.start != unconstrained.start
     assert best.start_value != 5
@@ -85,7 +91,11 @@ def test_max_price_increase_pct_relative_to_now():
     assert unconstrained.start == D + timedelta(minutes=30)
 
     best = find_best_within_price_constraint(
-        wf, price_ts, duration=DURATION, max_price=None, max_price_increase_pct=50
+        wf,
+        price_ts,
+        duration_minutes=DURATION,
+        max_price=None,
+        max_price_increase_pct=50,
     )
     assert best.start != unconstrained.start
     assert best.start_value != 10
@@ -98,7 +108,11 @@ def test_unsatisfiable_constraint_raises():
 
     with pytest.raises(PriceConstraintUnsatisfiableError):
         find_best_within_price_constraint(
-            wf, price, duration=DURATION, max_price=1.0, max_price_increase_pct=None
+            wf,
+            price,
+            duration_minutes=DURATION,
+            max_price=1.0,
+            max_price_increase_pct=None,
         )
 
 
@@ -118,7 +132,11 @@ def test_carbon_optimum_beyond_price_horizon_is_excluded_not_erroring():
     assert unconstrained.start_value == 5
 
     best = find_best_within_price_constraint(
-        wf, price, duration=DURATION, max_price=1_000_000, max_price_increase_pct=None
+        wf,
+        price,
+        duration_minutes=DURATION,
+        max_price=1_000_000,
+        max_price_increase_pct=None,
     )
     assert best.start_value != 5
     assert price_covers_window(price, best.start, best.end)
@@ -132,7 +150,11 @@ def test_now_without_price_coverage_is_unsatisfiable_for_relative_cap():
 
     with pytest.raises(PriceConstraintUnsatisfiableError):
         find_best_within_price_constraint(
-            wf, price, duration=DURATION, max_price=None, max_price_increase_pct=50
+            wf,
+            price,
+            duration_minutes=DURATION,
+            max_price=None,
+            max_price_increase_pct=50,
         )
 
 

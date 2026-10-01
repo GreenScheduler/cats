@@ -251,7 +251,7 @@ def parse_arguments():
         assert n >= 0
         return n
 
-    def signal_weight(string: str) -> tuple[str, float]:
+    def parse_signal_weight(string: str) -> tuple[str, float]:
         name, sep, weight_str = string.partition("=")
         if not sep:
             raise ValueError(f"--signal must be in NAME=WEIGHT format, got {string!r}")
@@ -297,15 +297,13 @@ def parse_arguments():
         "--metric",
         type=str,
         help="Which metric to request from the chosen provider, for providers that "
-        "serve more than one (e.g. carbonintensity.org.uk: carbon, renewables; "
-        "wattnet.eu: carbon, water, water_stress, environmental_score; "
-        "energy-charts.info: price, renewables). Run --list-providers to see each "
-        "provider's supported metrics and its default. Ignored by providers that "
-        "only serve a single metric.",
+        "serve more than one. Run --list-providers to see each provider's "
+        "supported metrics and its default. Ignored by providers that only serve "
+        "a single metric.",
     )
     parser.add_argument(
         "--signal",
-        type=signal_weight,
+        type=parse_signal_weight,
         action="append",
         metavar="NAME=WEIGHT",
         help="Repeatable. Selects which signals to combine, and their relative "
@@ -364,20 +362,8 @@ def parse_arguments():
         type=str,
         default="carbonintensity.org.uk",
         help="API to use to obtain forecasts. Overrides `config.yml`. "
-        "There is a choice of `carbonintensity.org.uk` (Great Britain: carbon "
-        "intensity or non-renewable share, see --metric), `wattnet.eu` (experimental, "
-        "across Europe: carbon intensity, water footprint, water impact or "
-        "environmental score, see --metric), `energy-charts.info` (across Europe "
-        "excluding Great Britain: day-ahead price or non-renewable share, see "
-        "--metric), `octopus.energy` (Great Britain: Agile tariff price in GBP/MWh) "
-        "or `composite` (configurable combination of signals from all the above, "
-        "accepting either a GB postcode or a wattnet.eu zone code and "
-        "automatically picking the right native data source for each requested "
-        "metric and location, see --signal). See --metric and --signal for the "
-        "multi-metric and composite providers. Run --list-providers for details. "
-        "The non-carbon metrics and the composite provider enable more than "
-        "purely carbon-aware scheduling; --footprint only has an effect when "
-        "forecast.metric == 'Carbon intensity'. Default: `carbonintensity.org.uk`.",
+        "Run --list-providers to see the available APIs, their metrics and "
+        "location formats. Default: `carbonintensity.org.uk`.",
     )
     parser.add_argument(
         "-c", "--command", help="Command to schedule, requires --scheduler to be set"

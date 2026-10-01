@@ -171,11 +171,11 @@ Sustainability metrics from wattnet.eu
 ``wattnet.eu`` (see :ref:`locations-outside-gb` above) serves four metrics
 from three separate endpoints of its own API, confirmed live against the
 real service: ``carbon`` (the default; the carbon intensity metric
-described above), ``water`` (life-cycle water footprint, in l/kWh),
-``water_stress`` (water-stress-weighted footprint, in stress-l/kWh -
+described above), ``water`` (life-cycle water footprint, in L/kWh),
+``water_stress`` (water-stress-weighted footprint, in stress-L/kWh -
 accounts for local water scarcity rather than plain volume), and
 ``environmental_score`` (wattnet's own composite score, where higher is
-better; CATS inverts it, consistent with every other metric CATS reports).
+better; CATS negates it so that lower is better, like every other metric CATS reports).
 
 .. code-block:: console
    :caption: *wattnet.eu's water metric, for Germany.*
@@ -184,8 +184,8 @@ better; CATS inverts it, consistent with every other metric CATS reports).
    ...
 
    Best job start time                       = 2026-09-30 10:24:43
-   Water footprint if job started now       = 18.10 l/kWh
-   Water footprint at optimal time          = 11.24 l/kWh
+   Water footprint if job started now       = 18.10 L/kWh
+   Water footprint at optimal time          = 11.24 L/kWh
 
 Trading off multiple signals with the composite provider
 -------------------------------------------------------------

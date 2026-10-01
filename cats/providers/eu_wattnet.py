@@ -42,8 +42,7 @@ METRIC_NAMES: dict[str, str] = {
     "carbon": "Carbon intensity",
     "water": "Water footprint",
     "water_stress": "Water stress",
-    # Inverted (100 - raw score), see get_data() below.
-    "environmental_score": "Non-environmental score",
+    "environmental_score": "Environmental score",
 }
 
 
@@ -62,16 +61,15 @@ class WattnetEuProvider(BaseProvider):
 
     - carbon (default): carbon intensity, life-cycle scope, in gCO2/kWh
       (unit read from the API response, not hardcoded).
-    - water: water footprint, life-cycle scope, in l/kWh.
+    - water: water footprint, life-cycle scope, in L/kWh.
     - water_stress: water-stress-weighted water footprint, operational
-      scope, in stress-l/kWh - accounts for local water scarcity, unlike
+      scope, in stress-L/kWh - accounts for local water scarcity, unlike
       water's plain volume figure.
     - environmental_score: wattnet's own composite environmental score,
       operational scope. The API gives no unit; higher is better (the
-      usual convention for "scores"), so this provider inverts it
-      (100 - score) so that lower is still "better" for CATS'
-      minimum-average-window scheduler, consistent with every other
-      metric in CATS.
+      usual convention for "scores"), so this provider negates it so that
+      lower is still "better" for CATS' minimum-average-window scheduler,
+      consistent with every other metric in CATS.
 
     Only carbon keeps the Timeseries.metric name "Carbon intensity", so
     that --footprint (which checks forecast.metric == "Carbon intensity" in
@@ -209,25 +207,18 @@ class WattnetEuProvider(BaseProvider):
         utc = ZoneInfo("UTC")
         raw_values = response[0]["series"][0]["values"]
 
-        if metric == "environmental_score":
-            values = [
-                PointEstimate(
-                    datetime=datetime.datetime.strptime(t, datefmt).replace(tzinfo=utc),
-                    value=100 - v,
-                )
-                for t, v in raw_values
-            ]
-            return Timeseries(
-                METRIC_NAMES[metric],
-                values=values,
-                unit="score (0-100, lower=better)",
-            )
-
         unit = response[0].get("unit", "")
+        match metric:
+            case "environmental_score":
+                # Higher score is better, so minimise the negated score
+                sign = -1
+                unit = "-score"
+            case _:
+                sign = 1
         values = [
             PointEstimate(
                 datetime=datetime.datetime.strptime(t, datefmt).replace(tzinfo=utc),
-                value=v,
+                value=sign * v,
             )
             for t, v in raw_values
         ]

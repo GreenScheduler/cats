@@ -50,7 +50,7 @@ class CATSOutput:
             col_ee_opt = ""
 
         # Labels vary a lot in length depending on which metric/provider is in
-        # use (e.g. "Carbon intensity" vs "Non-environmental score" vs a
+        # use (e.g. "Carbon intensity" vs "Environmental score" vs a
         # composite's long "Composite score (...)" label), so the "=" column
         # is aligned dynamically rather than to hardcoded whitespace tuned
         # for one particular metric name. Capped so one pathologically long

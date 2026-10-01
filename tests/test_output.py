@@ -57,15 +57,15 @@ OUTPUT_WITH_PRICE_INCREASE = CATSOutput(
 
 # A longer metric label (e.g. wattnet.eu's environmental_score) combined with
 # a price report: the "=" column must still line up, even though the label
-# lengths of "Non-environmental score if job started now" and "Price if job
+# lengths of "Environmental score if job started now" and "Price if job
 # started now" differ substantially.
 OUTPUT_WITH_LONG_METRIC_AND_PRICE = CATSOutput(
-    "Non-environmental score",
+    "Environmental score",
     AverageEstimate(19.59, now_start, now_end, 0.0, 0.0),
     AverageEstimate(18.75, optimal_start, optimal_end, 0.0, 0.0),
     "DE",
     "DEU",
-    "score (0-100, lower=better)",
+    "-score",
     priceEstimate=Estimates(17.49, 158.37, 17.49 - 158.37),
     priceUnit="EUR/MWh",
 )
@@ -111,11 +111,11 @@ Price at chosen start time          = 214.29 GBP/MWh (+ 71.24)""",
         (
             OUTPUT_WITH_LONG_METRIC_AND_PRICE,
             """
-Best job start time                        = 2024-03-16 02:00:00
-Non-environmental score if job started now = 19.59 score (0-100, lower=better)
-Non-environmental score at optimal time    = 18.75 score (0-100, lower=better)
-Price if job started now                   = 17.49 EUR/MWh
-Price at chosen start time                 = 158.37 EUR/MWh (+ 140.88)""",
+Best job start time                    = 2024-03-16 02:00:00
+Environmental score if job started now = 19.59 -score
+Environmental score at optimal time    = 18.75 -score
+Price if job started now               = 17.49 EUR/MWh
+Price at chosen start time             = 158.37 EUR/MWh (+ 140.88)""",
         ),
     ],
 )

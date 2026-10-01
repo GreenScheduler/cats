@@ -240,51 +240,57 @@ class EnergyChartsProvider(BaseProvider):
         )
         end_time = start_time + timedelta(minutes=self.get_max_duration_minutes(metric))
 
-        if metric == "price":
-            location = self._validate_price_location(location)
-            # Some zone codes contain characters that are unsafe unescaped in
-            # a URL query string (e.g. "IE(SEM)"), so quote it.
-            url = (
-                f"{self.base_url}/v2/price?"
-                f"bzn={quote(location, safe='')}&"
-                f"start={start_time.strftime('%Y-%m-%dT%H:%M:%SZ')}&"
-                f"end={end_time.strftime('%Y-%m-%dT%H:%M:%SZ')}"
-            )
-            response: dict[str, Any] | None = fetch_url(url)
-            # location has already been validated against the static zone
-            # list above, so a missing/empty "data" field indicates a
-            # genuine upstream/availability problem rather than a bad location.
-            assert response is not None, "No response from Energy-Charts price request"
-            assert response.get("data"), (
-                "Empty response from Energy-Charts price request"
-            )
-            values = [
-                PointEstimate(
-                    datetime=datetime.fromisoformat(d["timestamp"]),
-                    value=d["values"]["day_ahead_price"],
+        match metric:
+            case "price":
+                location = self._validate_price_location(location)
+                # Some zone codes contain characters that are unsafe unescaped in
+                # a URL query string (e.g. "IE(SEM)"), so quote it.
+                url = (
+                    f"{self.base_url}/v2/price?"
+                    f"bzn={quote(location, safe='')}&"
+                    f"start={start_time.strftime('%Y-%m-%dT%H:%M:%SZ')}&"
+                    f"end={end_time.strftime('%Y-%m-%dT%H:%M:%SZ')}"
                 )
-                for d in response["data"]
-            ]
-            return Timeseries(
-                "Day-ahead electricity price", values=values, unit="EUR/MWh"
-            )
-
-        # metric == "renewables"
-        location = self._validate_renewables_location(location)
-        url = (
-            f"{self.base_url}/v2/signal?"
-            f"country={location}&"
-            f"start={start_time.strftime('%Y-%m-%dT%H:%M:%SZ')}&"
-            f"end={end_time.strftime('%Y-%m-%dT%H:%M:%SZ')}"
-        )
-        response = fetch_url(url)
-        assert response is not None, "No response from Energy-Charts signal request"
-        assert response.get("data"), "Empty response from Energy-Charts signal request"
-        values = [
-            PointEstimate(
-                datetime=datetime.fromisoformat(d["timestamp"]),
-                value=100 - d["values"]["share"],
-            )
-            for d in response["data"]
-        ]
-        return Timeseries("Non-renewable share", values=values, unit="%")
+                response: dict[str, Any] | None = fetch_url(url)
+                # location has already been validated against the static zone
+                # list above, so a missing/empty "data" field indicates a
+                # genuine upstream/availability problem rather than a bad location.
+                assert response is not None, (
+                    "No response from Energy-Charts price request"
+                )
+                assert response.get("data"), (
+                    "Empty response from Energy-Charts price request"
+                )
+                values = [
+                    PointEstimate(
+                        datetime=datetime.fromisoformat(d["timestamp"]),
+                        value=d["values"]["day_ahead_price"],
+                    )
+                    for d in response["data"]
+                ]
+                return Timeseries(
+                    "Day-ahead electricity price", values=values, unit="EUR/MWh"
+                )
+            case _:  # renewables
+                location = self._validate_renewables_location(location)
+                url = (
+                    f"{self.base_url}/v2/signal?"
+                    f"country={location}&"
+                    f"start={start_time.strftime('%Y-%m-%dT%H:%M:%SZ')}&"
+                    f"end={end_time.strftime('%Y-%m-%dT%H:%M:%SZ')}"
+                )
+                response = fetch_url(url)
+                assert response is not None, (
+                    "No response from Energy-Charts signal request"
+                )
+                assert response.get("data"), (
+                    "Empty response from Energy-Charts signal request"
+                )
+                values = [
+                    PointEstimate(
+                        datetime=datetime.fromisoformat(d["timestamp"]),
+                        value=100 - d["values"]["share"],
+                    )
+                    for d in response["data"]
+                ]
+                return Timeseries("Non-renewable share", values=values, unit="%")
