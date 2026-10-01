@@ -8,12 +8,11 @@ CATS is a **C**limate-**A**ware **T**ask **S**cheduler. It schedules cluster job
 
 The Climate-Aware Task Scheduler is a lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment. This tool uses real-time carbon intensity data from the National Grid ESO via their API to estimate the carbon intensity of the electricity grid, and schedules tasks at times when the estimated carbon intensity is lowest. This helps to reduce the carbon emissions associated with running computationally intensive tasks, making it an ideal solution for environmentally conscious developers.
 
-*Demo showing CATS scheduling a 30 minute job using the `at` scheduler*
+_Demo showing CATS scheduling a 30 minute job using the `at` scheduler_
 ![CATS animated usage example](docs/source/_static/cats.gif)
 
 > [!NOTE]
 > Currently CATS only works by default in the Great Britain (using National Grid data) or elsewhere in Europe using data from the wattnet.eu project. If you are aware of APIs for realtime grid carbon intensity data in other countries please open an issue and let us know.
-
 
 ## Features
 
@@ -51,6 +50,26 @@ which produced at the time run (`Tue 20 Jan 15:40:21 GMT 2026`) a forecast minim
 illustrated by the resulting plot of:
 
 ![CATS command run plot example output for RG1 and 3 hour job](docs/source/_static/example_plot_output_rg1_180mins.png)
+
+## Restricting the scheduling window
+
+If you need to keep a job inside a specific time band, CATS supports a few
+simple constraints:
+
+- `--window`: maximum search window in minutes (default: `2820`, or 47 hours)
+- `--start-window`: earliest allowed start time, in ISO format or `HH:MM`
+- `--end-window`: latest allowed start time, in ISO format or `HH:MM`
+
+Example:
+
+```console
+$ cats --duration 180 --location "OX1" --window 240 \
+      --start-window 2026-01-22T09:00 --end-window 2026-01-22T17:00
+```
+
+This searches for the lowest-carbon start time only within the allowed window.
+If the requested job duration or time constraints are impossible to satisfy, CATS
+returns a clear validation error.
 
 ## Installation
 
