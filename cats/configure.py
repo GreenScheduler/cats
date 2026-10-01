@@ -16,12 +16,12 @@ import datetime
 import logging
 import os
 import sys
+import tomllib
 from argparse import Namespace
 from collections.abc import Mapping
 from typing import Any, Optional
 
 import requests
-import yaml
 
 from cats.providers import BaseProvider, get_provider
 
@@ -109,39 +109,53 @@ def get_runtime_config(
     return provider_cls, location, duration, jobinfo, PUE
 
 
+LEGACY_YAML_CONFIGS = [
+    "cats_config.yml",
+    "cats_config.yaml",
+    "config.yml",
+    "config.yaml",
+]
+YAML_UNSUPPORTED = (
+    "YAML configuration files are no longer supported, please convert {} to TOML"
+)
+
+
+def warn_if_yaml(path: str):
+    if path.endswith((".yml", ".yaml")):
+        logging.warning(YAML_UNSUPPORTED.format(path))
+
+
 def config_from_file(configpath: str | None = None) -> Mapping[str, Any]:
     conf_dict: Mapping[str, Any] = {}
     if configpath:
         # if path to config file provided, it is used
-        with open(configpath, "r") as f:
-            conf_dict = yaml.safe_load(f)
+        warn_if_yaml(configpath)
+        with open(configpath, "rb") as f:
+            conf_dict = tomllib.load(f)
         logging.info(f"Using provided config file: {configpath}\n")
     else:
         # if no path provided, try to use config environment variable
         cfile = os.getenv("CATS_CONFIG_FILE")
         if cfile is not None:
+            warn_if_yaml(cfile)
             try:
-                with open(cfile, "r") as f:
-                    conf_dict = yaml.safe_load(f)
+                with open(cfile, "rb") as f:
+                    conf_dict = tomllib.load(f)
                 logging.info(f"Using {cfile} found in CATS_CONFIG_FILE\n")
             except FileNotFoundError:
                 logging.warning("CATS_CONFIG_FILE config file not found")
         else:
             # if no path provided and no env variable, look for a file in current directory
-            # we support several file names but warn for deprecated names
-            config_file_names = ["cats_config.yml", "cats_config.yaml", "config.yaml"]
-            cfile = next(
-                (x for x in config_file_names if os.path.isfile(x)), "config.yml"
-            )
+            cfile = "config.toml"
             try:
-                with open(cfile, "r") as f:
-                    conf_dict = yaml.safe_load(f)
+                with open(cfile, "rb") as f:
+                    conf_dict = tomllib.load(f)
                 logging.info(f"Using {cfile} found in current directory\n")
-                if cfile in ["config.yaml", "config.yml"]:
-                    logging.warning(
-                        f"Use of {cfile} is deprecated. We suggest renaming to 'cats_config.yml'\n"
-                    )
             except FileNotFoundError:
+                if legacy := next(
+                    (x for x in LEGACY_YAML_CONFIGS if os.path.isfile(x)), None
+                ):
+                    logging.warning(YAML_UNSUPPORTED.format(legacy))
                 logging.warning("config file not found")
                 conf_dict = {}
 

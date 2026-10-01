@@ -1,11 +1,12 @@
 import os
 from contextlib import contextmanager
+from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch
 
 import pytest
-import yaml
 
+import cats
 from cats.cli import parse_arguments
 from cats.configure import (
     Args,
@@ -33,59 +34,53 @@ def change_dir(p):
 
 
 @pytest.fixture
-def local_config_file(request, tmp_path_factory):
-    # This fixture allows tests that use it to pass in
-    # a file name as a fixt_data mark. Default to config.yml
-    marker = request.node.get_closest_marker("fixt_data")
-    if marker is None:
-        filename = "config.yml"
-    else:
-        filename = marker.args[0]
-    p = tmp_path_factory.mktemp("temp") / filename
-    with open(p, "w") as stream:
-        yaml.dump(CATS_CONFIG, stream)
+def local_config_file(tmp_path_factory):
+    p = tmp_path_factory.mktemp("temp") / "config.toml"
+    p.write_text("\n".join(f'{k} = "{v}"' for k, v in CATS_CONFIG.items()))
     return p.parent
 
 
 def test_config_from_file():
-    missing_file = "missing.yaml"
+    missing_file = "missing.toml"
     with pytest.raises(FileNotFoundError):
         config_from_file(missing_file)
         config_from_file()
 
 
-@pytest.mark.fixt_data("cats_config.yml")
-def test_config_from_file_default_cats(local_config_file):
+def test_config_from_file_default(local_config_file):
     with change_dir(local_config_file):
         configmapping = config_from_file()
     assert configmapping == CATS_CONFIG
 
 
-@pytest.mark.fixt_data("cats_config.yaml")
-def test_config_from_file_default_catsyaml(local_config_file):
-    with change_dir(local_config_file):
-        configmapping = config_from_file()
+def test_config_from_file_path(local_config_file):
+    configmapping = config_from_file(str(local_config_file / "config.toml"))
     assert configmapping == CATS_CONFIG
 
 
-@pytest.mark.fixt_data("config.yml")
-def test_config_from_file_default_old(local_config_file):
-    with change_dir(local_config_file):
-        configmapping = config_from_file()
-    assert configmapping == CATS_CONFIG
+@pytest.mark.parametrize("filename", ["cats_config.yml", "config.yaml"])
+def test_config_from_file_warns_legacy_yaml(tmp_path, caplog, filename):
+    (tmp_path / filename).write_text('location: "EH8"\n')
+    with change_dir(tmp_path):
+        assert config_from_file() == {}
+    assert f"please convert {filename} to TOML" in caplog.text
 
 
-@pytest.mark.fixt_data("config.yaml")
-def test_config_from_file_default_configyaml(local_config_file):
-    with change_dir(local_config_file):
-        configmapping = config_from_file()
-    assert configmapping == CATS_CONFIG
+def test_config_from_env_warns_yaml(tmp_path, caplog, monkeypatch):
+    monkeypatch.setenv("CATS_CONFIG_FILE", str(tmp_path / "config.yml"))
+    assert config_from_file() == {}
+    assert "YAML configuration files are no longer supported" in caplog.text
 
 
-def test_config_from_env(local_config_file):
-    os.environ["CATS_CONFIG_FILE"] = str(local_config_file / "config.yml")
+def test_config_from_env(local_config_file, monkeypatch):
+    monkeypatch.setenv("CATS_CONFIG_FILE", str(local_config_file / "config.toml"))
     configmapping = config_from_file()
     assert configmapping == CATS_CONFIG
+
+
+def test_example_config_parses():
+    config = config_from_file(str(Path(cats.__file__).with_name("config.toml")))
+    assert set(config["profiles"]) == {"my_cpu_only_profile", "my_gpu_profile"}
 
 
 @patch("cats.configure.requests")
