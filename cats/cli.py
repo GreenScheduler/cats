@@ -587,7 +587,9 @@ def run_cats(arguments: list[str] | None = None):
         return
 
     if parsed_args.duration is None:
-        raise MissingArgumentError("the following arguments are required: -d/--duration")
+        raise MissingArgumentError(
+            "the following arguments are required: -d/--duration"
+        )
 
     if args.duration is None:
         raise MissingArgumentError(
