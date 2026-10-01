@@ -211,7 +211,7 @@ def parse_arguments():
     """
 
     config_text = indent_lines(
-        Path(__file__).with_name("config.yml").read_text(), spaces=8
+        Path(__file__).with_name("config.toml").read_text(), spaces=8
     )
     example_text = f"""
     Examples
@@ -234,7 +234,7 @@ def parse_arguments():
     The configuration file is documented in the Quickstart section of the online
     documentation. An example config file is given below:
 
-.. code-block:: yaml
+.. code-block:: toml
 
 {config_text}
     """
@@ -334,7 +334,7 @@ def parse_arguments():
         action=StoreApi,
         type=str,
         default="carbonintensity.org.uk",
-        help="API to use to obtain forecasts. Overrides `config.yml`. "
+        help="API to use to obtain forecasts. Overrides `config.toml`. "
         "Run --list-providers to see the available APIs, their metrics and "
         "location formats. Default: `carbonintensity.org.uk`.",
     )
@@ -351,15 +351,15 @@ def parse_arguments():
         type=str,
         help="Location of the computing facility with a format that depends on the API used."
         "For `carbonintensity.org.uk` the first half of a postcode (e.g. `M15`) is used, "
-        "for other APIs, see documentation for exact format. Overrides `config.yml`. "
+        "for other APIs, see documentation for exact format. Overrides `config.toml`. "
         "Default: if absent, location based in IP address is used.",
     )
     parser.add_argument(
         "--config",
         type=str,
         help="Path to a configuration file. The file is required to obtain carbon footprint estimates. "
-        "Default: `config.yml` in current directory."
-        "Template found at https://github.com/GreenScheduler/cats/blob/main/config.yml.",
+        "Default: `config.toml` in current directory. "
+        "Template found at https://github.com/GreenScheduler/cats/blob/main/cats/config.toml.",
     )
     parser.add_argument(
         "--profile",

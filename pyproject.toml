@@ -4,7 +4,7 @@
 
 [tool.setuptools]
   packages = ["cats", "cats.providers"]
-  package-data.cats = ["config.yml", "data/*.txt"]
+  package-data.cats = ["config.toml", "data/*.txt"]
 
 [project]
   name = "climate-aware-task-scheduler"
@@ -40,17 +40,14 @@
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
   ]
-  dependencies = ["requests>=2.0", "PyYAML>=6.0", "tzdata ; platform_system == 'Windows'"]
+  dependencies = ["requests>=2.0", "tzdata ; platform_system == 'Windows'"]
 
   [tool.setuptools.dynamic]
     version = {attr = "cats.version.version"}
 
-  [tool.pytest.ini_options]
-    markers = ["fixt_data: data for fixtures"]
-
   [project.optional-dependencies]
     test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov", "matplotlib>=3.0"]
-    types = ["mypy", "types-PyYAML", "types-redis", "types-requests", "types-ujson"]
+    types = ["mypy", "types-redis", "types-requests", "types-ujson"]
     docs = ["sphinx==6.*", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton", "sphinxcontrib-bibtex"]
     plots = ["matplotlib>=3.0"]
 
