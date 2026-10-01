@@ -108,3 +108,20 @@ def test_missing_location_raises_error():
     provider = OctopusAgilePriceProvider()
     with pytest.raises(InvalidLocationError):
         _ = provider.get_data(timestamp)
+
+
+@pytest.mark.parametrize(
+    "now, expected",
+    [
+        # Midnight GMT: all of today and tomorrow, less one 30 min period
+        (datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), 2850),
+        # 10:00 GMT: 14 h left today plus tomorrow
+        (datetime(2026, 1, 1, 10, 0, tzinfo=timezone.utc), 2250),
+        # Aligned down to the half hour
+        (datetime(2026, 1, 1, 10, 20, tzinfo=timezone.utc), 2250),
+        # BST: 10:00 UTC is 11:00 in London, so one hour less
+        (datetime(2026, 7, 1, 10, 0, tzinfo=timezone.utc), 2190),
+    ],
+)
+def test_horizon_depends_on_time_of_day(now, expected):
+    assert OctopusAgilePriceProvider()._horizon_minutes(now) == expected

@@ -2,10 +2,11 @@
 
 # pyright: reportUnknownArgumentType=none, reportUnknownVariableType=none, reportAny=none
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from importlib.resources import files
 from typing import Any, ClassVar
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 from ..exceptions import InvalidLocationError
 from ..forecast import PointEstimate, Timeseries
@@ -14,9 +15,13 @@ from .base import (
     LocationGroup,
     align_to_resolution,
     fetch_url,
+    minutes_to_end_of_day,
     provider,
     resolve_metric,
 )
+
+# The European day-ahead market runs on CET days, whichever zone is requested
+MARKET_TIMEZONE = ZoneInfo("Europe/Brussels")
 
 INVALID_ZONE_MESSAGE = (
     "{location}. The 'price' metric needs an Energy-Charts bidding zone code, "
@@ -103,8 +108,9 @@ class EnergyChartsProvider(BaseProvider):
       zone code, e.g. 'DE-LU', 'FR', 'IT-North'. 15 minute resolution.
       Day-ahead prices are typically published once per day around
       12:00-15:00 CET for the following day, so the effective forecast
-      horizon into the future varies through the day even though
-      get_max_duration_minutes() reports a fixed nominal maximum. Not
+      horizon into the future varies through the day, while
+      get_max_duration_minutes() reports the nominal maximum, up to the end
+      of tomorrow (CET), from the time it is called. Not
       compatible with --footprint, which only applies when
       forecast.metric == "Carbon intensity".
 
@@ -116,7 +122,7 @@ class EnergyChartsProvider(BaseProvider):
       data for the current day (00:00-23:45 local), even when explicit
       start/end query parameters are supplied requesting a later date -
       get_max_duration_minutes() reports a correspondingly modest nominal
-      maximum for this metric. Values can legitimately be negative:
+      maximum for this metric, up to the end of today (CET). Values can legitimately be negative:
       renewable generation can exceed 100% of domestic load around midday
       in high-solar/wind countries (the surplus is exported), which shows
       up here as a negative "non-renewable share". This is real data, not a
@@ -197,18 +203,26 @@ class EnergyChartsProvider(BaseProvider):
             )
         return groups
 
+    def _horizon_minutes(self, metric: str, timestamp: datetime) -> int:
+        """
+        Nominal forecast horizon for a request made at `timestamp`
+
+        Day-ahead prices run to the end of tomorrow (market days follow CET),
+        though actual availability can be less until the next day's auction
+        results are published, around local noon CET. The renewables endpoint
+        only appears to return "today" regardless of the requested range.
+        """
+        days_ahead = 1 if metric == "price" else 0
+        return minutes_to_end_of_day(
+            timestamp,
+            MARKET_TIMEZONE,
+            days_ahead,
+            self.get_temporal_resolution_minutes(metric),
+        )
+
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         metric = resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
-        if metric == "price":
-            # Nominal "today + tomorrow" day-ahead window, lop off one 15
-            # min step from the end. Actual data availability can be less
-            # than this near local noon CET, before the next day's auction
-            # results are published.
-            return 2865
-        # renewables: this endpoint only appears to return "today"
-        # regardless of the requested range, so declare a modest
-        # single-day nominal maximum instead.
-        return 1425  # nominal "rest of today", lop off one 15 min step
+        return self._horizon_minutes(metric, datetime.now(timezone.utc))
 
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
@@ -238,7 +252,9 @@ class EnergyChartsProvider(BaseProvider):
         start_time = align_to_resolution(
             timestamp, self.get_temporal_resolution_minutes(metric)
         )
-        end_time = start_time + timedelta(minutes=self.get_max_duration_minutes(metric))
+        end_time = start_time + timedelta(
+            minutes=self._horizon_minutes(metric, timestamp)
+        )
 
         match metric:
             case "price":

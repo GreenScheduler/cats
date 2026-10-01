@@ -15,9 +15,10 @@ from __future__ import annotations
 import tempfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, ClassVar
+from zoneinfo import ZoneInfo
 
 from ..cache import RETRY_STATUSES, Cache  # noqa: F401
 from ..exceptions import InvalidMetricError, UnsupportedProviderError
@@ -93,6 +94,33 @@ def align_to_resolution(timestamp: datetime, resolution_minutes: int) -> datetim
     timestamp = timestamp.astimezone(timezone.utc)
     patch_minute = (timestamp.minute // resolution_minutes) * resolution_minutes
     return timestamp.replace(minute=patch_minute, second=0, microsecond=0)
+
+
+def minutes_to_end_of_day(
+    timestamp: datetime, tz: ZoneInfo, days_ahead: int, resolution_minutes: int
+) -> int:
+    """
+    Minutes from the aligned `timestamp` to the end of a local day, less one step
+
+    For providers whose data runs up to the end of a calendar day in some
+    market's timezone (e.g. "today and tomorrow") rather than for a fixed
+    length of time from now, so the maximum duration depends on when it is asked.
+    The last resolution step is dropped, matching the other providers.
+
+    :param timestamp: The time of the request
+    :param tz: Timezone whose calendar days define the data horizon
+    :param days_ahead: 0 for the end of the local day of `timestamp`, 1 for
+        the end of the following day, and so on
+    :param resolution_minutes: Provider's temporal resolution
+    :return: Maximum duration in minutes, never negative
+    """
+    start = align_to_resolution(timestamp, resolution_minutes)
+    local_date = timestamp.astimezone(tz).date()
+    end = datetime.combine(
+        local_date + timedelta(days=days_ahead + 1), time.min, tzinfo=tz
+    )
+    minutes = (end - start).total_seconds() / 60  # aware: DST-correct
+    return max(int(minutes) - resolution_minutes, 0)
 
 
 def resolve_metric(

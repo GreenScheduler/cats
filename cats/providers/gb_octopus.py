@@ -2,7 +2,7 @@
 
 # pyright: reportUnknownArgumentType=none, reportUnknownVariableType=none, reportAny=none
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
 
@@ -13,9 +13,12 @@ from .base import (
     LocationGroup,
     align_to_resolution,
     fetch_url,
+    minutes_to_end_of_day,
     provider,
     resolve_metric,
 )
+
+GB_TIMEZONE = ZoneInfo("Europe/London")
 
 # The 14 GB electricity distribution regions, identified by letter, as used
 # by both Octopus Energy tariffs and carbonintensity.org.uk (whose provider
@@ -103,14 +106,21 @@ class OctopusAgilePriceProvider(BaseProvider):
             )
         ]
 
+    def _horizon_minutes(self, timestamp: datetime) -> int:
+        """
+        Nominal forecast horizon for a request made at `timestamp`
+
+        The end of tomorrow (UK time), less one 30 min settlement period.
+        Actual data availability can be less than this until tomorrow's Agile
+        rates are published, typically around 16:00 UK time.
+        """
+        return minutes_to_end_of_day(
+            timestamp, GB_TIMEZONE, 1, self.get_temporal_resolution_minutes()
+        )
+
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
-        # Nominal "today + tomorrow" day-ahead window, lop off one 30 min
-        # settlement period from the end, matching the convention used by
-        # gb_carbonintensity.py. Actual data availability can be less than
-        # this until tomorrow's Agile rates are published, typically around
-        # 16:00 UK time.
-        return 2820
+        return self._horizon_minutes(datetime.now(timezone.utc))
 
     def get_temporal_resolution_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
@@ -167,7 +177,7 @@ class OctopusAgilePriceProvider(BaseProvider):
         start_time = align_to_resolution(
             timestamp, self.get_temporal_resolution_minutes()
         )
-        end_time = start_time + timedelta(minutes=self.get_max_duration_minutes())
+        end_time = start_time + timedelta(minutes=self._horizon_minutes(timestamp))
 
         url = (
             f"{self.base_url}/products/{product_code}/electricity-tariffs/"

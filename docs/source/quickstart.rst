@@ -256,16 +256,21 @@ to also supply ``--duration``:
        metrics: carbon (default), renewables
    energy-charts.info
        Provider for the Fraunhofer ISE Energy-Charts API
-       max duration: 2865 min, resolution: 15 min
+       max duration: 2265 min, resolution: 15 min
        metrics: price (default), renewables
    octopus.energy
        Provider for the Octopus Energy Agile tariff API
-       max duration: 2820 min, resolution: 30 min
+       max duration: 2250 min, resolution: 30 min
        metrics: price (default)
    wattnet.eu
        Experimental provider for the wattnet.eu project API
        max duration: 4305 min, resolution: 15 min
        metrics: carbon (default), environmental_score, water, water_stress
+
+The maximum duration of ``energy-charts.info`` and ``octopus.energy`` depends
+on the time of day, since their data runs to the end of tomorrow (or, for the
+``energy-charts.info`` ``renewables`` metric, the end of today). The values
+above are from 10:00 local time.
 
 .. _listing-locations:
 

@@ -193,3 +193,22 @@ def test_missing_location_raises_error():
         _ = provider.get_data(timestamp, metric="price")
     with pytest.raises(InvalidLocationError):
         _ = provider.get_data(timestamp, metric="renewables")
+
+
+@pytest.mark.parametrize(
+    "metric, now, expected",
+    [
+        # Midnight CET: all of today and tomorrow, less one 15 min step
+        ("price", datetime(2025, 12, 31, 23, 0, tzinfo=timezone.utc), 2865),
+        ("renewables", datetime(2025, 12, 31, 23, 0, tzinfo=timezone.utc), 1425),
+        # 10:00 CET
+        ("price", datetime(2026, 1, 1, 9, 0, tzinfo=timezone.utc), 2265),
+        ("renewables", datetime(2026, 1, 1, 9, 0, tzinfo=timezone.utc), 825),
+        # Last step of the day leaves nothing, never a negative duration
+        ("renewables", datetime(2026, 1, 1, 22, 50, tzinfo=timezone.utc), 0),
+        # Spans the CET -> CEST change on 2026-03-29 (a 23 hour day)
+        ("price", datetime(2026, 3, 28, 9, 0, tzinfo=timezone.utc), 2205),
+    ],
+)
+def test_horizon_depends_on_time_of_day(metric, now, expected):
+    assert EnergyChartsProvider()._horizon_minutes(metric, now) == expected
