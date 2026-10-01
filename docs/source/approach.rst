@@ -97,7 +97,7 @@ reported with the opposite sign or as their complement: the environmental score 
 renewable share is reported as non-renewable share (100 minus the renewable percentage). Run
 ``cats --list-providers`` to see every provider with its metrics.
 
-Price can also act as a constraint rather than a goal: ``--max-price`` and
+Price can also act as a constraint rather than as the metric being minimised: ``--max-price`` and
 ``--max-price-increase-pct`` keep the chosen metric as what is minimised, but
 only over start times whose price satisfies the cap. This works with any provider. If no start time within the available price forecast satisfies the cap, CATS reports
 an error. Whenever price data is available, CATS also reports the price of the chosen schedule

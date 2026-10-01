@@ -3,9 +3,9 @@
 Cookbook
 ========
 
-Recipes for common things you might want to do with CATS beyond the default carbon-aware scheduling: choosing a different goal such as price or water use, and keeping your costs under control. The outputs shown are examples from one run and will differ on yours.
+Recipes for common things you might want to do with CATS beyond the default carbon-aware scheduling: choosing a different metric such as price or water use, and keeping your costs under control. The outputs shown are examples from one run and will differ on yours.
 
-Run ``cats --list-providers`` to see which data sources (``--api``) and goals (``--metric``) are available, and ``cats --list-locations`` to see the valid ``--location`` codes for each.
+Run ``cats --list-providers`` to see which data sources (``--api``) and metrics (``--metric``) are available, and ``cats --list-locations`` to see the valid ``--location`` codes for each.
 
 Run a job when the grid is cleanest
 -----------------------------------
@@ -63,7 +63,7 @@ Use ``--metric renewables``. CATS reports the non-renewable share, so lower is s
 Minimise water use or environmental impact
 ------------------------------------------
 
-The ``wattnet.eu`` API (which needs a free registration, see :ref:`quickstart`) offers several environmental goals for European zones: ``carbon``, ``water``, ``water_stress`` (water use weighted by local scarcity) and ``environmental_score``.
+The ``wattnet.eu`` API (which needs a free registration, see :ref:`quickstart`) offers several environmental metrics for European zones: ``carbon``, ``water``, ``water_stress`` (water use weighted by local scarcity) and ``environmental_score``.
 
 .. code-block:: console
 
@@ -94,7 +94,7 @@ The cleanest time to run is not always the cheapest, and it can cost more than s
    Price if job started now            = 153.39 GBP/MWh
    Price at chosen start time          = 219.20 GBP/MWh (+ 65.81)
 
-Rather than making price your goal, you can set a price limit. CATS then picks the best start time among those within the limit. Use ``--max-price-increase-pct`` to limit how much more than starting now you are willing to pay, with ``0`` meaning never more.
+Rather than making price the metric you minimise, you can set a price limit. CATS then picks the best start time among those within the limit. Use ``--max-price-increase-pct`` to limit how much more than starting now you are willing to pay, with ``0`` meaning never more.
 
 .. code-block:: console
 
@@ -128,10 +128,10 @@ Options at a glance
 ======================================  ===============================================================
 Option                                  What it does
 ======================================  ===============================================================
-``--metric NAME``                       What to minimise, for APIs that offer more than one goal
+``--metric NAME``                       What to minimise, for APIs that offer more than one metric
 ``--max-price N``                       Absolute price limit, in the unit of your location
 ``--max-price-increase-pct N``          Price limit relative to the price of starting now
-``--list-providers``                    List the APIs and their goals, without needing ``--duration``
+``--list-providers``                    List the APIs and their metrics, without needing ``--duration``
 ``--list-locations``                    List the valid ``--location`` codes of one API (or all),
                                         without needing ``--duration``
 ======================================  ===============================================================
