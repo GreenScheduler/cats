@@ -44,7 +44,7 @@ some information about the carbon intensity on standard error.
 
 
 Restricting the search window
-----------------------------
+-----------------------------
 
 If you need to limit when the job may start, you can set a maximum search
 window or explicit start/end bounds.
