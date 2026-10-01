@@ -5,7 +5,7 @@ import sys
 from argparse import Action, ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 import requests
 
@@ -31,7 +31,7 @@ from .pricing import (
     price_covers_window,
     resolve_price_series,
 )
-from .providers import get_provider, list_providers
+from .providers import CompositeProvider, get_provider, list_providers
 from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
 from .version import version
 
@@ -251,6 +251,18 @@ def parse_arguments():
         assert n >= 0
         return n
 
+    def parse_signal_weight(string: str) -> tuple[str, float]:
+        name, sep, weight_str = string.partition("=")
+        if not sep:
+            raise ValueError(f"--signal must be in NAME=WEIGHT format, got {string!r}")
+        try:
+            weight = float(weight_str)
+        except ValueError:
+            raise ValueError(
+                f"--signal weight must be a number, got {weight_str!r} in {string!r}"
+            )
+        return name, weight
+
     ### Required
 
     parser.add_argument(
@@ -289,15 +301,30 @@ def parse_arguments():
         "supported metrics and its default. Ignored by providers that only serve "
         "a single metric.",
     )
+    parser.add_argument(
+        "--signal",
+        type=parse_signal_weight,
+        action="append",
+        metavar="NAME=WEIGHT",
+        help="Repeatable. Selects which signals to combine, and their relative "
+        "weight, when using the 'composite' provider. Valid signal names: "
+        "carbon, price, renewables, water, water_stress, "
+        "environmental_score. Weights don't need to sum to 1 (normalised "
+        "automatically). Example: "
+        "--signal carbon=0.4 --signal price=0.3 --signal renewables=0.3. "
+        "With no --signal given, every no-extra-authentication signal available "
+        "for that location is combined with equal weight. Ignored by all other "
+        "providers.",
+    )
     price_constraint_group = parser.add_mutually_exclusive_group()
     price_constraint_group.add_argument(
         "--max-price",
         type=float,
         help="Restrict the job start time search to windows whose average day-ahead "
         "price does not exceed this absolute cap (GBP/MWh for a GB postcode, "
-        "EUR/MWh for a wattnet.eu zone). Works with any --api/--metric: price is "
-        "fetched separately for the location regardless of which metric is being "
-        "optimised. The search is also implicitly capped to "
+        "EUR/MWh for a wattnet.eu zone). Works with any --api/--metric, not just "
+        "'composite': price is fetched separately for the location regardless of "
+        "which metric is being optimised. The search is also implicitly capped to "
         "whatever forecast horizon price data currently covers, which is often "
         "shorter than the chosen metric's own horizon. Raises an error if no "
         "candidate start time satisfies the cap. Mutually exclusive with "
@@ -464,7 +491,10 @@ def run_cats(arguments: list[str] | None = None):
         )
 
     provider_cls, location, duration, jobinfo, PUE = get_runtime_config(args)
-    provider = provider_cls()
+    provider_kwargs: dict[str, Any] = {}
+    if provider_cls is CompositeProvider and args.signal:
+        provider_kwargs["api_data"] = {"signals": dict(args.signal)}
+    provider = provider_cls(**provider_kwargs)
 
     # Validate and parse window constraints
     try:
@@ -521,8 +551,9 @@ def run_cats(arguments: list[str] | None = None):
     # Reused for both the constrained search below and the always-on price
     # report: price is fetched for the location independently of whichever
     # metric/provider is actually being optimised (see cats/pricing.py). A
-    # location that is neither a GB postcode nor a wattnet.eu zone code
-    # (e.g. energy-charts.info's own native zone codes) is treated the same as
+    # location composite doesn't recognise (neither a GB postcode nor a
+    # wattnet.eu zone code, e.g. energy-charts.info's own native zone codes
+    # used directly rather than through composite) is treated the same as
     # "no price signal available" for the best-effort report, but as a hard
     # error when a price constraint was explicitly requested.
     price_constraint_requested = (

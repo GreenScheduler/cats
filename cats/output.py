@@ -50,10 +50,11 @@ class CATSOutput:
             col_ee_opt = ""
 
         # Labels vary a lot in length depending on which metric/provider is in
-        # use (e.g. "Carbon intensity" vs "Day-ahead electricity price"), so
-        # the "=" column is aligned dynamically rather than to hardcoded
-        # whitespace tuned for one particular metric name. Capped so one
-        # pathologically long label doesn't drag every other line's padding
+        # use (e.g. "Carbon intensity" vs "Environmental score" vs a
+        # composite's long "Composite score (...)" label), so the "=" column
+        # is aligned dynamically rather than to hardcoded whitespace tuned
+        # for one particular metric name. Capped so one pathologically long
+        # label (e.g. composite's) doesn't drag every other line's padding
         # out with it; a label past the cap just gets a single space instead.
         lines: list[tuple[str, str]] = [
             (

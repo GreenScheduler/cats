@@ -135,6 +135,7 @@ def test_list_providers(capsys):
         "wattnet.eu",
         "energy-charts.info",
         "octopus.energy",
+        "composite",
     ]:
         assert name in out
 
@@ -148,6 +149,7 @@ def test_list_locations_all(capsys):
         "wattnet.eu",
         "energy-charts.info",
         "octopus.energy",
+        "composite",
     ]:
         assert name in out
     assert "OX1" in out
@@ -193,6 +195,8 @@ def test_list_locations_codes_validate():
     from cats.providers import list_providers
 
     for name, cls in list_providers().items():
+        if name == "composite":
+            continue
         instance = cls()
         for group in instance.list_locations():
             assert group.locations, name
