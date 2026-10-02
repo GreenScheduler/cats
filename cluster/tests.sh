@@ -4,9 +4,10 @@
 #   ./cluster/start.sh
 set -eou pipefail
 
+echo "Current time: $(date)"
 # Step a) Run cats inside the slurmctld container and extract start time
 raw_output=$(docker exec -i slurmctld \
-  cats -d 5 --loc RG1 --scheduler=sbatch --command='ls' --format=json | \
+  cats -d 5 --loc RG1 --scheduler=sbatch --command='sleep 300' --format=json | \
   awk 'BEGIN{found=0} {
       if(!found){
           i=index($0,"{");
@@ -45,3 +46,22 @@ if ! echo "$job_output" | grep -q "StartTime=$scheduled_start"; then
 fi
 
 echo "✅ Job is correctly delayed until $scheduled_start"
+
+# Verify the local at queue is shared with the dynamic scheduler container.
+at_output=$(docker exec slurmctld bash -lc \
+  "echo 'sleep 120' | at -t \$(date -d '+1 day' +%Y%m%d%H%M)")
+at_job_id=$(printf '%s\n' "$at_output" | grep -Eo 'job[[:space:]]+[0-9]+' | awk '{print $2}' | tail -n 1)
+if [ -z "$at_job_id" ]; then
+  echo "Could not determine at job ID"
+  echo "$at_output"
+  exit 1
+fi
+
+if ! docker exec catsd atq | grep -q "^${at_job_id}[[:space:]]"; then
+  echo "at job $at_job_id is not visible from catsd"
+  docker exec slurmctld atrm "$at_job_id"
+  exit 1
+fi
+
+docker exec catsd atrm "$at_job_id"
+echo "at job $at_job_id is shared with catsd and can be removed"

@@ -1,6 +1,10 @@
 # pyright: reportUninitializedInstanceVariable=none, reportUnknownArgumentType=none, reportUnusedCallResult=none, reportUnknownMemberType=none
 import datetime
+import json
+import logging
 import os
+import shlex
+import sqlite3
 import sys
 from argparse import Action, ArgumentParser, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
@@ -23,6 +27,13 @@ from .exceptions import (
     UnsupportedProviderError,
 )
 from .forecast import WindowedForecast
+from .history import (
+    get_jobs_requiring_state_refresh,
+    read_schedule_checks,
+    record_schedule_check,
+    summarize_schedule_checks,
+    update_schedule_job_state,
+)
 from .output import CATSOutput
 from .plotting import plotplan
 from .pricing import (
@@ -32,7 +43,13 @@ from .pricing import (
     resolve_price_series,
 )
 from .providers import get_provider, list_providers
-from .schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
+from .schedulers import (
+    SCHEDULER_DATE_FORMAT,
+    get_at_job_state,
+    get_sbatch_job_state,
+    schedule_at,
+    schedule_sbatch,
+)
 from .version import version
 
 
@@ -106,6 +123,45 @@ def format_locations(locations: dict[str, str]) -> str:
         "".join(code.ljust(width) for code in codes[i : i + columns]).rstrip()
         for i in range(0, len(codes), columns)
     )
+
+
+def _workload_key(command: str) -> str:
+    parts = shlex.split(command)
+    for index, part in enumerate(parts):
+        if part.startswith("--job-name="):
+            return part.split("=", 1)[1]
+        if part in ("--job-name", "-J") and index + 1 < len(parts):
+            return parts[index + 1]
+        if part.startswith("-J") and len(part) > 2:
+            return part[2:]
+
+    if not parts:
+        return "unknown"
+    candidate = parts[0] if not parts[0].startswith("-") else parts[-1]
+    return Path(candidate).name or "unknown"
+
+
+def _refresh_history_job_states(history_db: str) -> None:
+    try:
+        job_ids = get_jobs_requiring_state_refresh(history_db)
+    except (OSError, sqlite3.Error) as error:
+        logging.warning(
+            "Could not read tracked Slurm jobs from CATS history: %s", error
+        )
+        return
+
+    for job_id in job_ids:
+        state = get_sbatch_job_state(job_id)
+        if state is None:
+            continue
+        try:
+            update_schedule_job_state(history_db, job_id, state)
+        except (OSError, sqlite3.Error) as error:
+            logging.warning(
+                "Could not update Slurm state for job %s in CATS history: %s",
+                job_id,
+                error,
+            )
 
 
 def print_banner(disable_colour):
@@ -257,7 +313,7 @@ def parse_arguments():
         "-d",
         "--duration",
         type=int,
-        help="[required, unless --list-providers or --list-locations is given] "
+        help="[required, unless --show-data, --list-providers or --list-locations is given] "
         "Expected duration "
         "of the job in minutes.",
     )
@@ -310,6 +366,21 @@ def parse_arguments():
         "price is not more than this many percent above the price if the job "
         "started right now. Same location/horizon behaviour as --max-price; "
         "mutually exclusive with it.",
+    )
+    parser.add_argument(
+        "--show-data",
+        action="store_true",
+        help="Display all saved CATS scheduling history as JSON (requires CATS_HISTORY_DB).",
+    )
+    parser.add_argument(
+        "--report",
+        action="store_true",
+        help="Summarize tracked jobs and estimated CO2 savings (requires CATS_HISTORY_DB).",
+    )
+    parser.add_argument(
+        "--dynamic",
+        action="store_true",
+        help="Re-evaluate a pending at or sbatch job over time (requires CATS_HISTORY_DB).",
     )
 
     parser.add_argument(
@@ -440,7 +511,70 @@ def parse_arguments():
 def run_cats(arguments: list[str] | None = None):
     "Main CLI runner, raises exceptions"
     parser = parse_arguments()
-    args = cast(Args, parser.parse_args(arguments))
+    parsed_args = parser.parse_args(arguments)
+    if parsed_args.show_data or parsed_args.report:
+        if parsed_args.show_data and parsed_args.report:
+            parser.error("--show-data and --report cannot be used together")
+        history_db = os.environ.get("CATS_HISTORY_DB")
+        if not history_db:
+            parser.error("CATS_HISTORY_DB is not set; history database path is unknown")
+            raise SystemExit(2)
+        if not history_db:
+            parser.error("CATS_HISTORY_DB is not set; history database path is unknown")
+        try:
+            _refresh_history_job_states(history_db)
+            records = read_schedule_checks(history_db)
+        except (OSError, sqlite3.Error) as error:
+            parser.error(f"Could not read CATS history database: {error}")
+        if parsed_args.report:
+            report = summarize_schedule_checks(records)
+            if parsed_args.format == "json":
+                print(json.dumps(report, indent=2, sort_keys=True))
+            else:
+                print("CATS scheduling report")
+                print(f"60{report['schedule_checks']}")
+                print(f"Tracked jobs: {report['tracked_jobs']}")
+                print(
+                    "Job states: "
+                    f"{report['completed_jobs']} completed, "
+                    f"{report['active_jobs']} active, "
+                    f"{report['failed_jobs']} failed, "
+                    f"{report['unknown_state_jobs']} unknown"
+                )
+                print(f"Dynamic jobs: {report['dynamic_jobs']}")
+                print(
+                    "Scheduled runtime of completed jobs: "
+                    f"{report['completed_runtime_hours']:.2f} hours"
+                )
+                completed_savings = report["estimated_co2_saved_g_completed_jobs"]
+                print(
+                    "Estimated CO2 savings for completed jobs: "
+                    f"{completed_savings:.2f} g "
+                    f"({completed_savings / 1000:.3f} kg; "
+                    f"{report['completed_jobs_with_emissions_estimate']} of "
+                    f"{report['completed_jobs']} jobs have footprint estimates)"
+                )
+                print(
+                    "Estimated CO2 savings for all tracked jobs: "
+                    f"{report['estimated_co2_saved_g_all_tracked_jobs']:.2f} g "
+                    f"({report['jobs_with_emissions_estimate']} jobs with estimates)"
+                )
+                if report["completed_jobs_by_location"]:
+                    print("Completed jobs by location:")
+                    for location, totals in sorted(
+                        report["completed_jobs_by_location"].items()
+                    ):
+                        print(
+                            f"  {location}: {totals['completed_jobs']} jobs, "
+                            f"{totals['estimated_co2_saved_g']:.2f} g estimated CO2 saved"
+                        )
+        elif records:
+            print(json.dumps(records, indent=2))
+        else:
+            print("No CATS history records found.")
+        return
+
+    args = cast(Args, parsed_args)
     colour_output = args.no_colour or args.no_color
 
     if args.list_providers:
@@ -452,6 +586,11 @@ def run_cats(arguments: list[str] | None = None):
         print_locations(api, args.metric)
         return
 
+    if parsed_args.duration is None:
+        raise MissingArgumentError(
+            "the following arguments are required: -d/--duration"
+        )
+
     if args.duration is None:
         raise MissingArgumentError(
             "-d / --duration is required, unless --list-providers or "
@@ -461,6 +600,14 @@ def run_cats(arguments: list[str] | None = None):
     if args.command and not args.scheduler:
         raise MissingArgumentError(
             "To run a command or sbatch script with -c / --comand, you must specify scheduler with -s / --scheduler"
+        )
+    if args.dynamic and (not args.command or args.scheduler not in ("at", "sbatch")):
+        raise MissingArgumentError(
+            "--dynamic requires --scheduler at or sbatch and a command passed with --command"
+        )
+    if args.dynamic and not os.environ.get("CATS_HISTORY_DB"):
+        raise MissingArgumentError(
+            "--dynamic requires CATS_HISTORY_DB to be configured for job tracking"
         )
 
     provider_cls, location, duration, jobinfo, PUE = get_runtime_config(args)
@@ -473,8 +620,13 @@ def run_cats(arguments: list[str] | None = None):
         )
     except ValueError as e:
         raise ValueError(f"Error in window constraints: {e}")
-    # Check against both API limit and user-specified window
-    max_duration_minutes = provider.get_max_duration_minutes(metric=args.metric)
+    # Check against both API limit and user-specified window. Some older
+    # provider implementations do not accept the optional metric keyword, so
+    # fall back to the no-argument form for compatibility.
+    try:
+        max_duration_minutes = provider.get_max_duration_minutes(metric=args.metric)
+    except TypeError:
+        max_duration_minutes = provider.get_max_duration_minutes()
     effective_max_duration = min(max_duration_minutes, max_window)
     if duration > effective_max_duration:
         if max_window < max_duration_minutes:
@@ -488,7 +640,10 @@ def run_cats(arguments: list[str] | None = None):
     ## Obtain CI forecast ##
     ########################
     now_utc = datetime.datetime.now(timezone.utc)
-    forecast = provider.get_data(now_utc, location, metric=args.metric)
+    try:
+        forecast = provider.get_data(now_utc, location, metric=args.metric)
+    except TypeError:
+        forecast = provider.get_data(now_utc, location)
 
     #############################
     ## Find optimal start time ##
@@ -512,7 +667,13 @@ def run_cats(arguments: list[str] | None = None):
         max_window_minutes=max_window,
         end_constraint=end_constraint,
     )
-    now_avg = wf[0]
+    if len(wf) == 0:
+        raise ValueError(
+            "No valid forecast windows are available for the requested job duration "
+            "and search window. Try increasing --window or checking that the "
+            "forecast covers the job duration."
+        )
+    now_avg, best_avg = wf[0], min(wf)
 
     #####################################################
     ## Price: constraint (if requested) and reporting  ##
@@ -616,14 +777,57 @@ def run_cats(arguments: list[str] | None = None):
         if filename:
             print("Saved plot to:", filename)
     if args.command:
+        job_id = None
+        history_db = os.environ.get("CATS_HISTORY_DB")
+        if args.scheduler == "sbatch" and history_db:
+            _refresh_history_job_states(history_db)
+
         if args.scheduler == "at":
-            err = schedule_at(output, args.command.split())
+            job_id, err = schedule_at(output, shlex.split(args.command))
         elif args.scheduler == "sbatch":
-            err = schedule_sbatch(output, args.command.split())
+            job_id, err = schedule_sbatch(output, shlex.split(args.command))
         else:  # pragma: no cover - we already check for valid scheduler in parse_arguments
             err = f"Scheduler {args.scheduler} not in supported schedulers: {SCHEDULER_DATE_FORMAT.keys()}"
         if err:
             raise SchedulerError(err)
+
+        if job_id and history_db and (args.scheduler == "sbatch" or args.dynamic):
+            estimate = output.emmissionEstimate
+            job_state = (
+                get_at_job_state(job_id)
+                if args.scheduler == "at"
+                else get_sbatch_job_state(job_id)
+            ) or "PENDING"
+            try:
+                record_schedule_check(
+                    history_db,
+                    workload_key=_workload_key(args.command),
+                    duration_minutes=duration,
+                    location=location,
+                    action="submitted",
+                    dynamic=args.dynamic,
+                    api=args.api,
+                    max_window_minutes=max_window,
+                    current_ci_g_per_kwh=now_avg.value,
+                    optimal_start_utc=output.valueOptimal.start.astimezone(
+                        timezone.utc
+                    ).isoformat(),
+                    optimal_ci_g_per_kwh=output.valueOptimal.value,
+                    estimated_emissions_now_g=(estimate.now if estimate else None),
+                    estimated_emissions_optimal_g=(estimate.best if estimate else None),
+                    active_job_id=job_id,
+                    slurm_state=job_state,
+                    scheduler=args.scheduler,
+                    command=args.command if args.dynamic else None,
+                    working_directory=os.getcwd() if args.dynamic else None,
+                )
+            except (OSError, sqlite3.Error) as error:
+                logging.warning(
+                    "%s job %s was submitted, but its CATS history could not be saved: %s",
+                    args.scheduler,
+                    job_id,
+                    error,
+                )
 
 
 def main(arguments: list[str] | None = None):

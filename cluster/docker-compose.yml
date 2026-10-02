@@ -1,3 +1,9 @@
+x-slurm-image: &slurm-image
+  image: cats-slurm-docker-cluster:at
+  build:
+    context: .
+    dockerfile: Dockerfile
+
 services:
   mysql:
     image: mariadb:10.11
@@ -14,7 +20,7 @@ services:
       - slurm-network
 
   slurmdbd:
-    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
+    <<: *slurm-image
     command: ["slurmdbd"]
     container_name: slurmdbd
     hostname: slurmdbd
@@ -30,15 +36,24 @@ services:
       - slurm-network
 
   slurmctld:
-    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
-    command: ["slurmctld"]
+    <<: *slurm-image
+    command:
+      - bash
+      - -lc
+      - |
+        /usr/sbin/atd
+        exec /usr/local/bin/docker-entrypoint.sh slurmctld
     container_name: slurmctld
     hostname: slurmctld
+    environment:
+      CATS_HISTORY_DB: /var/lib/cats/history.sqlite3
     volumes:
       - etc_munge:/etc/munge
       - etc_slurm:/etc/slurm
       - slurm_jobdir:/data
       - var_log_slurm:/var/log/slurm
+      - cats_data:/var/lib/cats
+      - at_spool:/var/spool/at
     expose:
       - "6817"
     depends_on:
@@ -46,8 +61,40 @@ services:
     networks:
       - slurm-network
 
+  catsd:
+    <<: *slurm-image
+    container_name: catsd
+    command:
+      - bash
+      - -lc
+      - |
+        set -e
+        gosu munge /usr/sbin/munged
+        source_dir=$(mktemp -d /tmp/cats-source.XXXXXX)
+        cp /opt/cats/pyproject.toml "$$source_dir/"
+        cp -a /opt/cats/cats "$$source_dir/"
+        uv tool install --reinstall "$$source_dir"
+        rm -rf "$$source_dir"
+        until scontrol ping >/dev/null 2>&1; do sleep 5; done
+        exec /root/.local/bin/catsd
+    environment:
+      CATS_HISTORY_DB: /var/lib/cats/history.sqlite3
+      CATS_DAEMON_INTERVAL_SECONDS: "3600"
+      CATS_EXECUTABLE: /root/.local/bin/cats
+    volumes:
+      - ../:/opt/cats:ro
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - cats_data:/var/lib/cats
+      - at_spool:/var/spool/at
+    depends_on:
+      - slurmctld
+    restart: unless-stopped
+    networks:
+      - slurm-network
+
   c1:
-    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
+    <<: *slurm-image
     command: ["slurmd"]
     hostname: c1
     container_name: c1
@@ -64,7 +111,7 @@ services:
       - slurm-network
 
   c2:
-    image: ghcr.io/greenscheduler/slurm-docker-cluster:latest
+    <<: *slurm-image
     command: ["slurmd"]
     hostname: c2
     container_name: c2
@@ -84,8 +131,10 @@ volumes:
   etc_munge:
   etc_slurm:
   slurm_jobdir:
+  at_spool:
   var_lib_mysql:
   var_log_slurm:
+  cats_data:
 
 networks:
   slurm-network:

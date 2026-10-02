@@ -36,6 +36,7 @@ class Args(Namespace):
     scheduler: str
     api: str
     command: str | None
+    dynamic: bool
     dateformat: str | None
     location: str | None
     config: str | None

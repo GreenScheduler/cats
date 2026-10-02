@@ -42,6 +42,32 @@ should be transparent to cluster users.
 It will display the time to start the job on standard out and optionally
 some information about the carbon intensity on standard error.
 
+
+Restricting the search window
+-----------------------------
+
+If you need to limit when the job may start, you can set a maximum search
+window or explicit start/end bounds.
+
+- ``--window``: the maximum time to search for a suitable start, in minutes
+  (default: 2820, i.e. 47 hours).
+- ``--start-window``: the earliest time the job may start. This accepts ISO
+  datetimes such as ``2026-01-22T09:00`` or a time-only value such as
+  ``09:00``.
+- ``--end-window``: the latest time the job may start, using the same format.
+
+For example, to search only between 09:00 and 17:00 on a given day:
+
+.. code-block:: console
+
+   $ cats --duration 180 --location "OX1" --window 240 \
+         --start-window 2026-01-22T09:00 --end-window 2026-01-22T17:00
+
+This keeps the scheduler within the allowed time range while still finding the
+lowest-carbon start time inside that window. If no valid window remains, CATS
+returns a clear error instead of silently choosing a bad start time.
+
+
 .. _locations-outside-gb:
 
 Locations outside Great Britain
@@ -390,6 +416,25 @@ Use --format=json to get this in machine readable format
    # otherwise 'cats' errors out.
    export CATS_CONFIG_FILE=/path/to/config.yml
    cats --duration 480
+
+
+Reporting tracked jobs and estimated savings
+--------------------------------------------
+
+When CATS records Slurm submissions in a SQLite history database, you can
+summarize completed jobs and their estimated carbon savings with:
+
+.. code-block:: console
+
+   $ export CATS_HISTORY_DB=/path/to/cats-history.sqlite3
+   $ cats --report
+
+Use ``cats --report --format json`` for machine-readable output. The report
+counts each Slurm job once, including jobs with dynamic scheduling checks, and
+groups completed jobs by location and workload. CO2 savings are estimates from
+the forecast and hardware profile supplied when scheduling; they are available
+only for jobs submitted with ``--footprint``. The report does not measure actual
+energy use or emissions. Slurm job states are refreshed when the report runs.
 
 
 Displaying carbon footprint estimates
