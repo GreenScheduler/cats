@@ -4,9 +4,10 @@
 #   ./cluster/start.sh
 set -eou pipefail
 
+echo "Current time: $(date)"
 # Step a) Run cats inside the slurmctld container and extract start time
 raw_output=$(docker exec -i slurmctld \
-  cats -d 5 --loc RG1 --scheduler=sbatch --command='ls' --format=json | \
+  cats -d 5 --loc RG1 --scheduler=sbatch --command='sleep 300' --format=json | \
   awk 'BEGIN{found=0} {
       if(!found){
           i=index($0,"{");
