@@ -290,3 +290,49 @@ def test_across_all_durations_at_half_hour(duration, sample_data):
     start = datetime(2023, 5, 4, 12, 30, tzinfo=utc)
     ws = WindowedForecast(sample_data, duration, start)
     assert min(ws)
+
+
+def test_missing_forecast_data_does_not_produce_invalid_optimal_window():
+    start = datetime(2026, 10, 3, 10, 0, tzinfo=timezone.utc)
+
+    data = [
+        PointEstimate(value=200, datetime=start),
+        PointEstimate(value=180, datetime=start + timedelta(minutes=30)),
+        # 11:00 forecast point is intentionally missing
+        PointEstimate(value=20, datetime=start + timedelta(minutes=90)),
+        PointEstimate(value=200, datetime=start + timedelta(minutes=120)),
+        PointEstimate(value=200, datetime=start + timedelta(minutes=150)),
+    ]
+
+    forecast = WindowedForecast(data, duration=30, start=start)
+
+    result = min(forecast)
+
+    assert result.start == start + timedelta(minutes=90)
+    assert result.end == start + timedelta(minutes=120)
+    assert result.value == pytest.approx(110)
+
+
+def test_window_crossing_missing_forecast_data_is_skipped():
+    start = datetime(2026, 10, 3, 10, 0, tzinfo=timezone.utc)
+
+    data = [
+        PointEstimate(value=200, datetime=start),
+        PointEstimate(value=180, datetime=start + timedelta(minutes=30)),
+        # 11:00 forecast point is intentionally missing
+        PointEstimate(value=20, datetime=start + timedelta(minutes=90)),
+        PointEstimate(value=200, datetime=start + timedelta(minutes=120)),
+        PointEstimate(value=200, datetime=start + timedelta(minutes=150)),
+    ]
+
+    forecast = WindowedForecast(data, duration=60, start=start)
+
+    windows = list(forecast)
+
+    assert all(
+        not (
+            window.start < start + timedelta(minutes=90)
+            and window.end > start + timedelta(minutes=30)
+        )
+        for window in windows
+    )
