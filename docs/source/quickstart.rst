@@ -348,25 +348,25 @@ Using a configuration file
 Information about location can be provided by a configuration file
 instead of a command line arguments to the ``cats`` command.
 
-.. code-block:: yaml
+.. code-block:: toml
 
-   location: "EH8"
+   location = "EH8"
 
 Use the ``--config`` option to specify a path to the configuration
 file, relative to the current directory.
 
 In case of a missing location command line argument, ``cats`` looks
 first in the ``CATS_CONFIG_FILE`` environment variable and if that
-is not set it looks for a file named ``config.yml``
+is not set it looks for a file named ``config.toml``
 in the current directory.
 
 .. code-block:: shell
 
    #  Override duration value at the command line
-   cats --config /path/to/config.y(a)ml --location "OX1"
+   cats --config /path/to/config.toml --location "OX1"
 
 When ``--duration`` information is not provided via the option, and
-location information is not provided in the YAML configuration file
+location information is not provided in the TOML configuration file
 specified or detected, CATS will try to estimate location from the
 machine IP address:
 
@@ -386,9 +386,9 @@ Use --format=json to get this in machine readable format
 
    # location information is provided by the file
    # specified in $CATS_CONFIG_FILE
-   # If not, it looks for ./config.yml
+   # If not, it looks for ./config.toml
    # otherwise 'cats' errors out.
-   export CATS_CONFIG_FILE=/path/to/config.yml
+   export CATS_CONFIG_FILE=/path/to/config.toml
    cats --duration 480
 
 
@@ -406,15 +406,15 @@ and a hardware profile:
 
 The ``--profile`` option specifies information power consumption and
 quantity of hardware the job using. This information is provided by
-adding a section ``profiles`` to the :ref:`cats YAML configuration
+adding a section ``profiles`` to the :ref:`cats TOML configuration
 file <configuration-file>`.
 
 You can define an arbitrary number of profiles as subsection of the
 top-level ``profiles`` section:
 
-.. literalinclude :: ../../cats/config.yml
-   :language: yaml
-   :caption: *An example provision of machine information by YAML file
+.. literalinclude :: ../../cats/config.toml
+   :language: toml
+   :caption: *An example provision of machine information by TOML file
              to enable estimation of the carbon footprint reduction.*
 
 The name of the profile section is arbitrary, but each profile section

@@ -86,7 +86,7 @@ We recommend the
 [quickstart](https://greenscheduler.github.io/cats/quickstart.html#basic-usage)
 if you are new to CATS. CATS can optionally [display carbon footprint
 savings](https://greenscheduler.github.io/cats/quickstart.html#displaying-carbon-footprint-estimates)
-using a [configuration file](cats/config.yml).
+using a [configuration file](cats/config.toml).
 
 ## Contributing
 
