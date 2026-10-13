@@ -1,13 +1,23 @@
 # Tests main() function
+import io
+import json
 import logging
+import os
+import stat
 import subprocess
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
 
-from cats.cli import configure_logging, main, parse_arguments, print_banner
+from cats.cli import (
+    configure_logging,
+    is_pipe,
+    main,
+    parse_arguments,
+    print_banner,
+)
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.exceptions import InvalidLocationError
 from cats.forecast import AverageEstimate, PointEstimate, Timeseries
@@ -387,3 +397,138 @@ def test_main_verbosity_output(caplog):
 
     main(["--list-providers", "--log-level=ERROR"])
     assert logging.getLogger().level == logging.ERROR
+
+
+@pytest.mark.parametrize(
+    "isatty_val,st_mode,fileno_raises,expected",
+    [
+        (False, stat.S_IFIFO, False, True),  # Connected to a pipe (FIFO)
+        (True, stat.S_IFIFO, False, False),  # isatty is True (terminal)
+        (False, stat.S_IFREG, False, False),  # Regular file redirect
+        (False, stat.S_IFCHR, False, False),  # Character device
+        (False, 0, True, False),  # fileno raises UnsupportedOperation (e.g. StringIO)
+    ],
+)
+def test_is_pipe(isatty_val, st_mode, fileno_raises, expected):
+    mock_stdout = MagicMock()
+    mock_stdout.isatty.return_value = isatty_val
+    if fileno_raises:
+        mock_stdout.fileno.side_effect = io.UnsupportedOperation
+    else:
+        mock_stdout.fileno.return_value = 1
+
+    mock_stat = MagicMock(st_mode=st_mode)
+    with patch("sys.stdout", mock_stdout), patch("os.fstat", return_value=mock_stat):
+        assert is_pipe() is expected
+
+
+def test_is_pipe_exceptions():
+    # If sys.stdout is None
+    with patch("sys.stdout", None):
+        assert is_pipe() is False
+
+    # If sys.stdout doesn't have isatty
+    mock_stdout = object()
+    with patch("sys.stdout", mock_stdout):
+        assert is_pipe() is False
+
+    # If isatty raises an exception
+    mock_raising = MagicMock()
+    mock_raising.isatty.side_effect = RuntimeError("stream error")
+    with patch("sys.stdout", mock_raising):
+        assert is_pipe() is False
+
+    # If fileno raises ValueError (e.g. closed stream)
+    mock_closed = MagicMock()
+    mock_closed.isatty.return_value = False
+    mock_closed.fileno.side_effect = ValueError("I/O operation on closed file")
+    with patch("sys.stdout", mock_closed):
+        assert is_pipe() is False
+
+
+def test_is_pipe_real_pipe():
+    r, w = os.pipe()
+    try:
+        with open(w, "w") as pipe_out:
+            with patch("sys.stdout", pipe_out):
+                assert is_pipe() is True
+    finally:
+        os.close(r)
+
+
+def test_is_pipe_real_file(tmp_path):
+    f_path = tmp_path / "stdout.txt"
+    with open(f_path, "w") as file_out:
+        with patch("sys.stdout", file_out):
+            assert is_pipe() is False
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+@patch("cats.cli.is_pipe", return_value=True)
+def test_auto_json_when_piped(
+    mock_is_pipe, mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = _wide_flat_series(
+        "Day-ahead electricity price", "GBP/MWh", 150.0
+    )
+
+    # When piped, output should be JSON by default without --format=json
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    out = capsys.readouterr().out
+    data = json.loads(out)
+    assert data["location"] == "OX1"
+    assert data["metric"] == "Carbon intensity"
+    assert data["valueNow"]["value"] == pytest.approx(100.0)
+    assert data["valueOptimal"]["value"] == pytest.approx(100.0)
+    assert CATS_ASCII_BANNER_COLOUR.strip() not in out
+    assert CATS_ASCII_BANNER_NO_COLOUR.strip() not in out
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+@patch("cats.cli.is_pipe", return_value=True)
+def test_format_text_overrides_pipe(
+    mock_is_pipe, mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = _wide_flat_series(
+        "Day-ahead electricity price", "GBP/MWh", 150.0
+    )
+
+    # User can explicitly request text format even when piped
+    assert main(["-d", "30", "--loc", "OX1", "--format", "text"]) == 0
+    out = capsys.readouterr().out
+    assert "Best job start time" in out
+    assert "Price if job started now" in out
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+@patch("cats.cli.is_pipe", return_value=False)
+def test_format_json_in_terminal(
+    mock_is_pipe, mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = _wide_flat_series(
+        "Day-ahead electricity price", "GBP/MWh", 150.0
+    )
+
+    # Explicit --format=json outputs JSON even when not piped
+    assert main(["-d", "30", "--loc", "OX1", "--format", "json"]) == 0
+    out = capsys.readouterr().out
+    data = json.loads(out)
+    assert data["location"] == "OX1"
+    assert data["metric"] == "Carbon intensity"
+
+
+def test_format_invalid_choice():
+    with pytest.raises(SystemExit):
+        main(["-d", "30", "--loc", "OX1", "--format", "yaml"])
