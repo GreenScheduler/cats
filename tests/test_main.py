@@ -1,4 +1,5 @@
 # Tests main() function
+import logging
 import subprocess
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
@@ -6,7 +7,7 @@ from unittest.mock import patch
 import pytest
 import requests
 
-from cats.cli import main, print_banner
+from cats.cli import configure_logging, main, parse_arguments, print_banner
 from cats.constants import CATS_ASCII_BANNER_COLOUR, CATS_ASCII_BANNER_NO_COLOUR
 from cats.exceptions import InvalidLocationError
 from cats.forecast import AverageEstimate, PointEstimate, Timeseries
@@ -327,3 +328,62 @@ def test_main_http_wattnet_errors(get_data):
 
     # CATS should return 1 when we get an JSON error
     assert main(["-c", "ls", "-d", "5"]) == 1
+
+
+@pytest.mark.parametrize(
+    "flags,expected_verbose,expected_log_level",
+    [
+        ([], 0, None),
+        (["-v"], 1, None),
+        (["-vv"], 2, None),
+        (["-v", "-v"], 2, None),
+        (["-vvv"], 3, None),
+        (["--verbose"], 1, None),
+        (["--verbosity"], 1, None),
+        (["--log-level", "debug"], 0, "DEBUG"),
+        (["--log-level=info"], 0, "INFO"),
+        (["--log-level=WARNING"], 0, "WARNING"),
+        (["--log-level=error"], 0, "ERROR"),
+        (["--log-level=critical"], 0, "CRITICAL"),
+        (["-v", "--log-level=DEBUG"], 1, "DEBUG"),
+    ],
+)
+def test_parse_arguments_verbosity(flags, expected_verbose, expected_log_level):
+    parser = parse_arguments()
+    args = parser.parse_args(flags + ["-d", "30"])
+    assert args.verbose == expected_verbose
+    assert args.log_level == expected_log_level
+
+
+@pytest.mark.parametrize(
+    "verbosity,log_level,expected_level",
+    [
+        (0, None, logging.WARNING),
+        (1, None, logging.INFO),
+        (2, None, logging.DEBUG),
+        (3, None, logging.DEBUG),
+        (0, "DEBUG", logging.DEBUG),
+        (0, "INFO", logging.INFO),
+        (0, "WARNING", logging.WARNING),
+        (0, "ERROR", logging.ERROR),
+        (0, "CRITICAL", logging.CRITICAL),
+        (1, "DEBUG", logging.DEBUG),
+    ],
+)
+def test_configure_logging(verbosity, log_level, expected_level):
+    configure_logging(verbosity=verbosity, log_level=log_level)
+    assert logging.getLogger().level == expected_level
+
+
+def test_main_verbosity_output(caplog):
+    main(["--list-providers"])
+    assert logging.getLogger().level == logging.WARNING
+
+    main(["--list-providers", "-v"])
+    assert logging.getLogger().level == logging.INFO
+
+    main(["--list-providers", "-vv"])
+    assert logging.getLogger().level == logging.DEBUG
+
+    main(["--list-providers", "--log-level=ERROR"])
+    assert logging.getLogger().level == logging.ERROR
