@@ -58,6 +58,8 @@ class Args(Namespace):
     metric: str | None
     max_price: float | None
     max_price_increase_pct: float | None
+    verbose: int
+    log_level: str | None
 
 
 def get_runtime_config(

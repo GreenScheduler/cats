@@ -1,5 +1,6 @@
 # pyright: reportUninitializedInstanceVariable=none, reportUnknownArgumentType=none, reportUnusedCallResult=none, reportUnknownMemberType=none
 import datetime
+import logging
 import os
 import sys
 from argparse import Action, ArgumentParser, RawDescriptionHelpFormatter
@@ -433,14 +434,46 @@ def parse_arguments():
         "If only time is provided (e.g., '17:00'), today's date is assumed. "
         "Timezone info is optional and defaults to system timezone.",
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        "--verbosity",
+        action="count",
+        default=0,
+        dest="verbose",
+        help="Increase output verbosity (-v for INFO, -vv for DEBUG)",
+    )
+    parser.add_argument(
+        "--log-level",
+        type=str.upper,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        default=None,
+        help="Set logging level directly (e.g. DEBUG, INFO). Overrides -v / --verbose.",
+    )
 
     return parser
+
+
+def configure_logging(verbosity: int = 0, log_level: str | None = None) -> None:
+    "Configure root logger level and format based on CLI arguments"
+    if log_level:
+        level = getattr(logging, log_level, logging.WARNING)
+    elif verbosity == 1:
+        level = logging.INFO
+    elif verbosity >= 2:
+        level = logging.DEBUG
+    else:
+        level = logging.WARNING
+
+    logging.basicConfig(level=level, format="%(levelname)s: %(message)s", force=True)
+    logging.getLogger().setLevel(level)
 
 
 def run_cats(arguments: list[str] | None = None):
     "Main CLI runner, raises exceptions"
     parser = parse_arguments()
     args = cast(Args, parser.parse_args(arguments))
+    configure_logging(args.verbose, args.log_level)
     colour_output = args.no_colour or args.no_color
 
     if args.list_providers:
