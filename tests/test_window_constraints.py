@@ -12,7 +12,7 @@ from cats.forecast import (
     Timeseries,
     WindowedForecast,
 )
-from cats.providers import UKCarbonIntensityProvider
+from cats.providers import GBCarbonIntensityProvider
 
 
 @pytest.fixture(scope="session")
@@ -316,7 +316,7 @@ class TestConstrainedWindowedForecast:
 class TestMainIntegration:
     """Integration tests for main function with window constraints."""
 
-    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
+    @patch("cats.providers.GBCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_window_constraint(
         self, mock_config: MagicMock, mock_forecast: MagicMock
@@ -325,7 +325,7 @@ class TestMainIntegration:
         # Mock the configuration
 
         mock_config.return_value = (
-            UKCarbonIntensityProvider,
+            GBCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -350,7 +350,7 @@ class TestMainIntegration:
         result = main(["-d", "60", "--loc", "OX1", "--window", "480"])
         assert result == 0
 
-    @patch("cats.providers.UKCarbonIntensityProvider.get_data")
+    @patch("cats.providers.GBCarbonIntensityProvider.get_data")
     @patch("cats.configure.get_runtime_config")
     def test_main_with_time_window_constraints(
         self, mock_config: MagicMock, mock_forecast: MagicMock
@@ -359,7 +359,7 @@ class TestMainIntegration:
         # Mock the configuration
 
         mock_config.return_value = (
-            UKCarbonIntensityProvider,
+            GBCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -404,7 +404,7 @@ class TestMainIntegration:
         # Mock the configuration
 
         mock_config.return_value = (
-            UKCarbonIntensityProvider,
+            GBCarbonIntensityProvider,
             "OX1",
             60,  # duration
             None,  # jobinfo
@@ -421,7 +421,7 @@ class TestMainIntegration:
         # Mock the configuration
 
         mock_config.return_value = (
-            UKCarbonIntensityProvider,
+            GBCarbonIntensityProvider,
             "OX1",
             480,  # 8 hour duration
             None,  # jobinfo
@@ -438,7 +438,7 @@ class TestMainIntegration:
         # Mock the configuration
 
         mock_config.return_value = (
-            UKCarbonIntensityProvider,
+            GBCarbonIntensityProvider,
             "OX1",
             60,
             None,

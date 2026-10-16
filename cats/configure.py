@@ -16,13 +16,12 @@ import datetime
 import logging
 import os
 import sys
+import tomllib
 from argparse import Namespace
 from collections.abc import Mapping
 from typing import Any, Optional
 
 import requests
-import requests_cache
-import yaml
 
 from cats.providers import BaseProvider, get_provider
 
@@ -30,12 +29,10 @@ from .constants import MEMORY_POWER_PER_GB
 from .version import user_agent
 
 __all__ = ["get_runtime_config"]
-# Patch requests to cache location API calls (and allow CI to still work)
-requests_cache.install_cache("cats_cache", use_temp=True)
 
 
 class Args(Namespace):
-    duration: int
+    duration: int | None
     scheduler: str
     api: str
     command: str | None
@@ -55,6 +52,12 @@ class Args(Namespace):
     window: int
     start_window: datetime.datetime | None
     end_window: datetime.datetime | None
+    list_providers: bool
+    list_locations: str | None
+    api_given: bool
+    metric: str | None
+    max_price: float | None
+    max_price_increase_pct: float | None
 
 
 def get_runtime_config(
@@ -80,6 +83,9 @@ def get_runtime_config(
     location = get_location_from_config_or_args(args, configmapping)
 
     msg = "Job duration must be a positive integer (number of minutes)"
+    if args.duration is None:
+        logging.error(msg)
+        raise ValueError
     try:
         duration = int(args.duration)
     except ValueError:
@@ -103,39 +109,53 @@ def get_runtime_config(
     return provider_cls, location, duration, jobinfo, PUE
 
 
+LEGACY_YAML_CONFIGS = [
+    "cats_config.yml",
+    "cats_config.yaml",
+    "config.yml",
+    "config.yaml",
+]
+YAML_UNSUPPORTED = (
+    "YAML configuration files are no longer supported, please convert {} to TOML"
+)
+
+
+def warn_if_yaml(path: str):
+    if path.endswith((".yml", ".yaml")):
+        logging.warning(YAML_UNSUPPORTED.format(path))
+
+
 def config_from_file(configpath: str | None = None) -> Mapping[str, Any]:
     conf_dict: Mapping[str, Any] = {}
     if configpath:
         # if path to config file provided, it is used
-        with open(configpath, "r") as f:
-            conf_dict = yaml.safe_load(f)
+        warn_if_yaml(configpath)
+        with open(configpath, "rb") as f:
+            conf_dict = tomllib.load(f)
         logging.info(f"Using provided config file: {configpath}\n")
     else:
         # if no path provided, try to use config environment variable
         cfile = os.getenv("CATS_CONFIG_FILE")
         if cfile is not None:
+            warn_if_yaml(cfile)
             try:
-                with open(cfile, "r") as f:
-                    conf_dict = yaml.safe_load(f)
+                with open(cfile, "rb") as f:
+                    conf_dict = tomllib.load(f)
                 logging.info(f"Using {cfile} found in CATS_CONFIG_FILE\n")
             except FileNotFoundError:
                 logging.warning("CATS_CONFIG_FILE config file not found")
         else:
             # if no path provided and no env variable, look for a file in current directory
-            # we support several file names but warn for deprecated names
-            config_file_names = ["cats_config.yml", "cats_config.yaml", "config.yaml"]
-            cfile = next(
-                (x for x in config_file_names if os.path.isfile(x)), "config.yml"
-            )
+            cfile = "config.toml"
             try:
-                with open(cfile, "r") as f:
-                    conf_dict = yaml.safe_load(f)
+                with open(cfile, "rb") as f:
+                    conf_dict = tomllib.load(f)
                 logging.info(f"Using {cfile} found in current directory\n")
-                if cfile in ["config.yaml", "config.yml"]:
-                    logging.warning(
-                        f"Use of {cfile} is deprecated. We suggest renaming to 'cats_config.yml'\n"
-                    )
             except FileNotFoundError:
+                if legacy := next(
+                    (x for x in LEGACY_YAML_CONFIGS if os.path.isfile(x)), None
+                ):
+                    logging.warning(YAML_UNSUPPORTED.format(legacy))
                 logging.warning("config file not found")
                 conf_dict = {}
 

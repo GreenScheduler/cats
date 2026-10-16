@@ -49,3 +49,17 @@ should be discussed ahead of time (via a PR changing the version string, see 1 b
  2. Check that all tests have passed after the merge and that the "latest" documentation at read the docs is updated.
  3. Create a release via the GitHub web interface. This involves creating a new tag ("v1.2.3" for version "1.2.3"), giving the release a name (just "1.2.3"), and adding short release notes using markdown as needed. Make sure this is "set as the latest release".
  4. After a short time you should be able to check that the new release exists on PyPI and is documented in the stable docs on read the docs.
+
+Changing supported python versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We try to support those versions of Python that currently have security support as per https://devguide.python.org/versions/.
+In order to change the supported Python version the following needs update:
+
+1. pyproject.toml (both requires-python and classifiers)
+2. README.md in the project root
+3. The python-version matrix in .github/workflows/tests.yml
+4. Any workflows that use unsupported versions of python to run
+5. The main documentation in docs/source/introduction.rst
+
+Push the change to a PR, and check everything still passes CI.
