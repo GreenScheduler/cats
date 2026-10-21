@@ -145,7 +145,7 @@ class OctopusAgilePriceProvider(BaseProvider):
                 and result.get("brand") == "OCTOPUS_ENERGY"
                 and result.get("available_to") is None
             ):
-                return code
+                return str(code)
         raise InvalidLocationError(
             "Could not find an active Octopus Agile product"
         )  # pragma: no cover

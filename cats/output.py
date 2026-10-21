@@ -1,7 +1,7 @@
 import dataclasses
 import json
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 from .carbonFootprint import Estimates
 from .forecast import AverageEstimate
@@ -117,7 +117,7 @@ class CATSOutput:
         logging.info("Use '--format=json' to get this in machine readable format")
         return out
 
-    def to_json(self, dateformat: str = "", **kwargs) -> str:
+    def to_json(self, dateformat: str = "", **kwargs: Any) -> str:
         data = dataclasses.asdict(self)
         for val in ["valueNow", "valueOptimal"]:
             if dateformat == "":

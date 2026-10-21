@@ -3,10 +3,10 @@ import datetime
 import logging
 import os
 import sys
-from argparse import Action, ArgumentParser, RawDescriptionHelpFormatter
+from argparse import Action, ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
-from typing import Optional, cast
+from typing import Any, Optional, Sequence, cast
 
 import requests
 
@@ -45,11 +45,11 @@ def is_headless() -> bool:
     )
 
 
-def indent_lines(lines, spaces):
+def indent_lines(lines: str, spaces: int) -> str:
     return "\n".join(" " * spaces + line for line in lines.split("\n"))
 
 
-def print_providers():
+def print_providers() -> None:
     "Print the registered data providers and their properties"
     for name, provider_cls in sorted(list_providers().items()):
         instance = provider_cls()
@@ -71,7 +71,7 @@ def print_providers():
             print(f"    metrics: {metrics}")
 
 
-def print_locations(api: str | None = None, metric: str | None = None):
+def print_locations(api: str | None = None, metric: str | None = None) -> None:
     "Print the valid --location codes of one provider, or of all of them"
     providers = list_providers()
     if api:
@@ -109,7 +109,7 @@ def format_locations(locations: dict[str, str]) -> str:
     )
 
 
-def print_banner(disable_colour):
+def print_banner(disable_colour: bool) -> None:
     """Print an ASCII art banner with the CATS title, optionally in colour."""
     if disable_colour:
         print(CATS_ASCII_BANNER_NO_COLOUR)
@@ -118,7 +118,7 @@ def print_banner(disable_colour):
 
 
 def parse_time_constraint(
-    time_str: str, timezone_info=None
+    time_str: str, timezone_info: Optional[datetime.tzinfo] = None
 ) -> Optional[datetime.datetime]:
     """
     Parse a time constraint string into a datetime object.
@@ -179,7 +179,7 @@ def validate_window_constraints(
     return start_window, end_window, window_minutes
 
 
-def parse_arguments():
+def parse_arguments() -> ArgumentParser:
     """
     Parse command line arguments
     :return: [dict] parsed arguments
@@ -247,7 +247,7 @@ def parse_arguments():
         formatter_class=RawDescriptionHelpFormatter,
     )
 
-    def positive_integer(string: str):
+    def positive_integer(string: str) -> int:
         n = int(string)
         assert n >= 0
         return n
@@ -324,7 +324,13 @@ def parse_arguments():
     class StoreApi(Action):
         "Store --api and remember it was given, as it has a default value"
 
-        def __call__(self, parser, namespace, values, option_string=None):
+        def __call__(
+            self,
+            parser: ArgumentParser,
+            namespace: Namespace,
+            values: str | Sequence[Any] | None,
+            option_string: str | None = None,
+        ) -> None:
             setattr(namespace, self.dest, values)
             namespace.api_given = True
 
@@ -469,7 +475,7 @@ def configure_logging(verbosity: int = 0, log_level: str | None = None) -> None:
     logging.getLogger().setLevel(level)
 
 
-def run_cats(arguments: list[str] | None = None):
+def run_cats(arguments: list[str] | None = None) -> None:
     "Main CLI runner, raises exceptions"
     parser = parse_arguments()
     args = cast(Args, parser.parse_args(arguments))
@@ -659,7 +665,7 @@ def run_cats(arguments: list[str] | None = None):
             raise SchedulerError(err)
 
 
-def main(arguments: list[str] | None = None):
+def main(arguments: list[str] | None = None) -> int:
     try:
         run_cats(arguments)
         return 0
