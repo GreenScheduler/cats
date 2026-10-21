@@ -14,6 +14,7 @@ cluster jobs to minimize predicted carbon intensity of running the process.
    introduction.rst
    installation.rst
    quickstart.rst
+   cookbook.rst
    approach.rst
    use-with-schedulers.rst
    cli-reference.rst

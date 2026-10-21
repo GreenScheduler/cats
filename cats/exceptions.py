@@ -5,6 +5,10 @@ class InvalidLocationError(Exception):
     "Location passed was invalid for chosen provider"
 
 
+class InvalidMetricError(Exception):
+    "Metric passed was invalid for chosen provider"
+
+
 class UnsupportedProviderError(Exception):
     "Provider is unsupported"
 
@@ -23,3 +27,7 @@ class DurationExceedsWindowError(Exception):
 
 class SchedulerError(Exception):
     "Error occurred while scheduling job"
+
+
+class PriceConstraintUnsatisfiableError(Exception):
+    "No candidate start time satisfies the given price constraint"

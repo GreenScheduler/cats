@@ -4,12 +4,21 @@
 
 [tool.setuptools]
   packages = ["cats", "cats.providers"]
-  package-data.cats = ["config.yml", "data/*.txt"]
+  package-data.cats = ["config.toml", "data/*.txt"]
 
 [project]
   name = "climate-aware-task-scheduler"
   dynamic = ["version"]
-  description = "Climate aware task scheduler"
+  description = "Lightweight Python package designed to schedule tasks based on the estimated carbon intensity of the electricity grid at any given moment"
+  keywords = [
+    "carbon intensity",
+    "carbon-aware computing",
+    "carbon-aware scheduling",
+    "climate-aware computing",
+    "task scheduling",
+    "energy-aware computing",
+    "green computing",
+  ]
   authors = [
     { name = "Colin Sauze" },
     { name = "Andrew Walker"},
@@ -22,11 +31,19 @@
     { name = "Carlos Martinez" },
     { name = "Sadie Bartholomew" }
   ]
-  license = { file = "LICENSE" }
+  maintainers = [
+    { name = "Colin Sauze" },
+    { name = "Andrew Walker"},
+    { name = "Loïc Lannelongue" },
+    { name = "Tony Greenberg" },
+    { name = "Abhishek Dasgupta" },
+    { name = "Sadie Bartholomew" }
+  ]
+  license = "MIT"
+  license-files = ["LICENSE"]
   requires-python = ">=3.11"
   readme = "README.md"
   classifiers = [
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -36,27 +53,30 @@
     "Environment :: Console",
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
-    "Operating System :: Microsoft :: Windows",
+    "Intended Audience :: Developers",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: System :: Distributed Computing :: Batch Processing",
   ]
-  dependencies = ["requests-cache>=1.0", "PyYAML>=6.0", "tzdata ; platform_system == 'Windows'"]
+  dependencies = ["requests>=2.0", "tzdata ; platform_system == 'Windows'"]
 
   [tool.setuptools.dynamic]
     version = {attr = "cats.version.version"}
 
-  [tool.pytest.ini_options]
-    markers = ["fixt_data: data for fixtures"]
-
   [project.optional-dependencies]
     test = ["pytest", "numpy>=1.5.0", "pytest-subprocess==1.5.0", "pytest-cov", "matplotlib>=3.0"]
-    types = ["mypy>=2.3.1", "types-PyYAML>=6.0.12.20260906", "types-redis", "types-requests", "types-ujson"]
+    types = ["mypy>=2.3.1", "types-redis", "types-requests", "types-ujson"]
     docs = ["sphinx==6.*", "sphinx-argparse", "ghp-import", "renku-sphinx-theme", "sphinx_copybutton", "sphinxcontrib-bibtex"]
     plots = ["matplotlib>=3.0"]
 
   [project.urls]
     Home = "https://github.com/GreenScheduler/cats"
     Documentation = "https://cats.readthedocs.io/"
+    Repository = "https://github.com/GreenScheduler/cats"
+    Issues = "https://github.com/GreenScheduler/cats/issues"
 
   [project.scripts]
     cats = "cats.cli:main"
