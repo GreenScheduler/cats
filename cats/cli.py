@@ -3,10 +3,10 @@ import datetime
 import logging
 import os
 import sys
-from argparse import Action, ArgumentParser, RawDescriptionHelpFormatter
+from argparse import Action, ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
 from pathlib import Path
-from typing import Optional, cast
+from typing import Any, Optional, Sequence, cast
 
 import requests
 
@@ -71,7 +71,7 @@ def print_providers() -> None:
             print(f"    metrics: {metrics}")
 
 
-def print_locations(api: str | None = None, metric: str | None = None):
+def print_locations(api: str | None = None, metric: str | None = None) -> None:
     "Print the valid --location codes of one provider, or of all of them"
     providers = list_providers()
     if api:
@@ -324,7 +324,13 @@ def parse_arguments() -> ArgumentParser:
     class StoreApi(Action):
         "Store --api and remember it was given, as it has a default value"
 
-        def __call__(self, parser, namespace, values, option_string=None):
+        def __call__(
+            self,
+            parser: ArgumentParser,
+            namespace: Namespace,
+            values: str | Sequence[Any] | None,
+            option_string: str | None = None,
+        ) -> None:
             setattr(namespace, self.dest, values)
             namespace.api_given = True
 

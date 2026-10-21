@@ -122,7 +122,7 @@ YAML_UNSUPPORTED = (
 )
 
 
-def warn_if_yaml(path: str):
+def warn_if_yaml(path: str) -> None:
     if path.endswith((".yml", ".yaml")):
         logging.warning(YAML_UNSUPPORTED.format(path))
 
