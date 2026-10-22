@@ -23,6 +23,7 @@ from cats.exceptions import InvalidLocationError
 from cats.forecast import AverageEstimate, PointEstimate, Timeseries
 from cats.output import CATSOutput
 from cats.schedulers import SCHEDULER_DATE_FORMAT, schedule_at, schedule_sbatch
+from cats.version import version
 
 AT_OUTPUT = "%a %b %d %H:%M:%S %Y"
 now_start = (datetime.now() + timedelta(minutes=1)).replace(second=0)
@@ -532,3 +533,13 @@ def test_format_json_in_terminal(
 def test_format_invalid_choice():
     with pytest.raises(SystemExit):
         main(["-d", "30", "--loc", "OX1", "--format", "yaml"])
+
+
+@pytest.mark.parametrize("flag", ["-V", "--version"])
+def test_version_flag(flag, capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        main([flag])
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    output = captured.out or captured.err
+    assert f"cats {version}" in output

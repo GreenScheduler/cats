@@ -268,6 +268,14 @@ def parse_arguments() -> ArgumentParser:
         formatter_class=RawDescriptionHelpFormatter,
     )
 
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"%(prog)s {version}",
+        help="Show program's version number and exit.",
+    )
+
     def positive_integer(string: str) -> int:
         n = int(string)
         assert n >= 0
