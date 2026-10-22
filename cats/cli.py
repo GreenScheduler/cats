@@ -1,7 +1,9 @@
 # pyright: reportUninitializedInstanceVariable=none, reportUnknownArgumentType=none, reportUnusedCallResult=none, reportUnknownMemberType=none
 import datetime
+import io
 import logging
 import os
+import stat
 import sys
 from argparse import Action, ArgumentParser, Namespace, RawDescriptionHelpFormatter
 from datetime import timedelta, timezone
@@ -43,6 +45,25 @@ def is_headless() -> bool:
         and "DISPLAY" not in os.environ
         and "WAYLAND_DISPLAY" not in os.environ
     )
+
+
+def is_pipe() -> bool:
+    """Return True if sys.stdout is connected to a pipe."""
+    try:
+        if (
+            sys.stdout is not None
+            and hasattr(sys.stdout, "isatty")
+            and not sys.stdout.isatty()
+        ):
+            if hasattr(sys.stdout, "fileno"):
+                try:
+                    mode = os.fstat(sys.stdout.fileno()).st_mode
+                    return stat.S_ISFIFO(mode)
+                except (io.UnsupportedOperation, OSError, ValueError):
+                    return False
+    except Exception:
+        pass
+    return False
 
 
 def indent_lines(lines: str, spaces: int) -> str:
@@ -376,9 +397,10 @@ def parse_arguments() -> ArgumentParser:
     parser.add_argument(
         "--format",
         type=str,
-        help="Format to output optimal start time and carbon emmission"
-        "estimate savings in. Currently only JSON is supported.",
-        choices=["json"],
+        help="Format to output optimal start time and carbon emission "
+        "estimate savings in (choices: 'json', 'text'). "
+        "Defaults to 'json' when output is piped, and 'text' otherwise.",
+        choices=["json", "text"],
     )
     parser.add_argument(
         "-f",
@@ -627,7 +649,11 @@ def run_cats(arguments: list[str] | None = None) -> None:
             average_now_ci=now_avg.value,
         )
 
-    if args.format == "json":
+    format_type = args.format
+    if format_type is None and is_pipe():
+        format_type = "json"
+
+    if format_type == "json":
         if isinstance(args.dateformat, str) and "%" not in args.dateformat:
             dateformat = SCHEDULER_DATE_FORMAT.get(args.dateformat, "")
         else:
