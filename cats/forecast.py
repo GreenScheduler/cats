@@ -177,7 +177,6 @@ class WindowedForecast:
         # Account for the fact that the start and end of each window
         # might not fall exactly on data points.
 
-
         window_start = self.start + index * self.data_stepsize
         window_end = self.end + index * self.data_stepsize
 
