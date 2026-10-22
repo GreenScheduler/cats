@@ -175,15 +175,8 @@ class WindowedForecast:
             raise IndexError("Window index out of range")
 
         # Account for the fact that the start and end of each window
-        # might not fall exactly on data points.  The starting
-        # intensity is interpolated between the first (index) and
-        # second data point (index + 1) in the window.  The ending
-        # intensity value is interpolated between the last and
-        # penultimate data points in the window.
+        # might not fall exactly on data points.
 
-        # rbound: carbon intensity point estimate at window end
-        # Handle case when last data point exactly matches last carbon intensity,
-        # so there is no further data point to interpolate from.
 
         window_start = self.start + index * self.data_stepsize
         window_end = self.end + index * self.data_stepsize
@@ -197,6 +190,10 @@ class WindowedForecast:
             when=window_start,
         )
 
+        # rbound: carbon intensity point estimate at window end.
+        # Interpolate between the last two relevant data points unless the
+        # window ends at the final available data point, in which case
+        # no further interpolation is needed.
         if data_index + self.ndata == len(self.data):
             rbound = self.data[-1]
         else:
@@ -245,6 +242,8 @@ class WindowedForecast:
             window_start = self.start + index * self.data_stepsize
             window_end = self.end + index * self.data_stepsize
 
+            # Skip windows crossing missing forecast data rather than
+            # yielding potentially invalid results.
             if self._window_has_missing_data(window_start, window_end):
                 continue
 
