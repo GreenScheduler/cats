@@ -510,7 +510,7 @@ def run_cats(arguments: list[str] | None = None) -> None:
     parser = parse_arguments()
     args = cast(Args, parser.parse_args(arguments))
     configure_logging(args.verbose, args.log_level)
-    colour_output = args.no_colour or args.no_color
+    colour_output = args.no_colour or args.no_color or bool(os.environ.get("NO_COLOR"))
 
     if args.list_providers:
         print_providers()
