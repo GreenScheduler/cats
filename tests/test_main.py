@@ -543,3 +543,35 @@ def test_version_flag(flag, capsys):
     captured = capsys.readouterr()
     output = captured.out or captured.err
     assert f"cats {version}" in output
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_no_color_environment_variable(
+    mock_carbon_get_data, mock_resolve_price_series, monkeypatch, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = _wide_flat_series(
+        "Day-ahead electricity price", "GBP/MWh", 150.0
+    )
+
+    # With NO_COLOR set to a non-empty value, no ANSI colour escape codes
+    # should be emitted.
+    monkeypatch.setenv("NO_COLOR", "1")
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    out_no_color = capsys.readouterr().out
+    assert "\33[" not in out_no_color
+
+    # Per https://no-color.org, an empty NO_COLOR should NOT disable colour.
+    monkeypatch.setenv("NO_COLOR", "")
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    out_empty_env = capsys.readouterr().out
+    assert "\33[" in out_empty_env
+
+    # Without NO_COLOR and without --no-colour, colour is still used.
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    out_colored = capsys.readouterr().out
+    assert "\33[" in out_colored
