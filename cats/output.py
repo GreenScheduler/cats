@@ -27,6 +27,36 @@ class CATSOutput:
     priceEstimate: Optional[Estimates] = None
     priceUnit: Optional[str] = None
     colour: bool = False
+    # Whether to report the reduction in the metric between starting now and
+    # starting at the optimal time.  Defaults to True so that the library
+    # output matches the command line output (which reports it by default);
+    # the CLI turns it off when -e/--hide-reduction is given.
+    show_reduction: bool = True
+
+    @property
+    def reduction(self) -> float:
+        """The reduction in the metric between starting now and starting at the optimal time.
+
+        A positive value means the metric is lower (i.e. better, for the
+        metrics CATS optimises for) at the optimal start time than it would
+        be if the job started right now.  The value is rounded to two decimal
+        places, matching the precision used in the text output, and is always
+        returned as a float so that the JSON output has a stable type.
+
+        :return: The reduction in the metric, in the same unit as the metric
+        :rtype: float
+        """
+        val = round(self.valueNow.value - self.valueOptimal.value, 2)
+        # Avoid negative zero (-0.0) from IEEE 754 floating point arithmetic
+        return 0.0 if val == 0 else float(val)
+
+    @property
+    def savings(self) -> float:
+        """Alias for :py:attr:`reduction`, using the wording of ``Estimates.savings``.
+
+        Note that only ``reduction`` is included in the JSON output.
+        """
+        return self.reduction
 
     def __str__(self) -> str:
         if self.colour:
@@ -69,6 +99,18 @@ class CATSOutput:
                 f"{col_ci_opt}{self.valueOptimal.value:.2f} {self.unit}{col_normal}",
             ),
         ]
+
+        if self.show_reduction:
+            reduction = self.reduction
+            # A positive reduction means the metric is better at the optimal
+            # start time than it would be now, so it gets the "good" colour.
+            col_reduction = col_ci_opt if reduction >= 0 else col_ci_now
+            lines.append(
+                (
+                    f"{self.metric} reduction",
+                    f"{col_reduction}{reduction:.2f} {self.unit}{col_normal}",
+                )
+            )
 
         if self.emmissionEstimate:
             lines.append(
@@ -119,6 +161,8 @@ class CATSOutput:
 
     def to_json(self, dateformat: str = "", **kwargs: Any) -> str:
         data = dataclasses.asdict(self)
+        # show_reduction is a presentation flag, not part of the reported data
+        data.pop("show_reduction", None)
         for val in ["valueNow", "valueOptimal"]:
             if dateformat == "":
                 data[val]["start"] = data[val]["start"].isoformat()
@@ -126,5 +170,10 @@ class CATSOutput:
             else:
                 data[val]["start"] = data[val]["start"].strftime(dateformat)
                 data[val]["end"] = data[val]["end"].strftime(dateformat)
+
+        # The reduction is always present as a key, so that consumers of the
+        # JSON output always see the same schema; it is null when the
+        # reduction has been hidden.
+        data["reduction"] = self.reduction if self.show_reduction else None
 
         return json.dumps(data, **kwargs)
