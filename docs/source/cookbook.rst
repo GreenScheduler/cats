@@ -19,8 +19,11 @@ This is the default. Give CATS the duration of your job in minutes and your loca
    Best job start time                 = 2026-09-30 14:40:20
    Carbon intensity if job started now = 66.13 gCO2eq/kWh
    Carbon intensity at optimal time    = 63.70 gCO2eq/kWh
+   Carbon intensity reduction          = 2.43 gCO2eq/kWh
    Price if job started now            = 153.19 GBP/MWh
    Price at chosen start time          = 218.16 GBP/MWh (+ 64.97)
+
+The ``Carbon intensity reduction`` line is the difference between the carbon intensity now and at the chosen start time, i.e. how much lower it would be if the job waited. It is reported by default and can be left out with ``-e`` (``--hide-reduction``, also spelled ``--exclude-savings``).
 
 Whenever electricity price data is available for your location, CATS also tells you what the chosen start time costs compared with starting now. See :ref:`cookbook-price-constraint` if you want to limit that.
 
@@ -36,6 +39,7 @@ Use ``--metric price`` to minimise day-ahead electricity price instead of carbon
    Best job start time                            = 2026-09-30 12:40:21
    Day-ahead electricity price if job started now = 144.31 GBP/MWh
    Day-ahead electricity price at optimal time    = 144.31 GBP/MWh
+   Day-ahead electricity price reduction          = 0.00 GBP/MWh
 
 In continental Europe use ``energy-charts.info`` with a bidding zone or country code.
 
@@ -46,6 +50,7 @@ In continental Europe use ``energy-charts.info`` with a bidding zone or country 
    Best job start time                            = 2026-10-01 12:40:22
    Day-ahead electricity price if job started now = 97.55 EUR/MWh
    Day-ahead electricity price at optimal time    = 39.11 EUR/MWh
+   Day-ahead electricity price reduction          = 58.44 EUR/MWh
 
 Run a job when the most renewable energy is available
 -----------------------------------------------------
@@ -59,6 +64,7 @@ Use ``--metric renewables``. CATS reports the non-renewable share, so lower is s
    Best job start time                    = 2026-09-30 12:40:21
    Non-renewable share if job started now = 23.51 %
    Non-renewable share at optimal time    = 23.51 %
+   Non-renewable share reduction          = 0.00 %
 
 Minimise water use or environmental impact
 ------------------------------------------
@@ -71,6 +77,7 @@ The ``wattnet.eu`` API (which needs a free registration, see :ref:`quickstart`) 
 
    Water footprint if job started now = 11.89 L/kWh
    Water footprint at optimal time    = 11.80 L/kWh
+   Water footprint reduction          = 0.09 L/kWh
    Price if job started now           = 26.88 EUR/MWh
    Price at chosen start time         = 156.99 EUR/MWh (+ 130.11)
 
@@ -91,6 +98,7 @@ The cleanest time to run is not always the cheapest, and it can cost more than s
 
    Carbon intensity if job started now = 66.10 gCO2eq/kWh
    Carbon intensity at optimal time    = 63.71 gCO2eq/kWh
+   Carbon intensity reduction          = 2.39 gCO2eq/kWh
    Price if job started now            = 153.39 GBP/MWh
    Price at chosen start time          = 219.20 GBP/MWh (+ 65.81)
 
@@ -102,6 +110,7 @@ Rather than making price the metric you minimise, you can set a price limit. CAT
 
    Carbon intensity if job started now = 66.10 gCO2eq/kWh
    Carbon intensity at optimal time    = 66.10 gCO2eq/kWh
+   Carbon intensity reduction          = 0.00 gCO2eq/kWh
    Price if job started now            = 153.39 GBP/MWh
    Price at chosen start time          = 153.39 GBP/MWh (- 0.00)
 
@@ -113,6 +122,7 @@ Or use ``--max-price`` to set an absolute limit in the unit of your location (GB
 
    Carbon intensity if job started now = 66.10 gCO2eq/kWh
    Carbon intensity at optimal time    = 66.10 gCO2eq/kWh
+   Carbon intensity reduction          = 0.00 gCO2eq/kWh
    Price at chosen start time          = 153.40 GBP/MWh (- 0.00)
 
 The two options cannot be used together. If no start time satisfies the limit, or the location has no price data, CATS stops with an error instead of ignoring the limit.
@@ -131,6 +141,7 @@ Option                                  What it does
 ``--metric NAME``                       What to minimise, for APIs that offer more than one metric
 ``--max-price N``                       Absolute price limit, in the unit of your location
 ``--max-price-increase-pct N``          Price limit relative to the price of starting now
+``-e``, ``--hide-reduction``            Leave the reduction figure out of the output
 ``--list-providers``                    List the APIs and their metrics, without needing ``--duration``
 ``--list-locations``                    List the valid ``--location`` codes of one API (or all),
                                         without needing ``--duration``
