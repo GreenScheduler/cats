@@ -53,9 +53,10 @@ The.____ ..... __ .... ________ . ______...
 ...\    )..|  (..)  |....|  |...(      (..
 
 
-Best job start time                       = 2026-01-22 10:10:31
-Carbon intensity if job started now       = 217.41 gCO2eq/kWh
-Carbon intensity at optimal time          = 118.65 gCO2eq/kWh
+Best job start time                 = 2026-01-22 10:10:31
+Carbon intensity if job started now = 217.41 gCO2eq/kWh
+Carbon intensity at optimal time    = 118.65 gCO2eq/kWh
+Carbon intensity reduction          = 98.76 gCO2eq/kWh
 ```
 
 which produced at the time run (`Tue 20 Jan 15:40:21 GMT 2026`) a forecast minimum of

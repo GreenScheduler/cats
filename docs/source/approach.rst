@@ -65,9 +65,10 @@ over the duration of the computation.
    ...\    )..|  (..)  |....|  |...(      (..
 
 
-   Best job start time                       = 2026-01-22 01:43:27
-   Carbon intensity if job started now       = 43.23 gCO2eq/kWh
-   Carbon intensity at optimal time          = 1.66 gCO2eq/kWh
+   Best job start time                 = 2026-01-22 01:43:27
+   Carbon intensity if job started now = 43.23 gCO2eq/kWh
+   Carbon intensity at optimal time    = 1.66 gCO2eq/kWh
+   Carbon intensity reduction          = 41.57 gCO2eq/kWh
 
 
 At the moment, CATS is available for Great Britain through the National Grid's API which provides
