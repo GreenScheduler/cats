@@ -216,9 +216,12 @@ def parse_arguments() -> ArgumentParser:
     By default, the command simply returns information about when the
     calculation should be undertaken and compares the carbon intensity
     (gCO2/kWh) of running the calculation now with the carbon intensity at that
-    time in the future. To undertake this calculation, cats needs to know the
-    predicted duration of the calculation (which you must supply, see `-d`) and
-    your location, either inferred from your IP address, or passed using `-l`.
+    time in the future, along with the reduction in the metric that waiting
+    until that time would achieve. The reduction figure can be left out of the
+    output with -e/--hide-reduction. To undertake this calculation, cats needs
+    to know the predicted duration of the calculation (which you must supply,
+    see `-d`) and your location, either inferred from your IP address, or
+    passed using `-l`.
     If additional information about the power consumption of your computer is
     available and passed to CATS via the `--config` option, the predicted CO2
     usage will be reported.
@@ -407,7 +410,10 @@ def parse_arguments() -> ArgumentParser:
         type=str,
         help="Format to output optimal start time and carbon emission "
         "estimate savings in (choices: 'json', 'text'). "
-        "Defaults to 'json' when output is piped, and 'text' otherwise.",
+        "Defaults to 'json' when output is piped, and 'text' otherwise. "
+        "The JSON output reports the reduction in the metric as the "
+        "'reduction' key, which is null when the reduction is hidden with "
+        "-e/--hide-reduction.",
         choices=["json", "text"],
     )
     parser.add_argument(
@@ -441,6 +447,18 @@ def parse_arguments() -> ArgumentParser:
         action="store_true",
         help="Disable all terminal output colouring (alias to --no-colour)",
     )
+    parser.add_argument(
+        "-e",
+        "--hide-reduction",
+        "--exclude-savings",
+        action="store_true",
+        dest="hide_reduction",
+        help="Hide the forecast metric reduction figure (e.g. 'Carbon intensity "
+        "reduction') from the output. The reduction is reported by default. "
+        "This does not affect the estimated emissions or price figures, which "
+        "are reported separately.",
+    )
+    parser.set_defaults(hide_reduction=False)
     parser.add_argument(
         "--plot",
         help="Create a plot of the forecast and optimised plan for the job. "
@@ -644,6 +662,7 @@ def run_cats(arguments: list[str] | None = None) -> None:
         "GBR",
         unit=forecast.unit,
         colour=not colour_output,
+        show_reduction=not args.hide_reduction,
     )
 
     if (
