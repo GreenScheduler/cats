@@ -1,6 +1,7 @@
 """Providers module for CATS"""
 
 from .base import BaseProvider, get_provider, list_providers
+from .energy_neso import UKGenerationDemandProvider
 from .eu_energycharts import EnergyChartsProvider
 from .eu_wattnet import WattnetEuProvider
 from .gb_carbonintensity import GBCarbonIntensityProvider
@@ -14,4 +15,5 @@ __all__ = [
     "OctopusAgilePriceProvider",
     "GBCarbonIntensityProvider",
     "WattnetEuProvider",
+    "UKGenerationDemandProvider",
 ]
