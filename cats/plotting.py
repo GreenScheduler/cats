@@ -226,11 +226,16 @@ def plotplan(
     # Compute the absolute and percentage saving between running now and
     # running at the optimal time. This works for any metric (carbon
     # intensity, day-ahead price, ...) since it is just now_value - optimal_value.
+    # The absolute figure comes from the output object, so that the plot and
+    # the text/JSON output report the same number (including the rounding and
+    # the avoidance of a negative zero); the percentage is computed from the
+    # unrounded difference.
     # Shown as the legend title, rather than a floating annotation, so it
     # never overlaps the plotted data or the legend itself.
-    saving = now_value - optimal_value
-    saving_pct = (saving / now_value * 100) if now_value else float("nan")
-    legend_title = f"Saving: {saving:.2f} {units}  ({saving_pct:.1f}%)"
+    saving_pct = (
+        ((now_value - optimal_value) / now_value * 100) if now_value else float("nan")
+    )
+    legend_title = f"Saving: {output.reduction:.2f} {units}  ({saving_pct:.1f}%)"
 
     # Include subtle markers at each data point, in case it helps to
     # distinguish forecast points from the trend (esp. useful if there)

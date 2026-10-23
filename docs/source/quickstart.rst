@@ -23,9 +23,15 @@ You can run CATS with:
    ...\    )..|  (..)  |....|  |...(      (..
 
 
-   Best job start time                       = 2026-01-22 01:43:27
-   Carbon intensity if job started now       = 43.23 gCO2eq/kWh
-   Carbon intensity at optimal time          = 1.66 gCO2eq/kWh
+   Best job start time                 = 2026-01-22 01:43:27
+   Carbon intensity if job started now = 43.23 gCO2eq/kWh
+   Carbon intensity at optimal time    = 1.66 gCO2eq/kWh
+   Carbon intensity reduction          = 41.57 gCO2eq/kWh
+
+The ``Carbon intensity reduction`` line is the difference between the two
+carbon intensity figures, i.e. how much lower the carbon intensity would be
+if the job started at the recommended time instead of right now. It is
+reported by default and can be left out with ``-e`` (``--hide-reduction``).
 
 The ``--location`` option is optional, and can be pulled from a
 configuration file (see :ref:`configuration-file`), or inferred using
@@ -78,9 +84,10 @@ account and obtaining these credentials. The example above is thus changed to:
     ...\    )..|  (..)  |....|  |...(      (..
 
 
-    Best job start time                       = 2026-08-28 09:17:29
-    Carbon intensity if job started now       = 146.84 gCO2eq/kWh
-    Carbon intensity at optimal time          = 96.39 gCO2eq/kWh
+    Best job start time                 = 2026-08-28 09:17:29
+    Carbon intensity if job started now = 146.84 gCO2eq/kWh
+    Carbon intensity at optimal time    = 96.39 gCO2eq/kWh
+    Carbon intensity reduction          = 50.45 gCO2eq/kWh
 
 The best start time from wattnet may not match the best start time from NESO's
 service. All other arguments below are supported by both providers, and it
@@ -109,9 +116,10 @@ carbon intensity is, so no other arguments change:
    $ cats --duration 180 --location DE-LU --api energy-charts.info
    ...
 
-   Best job start time                       = 2026-09-29 21:00:00
-   Day-ahead electricity price if job started now       = 89.40 EUR/MWh
-   Day-ahead electricity price at optimal time          = 80.34 EUR/MWh
+   Best job start time                            = 2026-09-29 21:00:00
+   Day-ahead electricity price if job started now = 89.40 EUR/MWh
+   Day-ahead electricity price at optimal time    = 80.34 EUR/MWh
+   Day-ahead electricity price reduction          = 9.06 EUR/MWh
 
 .. code-block:: console
    :caption: *Using octopus.energy for cost-aware scheduling in Great Britain (region C, London).*
@@ -119,9 +127,10 @@ carbon intensity is, so no other arguments change:
    $ cats --duration 180 --location C --api octopus.energy
    ...
 
-   Best job start time                       = 2026-09-29 21:00:00
-   Day-ahead electricity price if job started now       = 163.64 GBP/MWh
-   Day-ahead electricity price at optimal time          = 135.21 GBP/MWh
+   Best job start time                            = 2026-09-29 21:00:00
+   Day-ahead electricity price if job started now = 163.64 GBP/MWh
+   Day-ahead electricity price at optimal time    = 135.21 GBP/MWh
+   Day-ahead electricity price reduction          = 28.43 GBP/MWh
 
 The same two providers also serve a ``renewables`` metric: the share of
 electricity generation that is renewable. Maximising renewable share does
@@ -140,9 +149,10 @@ no changes were needed to the scheduler itself:
    $ cats --duration 180 --location de --api energy-charts.info --metric renewables
    ...
 
-   Best job start time                       = 2026-09-29 19:39:41
-   Non-renewable share if job started now       = 41.09 %
-   Non-renewable share at optimal time          = 31.42 %
+   Best job start time                    = 2026-09-29 19:39:41
+   Non-renewable share if job started now = 41.09 %
+   Non-renewable share at optimal time    = 31.42 %
+   Non-renewable share reduction          = 9.67 %
 
 .. code-block:: console
    :caption: *carbonintensity.org.uk's renewables metric, for a GB postcode.*
@@ -150,9 +160,10 @@ no changes were needed to the scheduler itself:
    $ cats --duration 180 --location OX1 --api carbonintensity.org.uk --metric renewables
    ...
 
-   Best job start time                       = 2026-09-30 04:39:41
-   Non-renewable share if job started now       = 47.70 %
-   Non-renewable share at optimal time          = 28.83 %
+   Best job start time                    = 2026-09-30 04:39:41
+   Non-renewable share if job started now = 47.70 %
+   Non-renewable share at optimal time    = 28.83 %
+   Non-renewable share reduction          = 18.87 %
 
 Note this value can occasionally go negative for the ``energy-charts.info``
 provider: renewable generation can briefly exceed 100% of domestic load
@@ -183,9 +194,10 @@ better; CATS negates it so that lower is better, like every other metric CATS re
    $ cats --duration 180 --location DE --api wattnet.eu --metric water
    ...
 
-   Best job start time                       = 2026-09-30 10:24:43
-   Water footprint if job started now       = 18.10 L/kWh
-   Water footprint at optimal time          = 11.24 L/kWh
+   Best job start time                = 2026-09-30 10:24:43
+   Water footprint if job started now = 18.10 L/kWh
+   Water footprint at optimal time    = 11.24 L/kWh
+   Water footprint reduction          = 6.86 L/kWh
 
 Constraining, rather than optimising for, price
 -------------------------------------------------
@@ -210,11 +222,12 @@ independently of what is actually being optimised:
    $ cats --duration 60 --location OX1 --api carbonintensity.org.uk --max-price-increase-pct 0
    ...
 
-   Best job start time                       = 2026-09-30 11:46:45
-   Carbon intensity if job started now       = 72.71 gCO2eq/kWh
-   Carbon intensity at optimal time          = 72.71 gCO2eq/kWh
-   Price if job started now                  = 137.65 GBP/MWh
-   Price at chosen start time                 = 137.65 GBP/MWh (- 0.00)
+   Best job start time                 = 2026-09-30 11:46:45
+   Carbon intensity if job started now = 72.71 gCO2eq/kWh
+   Carbon intensity at optimal time    = 72.71 gCO2eq/kWh
+   Carbon intensity reduction          = 0.00 gCO2eq/kWh
+   Price if job started now            = 137.65 GBP/MWh
+   Price at chosen start time          = 137.65 GBP/MWh (- 0.00)
 
 Without the ``--max-price-increase-pct`` constraint above, the same command
 picks a genuinely lower-carbon window (64.01 gCO2eq/kWh) that happens to be
@@ -325,9 +338,10 @@ compared to at the optimal time. For example:
    ...\    )..|  (..)  |....|  |...(      (..
 
 
-   Best job start time                       = 2026-01-22 10:10:31
-   Carbon intensity if job started now       = 217.41 gCO2eq/kWh
-   Carbon intensity at optimal time          = 118.65 gCO2eq/kWh
+   Best job start time                 = 2026-01-22 10:10:31
+   Carbon intensity if job started now = 217.41 gCO2eq/kWh
+   Carbon intensity at optimal time    = 118.65 gCO2eq/kWh
+   Carbon intensity reduction          = 98.76 gCO2eq/kWh
 
 .. image:: _static/example_plot_output_rg1_180mins.png
   :width: 400
@@ -376,9 +390,10 @@ machine IP address:
    WARNING:root:config file not found
    WARNING:root:Unspecified carbon intensity forecast service, using carbonintensity.org.uk
    WARNING:root:location not provided. Estimating location from IP address: RG2.
-   Best job start time 2024-08-22 07:30:49.800951+01:00
-   Carbon intensity if job started now       = 117.95 gCO2eq/kWh
-   Carbon intensity at optimal time          = 60.93 gCO2eq/kWh
+   Best job start time                 = 2024-08-22 07:30:49
+   Carbon intensity if job started now = 117.95 gCO2eq/kWh
+   Carbon intensity at optimal time    = 60.93 gCO2eq/kWh
+   Carbon intensity reduction          = 57.02 gCO2eq/kWh
 
 Use --format=json to get this in machine readable format
 
