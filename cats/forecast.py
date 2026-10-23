@@ -90,6 +90,35 @@ class WindowedForecast:
 
         self.ndata = bisect_left(self.data, self.end)  # window size
 
+    def _window_has_missing_data(
+        self,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> bool:
+        """Return True if a forecast window crosses a gap in the data."""
+        relevant_points = [
+            point
+            for point in self.data
+            if window_start - self.data_stepsize
+            <= point.datetime
+            <= window_end + self.data_stepsize
+        ]
+
+        for previous, current in zip(relevant_points, relevant_points[1:]):
+            if current.datetime - previous.datetime > self.data_stepsize:
+                if previous.datetime < window_end and current.datetime > window_start:
+                    return True
+
+        return False
+
+    def _find_data_index(self, when: datetime) -> int:
+        """Return the index of the forecast point at or immediately before a time."""
+        for index, point in enumerate(self.data):
+            if point.datetime > when:
+                return index - 1
+
+        return len(self.data) - 1
+
     def _filter_data_by_constraints(
         self,
         data: list[PointEstimate],
@@ -146,34 +175,37 @@ class WindowedForecast:
             raise IndexError("Window index out of range")
 
         # Account for the fact that the start and end of each window
-        # might not fall exactly on data points.  The starting
-        # intensity is interpolated between the first (index) and
-        # second data point (index + 1) in the window.  The ending
-        # intensity value is interpolated between the last and
-        # penultimate data points in the window.
+        # might not fall exactly on data points.
+
         window_start = self.start + index * self.data_stepsize
         window_end = self.end + index * self.data_stepsize
 
+        data_index = self._find_data_index(window_start)
+
         # lbound: carbon intensity point estimate at window start
         lbound = self.interp(
-            self.data[index],
-            self.data[index + 1],
+            self.data[data_index],
+            self.data[data_index + 1],
             when=window_start,
         )
-        # rbound: carbon intensity point estimate at window end
-        # Handle case when last data point exactly matches last carbon intensity,
-        # so there is no further data point to interpolate from.
-        if index + self.ndata == len(self.data):
+
+        # rbound: carbon intensity point estimate at window end.
+        # Interpolate between the last two relevant data points unless the
+        # window ends at the final available data point, in which case
+        # no further interpolation is needed.
+        if data_index + self.ndata == len(self.data):
             rbound = self.data[-1]
         else:
             rbound = self.interp(
-                self.data[index + self.ndata - 1],
-                self.data[index + self.ndata],
+                self.data[data_index + self.ndata - 1],
+                self.data[data_index + self.ndata],
                 when=window_end,
             )
-        # window_data <- [lbound] + [...bulk...] + [rbound] where
-        # lbound and rbound are interpolated intensity values.
-        window_data = [lbound] + self.data[index + 1 : index + self.ndata] + [rbound]
+
+        window_data = (
+            [lbound] + self.data[data_index + 1 : data_index + self.ndata] + [rbound]
+        )
+
         acc = [
             0.5 * (a.value + b.value) * (b.datetime - a.datetime).total_seconds()
             for a, b in zip(window_data[:-1], window_data[1:])
@@ -206,6 +238,14 @@ class WindowedForecast:
 
     def __iter__(self) -> Iterator[AverageEstimate]:
         for index in range(len(self)):
+            window_start = self.start + index * self.data_stepsize
+            window_end = self.end + index * self.data_stepsize
+
+            # Skip windows crossing missing forecast data rather than
+            # yielding potentially invalid results.
+            if self._window_has_missing_data(window_start, window_end):
+                continue
+
             yield self[index]
 
     def __len__(self) -> int:
