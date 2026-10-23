@@ -532,3 +532,100 @@ def test_format_json_in_terminal(
 def test_format_invalid_choice():
     with pytest.raises(SystemExit):
         main(["-d", "30", "--loc", "OX1", "--format", "yaml"])
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_reduction_in_output_by_default(
+    mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    # No price data: the price report would otherwise add unrelated lines
+    # (and require a network request) to the output under test.
+    mock_resolve_price_series.return_value = None
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    out = capsys.readouterr().out
+    assert "Carbon intensity reduction" in out
+    assert "0.00 gCO2eq/kWh" in out
+
+
+@pytest.mark.parametrize("flag", ["-e", "--hide-reduction", "--exclude-savings"])
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_hide_reduction_flag(
+    mock_carbon_get_data, mock_resolve_price_series, flag, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = None
+    assert main(["-d", "30", "--loc", "OX1", flag]) == 0
+    out = capsys.readouterr().out
+    assert "Carbon intensity reduction" not in out
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_reduction_in_json_output_by_default(
+    mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = None
+    assert main(["-d", "30", "--loc", "OX1", "--format", "json"]) == 0
+    data = json.loads(capsys.readouterr().out)
+    assert "reduction" in data
+    assert data["reduction"] == 0.0
+
+
+@pytest.mark.parametrize("flag", ["-e", "--hide-reduction", "--exclude-savings"])
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_hide_reduction_in_json_output(
+    mock_carbon_get_data, mock_resolve_price_series, flag, capsys
+):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity", "gCO2eq/kWh", 100.0
+    )
+    mock_resolve_price_series.return_value = None
+    assert main(["-d", "30", "--loc", "OX1", "--format", "json", flag]) == 0
+    data = json.loads(capsys.readouterr().out)
+    # The key is always present so that the JSON schema does not depend on
+    # the flag, but the value is hidden when the flag is given.
+    assert "reduction" in data
+    assert data["reduction"] is None
+
+
+@patch("cats.cli.resolve_price_series")
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_reduction_non_zero_calculation_in_main(
+    mock_carbon_get_data, mock_resolve_price_series, capsys
+):
+    start = datetime.now(timezone.utc) - timedelta(hours=2)
+    # First 6 steps (past through now) are 100.0, future steps drop to 40.0
+    values = [
+        PointEstimate(
+            value=100.0 if i < 6 else 40.0, datetime=start + timedelta(minutes=30 * i)
+        )
+        for i in range(100)
+    ]
+    mock_carbon_get_data.return_value = Timeseries(
+        "Carbon intensity", values, "gCO2eq/kWh"
+    )
+    mock_resolve_price_series.return_value = None
+    assert main(["-d", "30", "--loc", "OX1"]) == 0
+    out = capsys.readouterr().out
+    assert "Carbon intensity reduction" in out
+    assert "60.00 gCO2eq/kWh" in out
+
+
+def test_help_documents_the_reduction_flags():
+    # The flag is the user-facing contract for the new output line, so make
+    # sure it stays discoverable from --help.
+    help_text = parse_arguments().format_help()
+    assert "--hide-reduction" in help_text
+    assert "--exclude-savings" in help_text
+    assert "reduction" in help_text
