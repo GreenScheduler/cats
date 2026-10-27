@@ -1,3 +1,6 @@
+import dataclasses
+import json
+import typing
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -31,6 +34,25 @@ class Timeseries:
     metric: str
     values: list[PointEstimate]
     unit: str
+
+    def json_serialized(self: AverageEstimate) -> str:
+        "Return the Timeseries as a JSON encoded string"
+        return json.dumps(self, default=timeserise_encoder)
+
+
+def timeserise_encoder(x: typing.Any) -> typing.Any:
+    """
+    JSON encode values found in a Timeserise handling expected oddities
+
+    The Timeserise is encoded as a dict, with dateime objects in isoformat.
+    See https://tomaugspurger.net/posts/serializing-dataclasses/ for
+    discussion.
+    """
+    if dataclasses.is_dataclass(x):
+        return dataclasses.asdict(x)
+    elif isinstance(x, datetime):
+        return x.isoformat()
+    return x
 
 
 class WindowedForecast:
