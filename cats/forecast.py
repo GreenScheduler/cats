@@ -35,7 +35,7 @@ class Timeseries:
     values: list[PointEstimate]
     unit: str
 
-    def json_serialized(self: AverageEstimate) -> str:
+    def json_serialized(self) -> str:
         "Return the Timeseries as a JSON encoded string"
         return json.dumps(self, default=timeserise_encoder)
 
@@ -48,7 +48,9 @@ def timeserise_encoder(x: typing.Any) -> typing.Any:
     See https://tomaugspurger.net/posts/serializing-dataclasses/ for
     discussion.
     """
-    if dataclasses.is_dataclass(x):
+    # Return the dataclass instance as a dict (for further serialization)
+    # but not if it is a dataclass itself (for type checking)
+    if dataclasses.is_dataclass(x) and not isinstance(x, type):
         return dataclasses.asdict(x)
     elif isinstance(x, datetime):
         return x.isoformat()

@@ -663,10 +663,12 @@ def run_cats(arguments: list[str] | None = None) -> None:
     if args.footprint and forecast.metric == "Carbon intensity":
         assert PUE is not None, "PUE not set by get_runtime_config!"
         assert jobinfo is not None, "jobinfo not set by get_runtime_config!"
+        # For mypy 2.4.0 on python 3.14.0 (also the minutes cast to float below):
+        assert args.duration is not None, "Duration must be set here!"
         output.emmissionEstimate = get_footprint_reduction_estimate(
             PUE=PUE,
             jobinfo=jobinfo,
-            runtime=timedelta(minutes=args.duration),
+            runtime=timedelta(minutes=float(args.duration)),
             average_best_ci=best_avg.value,
             average_now_ci=now_avg.value,
         )
