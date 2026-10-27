@@ -212,9 +212,14 @@ def test_list_locations_codes_validate():
                 instance.validate_location(code)
 
 
-def _wide_flat_series(metric: str, unit: str, value: float) -> Timeseries:
+def _wide_flat_series(
+    metric: str, unit: str, value: float, starttime: datetime | None = None
+) -> Timeseries:
     "A flat series spanning well beyond any real 'now' at 30 minute resolution"
-    start = datetime.now(timezone.utc) - timedelta(hours=2)
+    if starttime is not None:
+        start = starttime
+    else:
+        start = datetime.now(timezone.utc) - timedelta(hours=2)
     return Timeseries(
         metric,
         values=[
@@ -575,3 +580,26 @@ def test_no_color_environment_variable(
     assert main(["-d", "30", "--loc", "OX1"]) == 0
     out_colored = capsys.readouterr().out
     assert "\33[" in out_colored
+
+
+@patch("cats.providers.GBCarbonIntensityProvider.get_data")
+def test_forecast_only(mock_carbon_get_data, capsys):
+    mock_carbon_get_data.return_value = _wide_flat_series(
+        "Carbon intensity",
+        "gCO2eq/kWh",
+        100.0,
+        starttime=datetime(2026, 2, 2, 10, 0, 0, 0),
+    )
+    # THe forecast-only flag print JSON output
+    assert main(["--forecast-only"]) == 0
+    out = capsys.readouterr().out
+    result = json.loads(out)
+    # We test a bunch of output values - but not all of them
+    assert result["metric"] == "Carbon intensity"
+    assert result["unit"] == "gCO2eq/kWh"
+    assert result["values"][0]["value"] == 100.0
+    assert result["values"][0]["datetime"] == "2026-02-02T10:00:00"
+    assert result["values"][1]["value"] == 100.0
+    assert result["values"][1]["datetime"] == "2026-02-02T10:30:00"
+    assert result["values"][-1]["value"] == 100.0
+    assert result["values"][-1]["datetime"] == "2026-02-04T11:30:00"

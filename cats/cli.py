@@ -486,6 +486,11 @@ def parse_arguments() -> ArgumentParser:
         default=None,
         help="Set logging level directly (e.g. DEBUG, INFO). Overrides -v / --verbose.",
     )
+    parser.add_argument(
+        "--forecast-only",
+        help="Print JSON encoded forecast data to STDOUT and stop processing",
+        action="store_true",
+    )
 
     return parser
 
@@ -521,10 +526,15 @@ def run_cats(arguments: list[str] | None = None) -> None:
         print_locations(api, args.metric)
         return
 
-    if args.duration is None:
+    if args.forecast_only:
+        # Set a duration value - we need this for the get_runtime_config
+        # validation although it is not used.
+        args.duration = 30
+
+    if args.duration is None and not args.forecast_only:
         raise MissingArgumentError(
-            "-d / --duration is required, unless --list-providers or "
-            "--list-locations is given"
+            "-d / --duration is required, unless --list-providers, "
+            "--list-locations or --forecast-only is given"
         )
 
     if args.command and not args.scheduler:
@@ -558,6 +568,10 @@ def run_cats(arguments: list[str] | None = None) -> None:
     ########################
     now_utc = datetime.datetime.now(timezone.utc)
     forecast = provider.get_data(now_utc, location, metric=args.metric)
+
+    if args.forecast_only:
+        print(forecast.json_serialized())
+        return
 
     #############################
     ## Find optimal start time ##
