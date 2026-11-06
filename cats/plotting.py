@@ -3,7 +3,7 @@
 # pyright: reportUnknownMemberType=none, reportAny=none, reportUnusedCallResult=none
 
 from collections.abc import Sequence
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .forecast import Timeseries
 from .output import CATSOutput
@@ -25,6 +25,17 @@ def _date2num(dts: list[datetime]) -> Sequence[float]:
     # See matplotlib bug #26942. This manual type override and ignore
     # comments can be removed once the issue is fixed upstream.
     return date2num(dts)  # type: ignore[no-untyped-call, no-any-return]
+
+
+def _format_duration(duration: timedelta) -> str:
+    """Format a job duration compactly for a plot label."""
+    total_minutes = int(duration.total_seconds() // 60)
+    hours, minutes = divmod(total_minutes, 60)
+    if hours and minutes:
+        return f"{hours}h {minutes}m"
+    if hours:
+        return f"{hours}h"
+    return f"{minutes}m"
 
 
 # PRETTY_UNITS: Latex version of plain text units
@@ -104,6 +115,11 @@ def plotplan(
     # due to long datetime labels
     fig, ax = plt.subplots(figsize=(7.0, 5.5))
 
+    job_duration_now = _format_duration(output.valueNow.end - output.valueNow.start)
+    job_duration_optimal = _format_duration(
+        output.valueOptimal.end - output.valueOptimal.start
+    )
+
     # Filling under curves for the forecast, run now time and optimal run time
     ax.fill_between(
         _date2num(times),
@@ -121,7 +137,7 @@ def plotplan(
         now_values,
         alpha=0.6,
         color=now_colour,
-        label="If job started now",
+        label=f"If job started now ({job_duration_now})",
         hatch="///",
         edgecolor="k",
     )
@@ -134,7 +150,7 @@ def plotplan(
         opt_values,
         alpha=0.6,
         color=optimal_colour,
-        label="Optimal job window",
+        label=f"Optimal job window ({job_duration_optimal})",
         hatch="\\\\\\",
         edgecolor="k",
     )
@@ -165,6 +181,15 @@ def plotplan(
     optimal_value = output.valueOptimal.value
     units = PRETTY_UNITS.get(forecast.unit, forecast.unit)
 
+    ax.text(
+        0.5,
+        1.10,
+        f"Location: {output.location}",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+        transform=ax.transAxes,
+    )
     ax.text(
         0.5,
         1.05,
