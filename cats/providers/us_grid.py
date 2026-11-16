@@ -172,8 +172,10 @@ class ERCOTProvider(BaseProvider):
     not publish a carbon intensity forecast, so this provider converts the
     observed fuel mix to carbon intensity with IPCC AR5 life-cycle factors
     (EMISSION_FACTORS) and forecasts the next 24 hours as the same time on
-    the previous day (a persistence forecast). This is a simple forecast:
-    it does not anticipate tomorrow's wind or a cold front.
+    the previous day (a persistence forecast). The dashboard keeps only today
+    and yesterday, so it cannot average over more days the way the eia.gov
+    provider does. This is a simple forecast: it does not anticipate
+    tomorrow's wind or a cold front.
 
     ERCOT's website terms allow its raw public data to be used in analyses.
     """
@@ -265,9 +267,10 @@ class EIAProvider(BaseProvider):
     Energy Information Administration (form EIA-930) and converts it to
     carbon intensity with IPCC AR5 life-cycle factors (EMISSION_FACTORS).
     EIA-930 data are observations, not forecasts, so this provider forecasts
-    the next 24 hours as the same hour on the previous day (a persistence
-    forecast). Balancing authorities report with a delay of an hour or more,
-    so the forecast uses the most recent day that has been published.
+    each of the next 24 hours as the mean of the same hour over the last 7
+    published days (a persistence forecast). Balancing authorities report
+    with a delay of an hour or more, so the days used are the most recent
+    ones that have been published.
 
     The EIA open data API needs a free API key, registered at
     https://www.eia.gov/opendata/. Set it in the CATS_EIA_API_KEY
@@ -276,9 +279,10 @@ class EIAProvider(BaseProvider):
 
     BASE_URL: ClassVar[str] = "https://api.eia.gov"
     PATH: ClassVar[str] = "/v2/electricity/rto/fuel-type-data/data/"
-    # Days of history to request: enough for the persistence forecast even
-    # when the newest day is not yet published.
-    HISTORY: ClassVar[timedelta] = timedelta(days=3)
+    # Days averaged by the persistence forecast, and days of history to
+    # request: two more than that, in case the newest day is not published.
+    DAYS: ClassVar[int] = 7
+    HISTORY: ClassVar[timedelta] = timedelta(days=DAYS + 2)
 
     def validate_location(self, location: str | None) -> str:
         if location is None or location.upper() not in EIA_BALANCING_AUTHORITIES:
@@ -374,6 +378,6 @@ class EIAProvider(BaseProvider):
             "Empty response from EIA fuel type request"
         )
         values = persistence_forecast(
-            self.observed(response), start, timedelta(hours=1)
+            self.observed(response), start, timedelta(hours=1), days=self.DAYS
         )
         return Timeseries("Carbon intensity", values=values, unit="gCO2eq/kWh")

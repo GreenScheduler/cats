@@ -225,11 +225,16 @@ def test_eia_get_data(mock_fetch_url, monkeypatch):
     )
     assert "api_key=test-key" in url
     assert "facets%5Brespondent%5D%5B%5D=ERCO" in url
+    assert "start=2025-05-25T12" in url  # 7 days plus 2 spare
     values = forecast.values
     assert values[0].datetime == datetime(2025, 6, 3, 12, tzinfo=timezone.utc)
-    # 12:00 today repeats 12:00 yesterday, which is history hour 36
+    # 12:00 today is the mean of 12:00 on the published days (only two here)
     observed = {
         p.datetime: p.value for p in EIAProvider.observed(mock_fetch_url.return_value)
     }
-    assert values[0].value == observed[datetime(2025, 6, 2, 12, tzinfo=timezone.utc)]
+    expected = (
+        observed[datetime(2025, 6, 2, 12, tzinfo=timezone.utc)]
+        + observed[datetime(2025, 6, 1, 12, tzinfo=timezone.utc)]
+    ) / 2
+    assert values[0].value == pytest.approx(expected)
     assert values[-1].datetime == datetime(2025, 6, 4, 12, tzinfo=timezone.utc)
