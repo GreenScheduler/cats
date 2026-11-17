@@ -52,8 +52,10 @@ ERCOT_FUELS: dict[str, str] = {
     "Other": "other",
 }
 
-# EIA-930 fuel type codes, as used by the EIA open data API (v2,
-# electricity/rto/fuel-type-data). Codes not listed here count as "other".
+# EIA-930 energy source codes (EIA930_Reference_Tables.xlsx, "Energy Sources"),
+# as used by the EIA open data API (v2, electricity/rto/fuel-type-data). Codes
+# not listed here count as "other". "SYS" (all sources) is a total, not a fuel,
+# and is skipped by EIAProvider.observed().
 EIA_FUELS: dict[str, str] = {
     "COL": "coal",
     "NG": "gas",
@@ -269,8 +271,8 @@ class EIAProvider(BaseProvider):
     EIA-930 data are observations, not forecasts, so this provider forecasts
     each of the next 24 hours as the mean of the same hour over the last 7
     published days (a persistence forecast). Balancing authorities report
-    with a delay of an hour or more, so the days used are the most recent
-    ones that have been published.
+    with a delay, so the days used are the most recent ones that have been
+    published.
 
     The EIA open data API needs a free API key, registered at
     https://www.eia.gov/opendata/. Set it in the CATS_EIA_API_KEY
@@ -320,7 +322,7 @@ class EIAProvider(BaseProvider):
         """
         mixes: dict[datetime, dict[str, float]] = {}
         for row in response["response"]["data"]:
-            if row.get("value") is None:
+            if row.get("value") is None or row["fueltype"] == "SYS":
                 continue
             end = datetime.strptime(row["period"], "%Y-%m-%dT%H").replace(
                 tzinfo=timezone.utc

@@ -210,6 +210,21 @@ def test_eia_periods_are_hour_ending():
     assert points[0].value == pytest.approx((820 * 100 + 11 * 100) / 200)
 
 
+def test_eia_ignores_all_sources_total():
+    start = datetime(2025, 6, 1, tzinfo=timezone.utc)
+    response = eia_response(start, 1, 100.0, 100.0)
+    response["response"]["data"].append(
+        {
+            "period": "2025-06-01T01",
+            "respondent": "ERCO",
+            "fueltype": "SYS",
+            "value": 200,
+        }
+    )
+    points = EIAProvider.observed(response)
+    assert points[0].value == pytest.approx((820 * 100 + 11 * 100) / 200)
+
+
 @patch("cats.providers.us_grid.fetch_url")
 def test_eia_get_data(mock_fetch_url, monkeypatch):
     monkeypatch.setenv("CATS_EIA_API_KEY", "test-key")
