@@ -198,15 +198,15 @@ ever serves one implicit metric can leave ``SUPPORTED_METRICS`` at its empty def
 ``metric`` parameter entirely.
 
 ``cats/providers/gb_carbonintensity.py`` (``carbon``, ``renewables``) and ``cats/providers/eu_wattnet.py``
-(``carbon``, ``water``, ``water_stress``, ``environmental_score``) are worked examples. The
+(``carbon``, ``water``, ``water_stress``) are worked examples. The
 carbonintensity.org.uk case is the simplest: both metrics come from a single API call (the response
 already includes both "intensity" and "generationmix" for every period), so ``get_data()`` makes the same
 request regardless of ``metric`` and only changes which field it extracts; requesting both metrics in the
 same run costs only one real HTTP request, the second being served from the shared ``fetch_url()`` cache. wattnet.eu is the more general case: each metric maps to a genuinely
 different endpoint (not just a different query parameter on one endpoint), so the provider keeps a small
 ``metric -> (path, query_params)`` table and dispatches the URL build and the parsed ``Timeseries.metric``
-name from it, while still sharing one parsing routine since all three endpoints return the same
-series/values response shape. Two further things worth checking for any new multi-metric provider:
+name from it, while still sharing one parsing routine since both endpoints return the same
+series/points response shape. Two further things worth checking for any new multi-metric provider:
 
 - Don't assume every value an API's own parameter-validation error message lists as "accepted" actually
   has real data behind it - the Energy-Charts ``/v2/signal`` endpoint (used for ``energy-charts.info``'s

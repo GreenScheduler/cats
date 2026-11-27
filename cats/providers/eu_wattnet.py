@@ -29,20 +29,20 @@ WATTNET_ZONES: set[str] = set(
 # Each metric maps to a different wattnet.eu endpoint (not a shared endpoint
 # with more parameters), confirmed against the live API: /v1/footprints
 # takes footprint_type=carbon|water, /v1/impacts only accepts
-# impact_type=water, and /v1/environmental-score takes no parameter at all.
-# All three response shapes share the same series/values structure, so
-# get_data() below parses them identically regardless of endpoint.
+# impact_type=water. Both response shapes share the same series/points
+# structure, so get_data() below parses them identically regardless of
+# endpoint. /v1/environmental-score is deliberately not offered: it ranks
+# locations at a point in time, while CATS picks a time for one location
+# (see GreenScheduler/cats#266).
 METRIC_ENDPOINTS: dict[str, tuple[str, str]] = {
     "carbon": ("/v1/footprints", "footprint_type=carbon&"),
     "water": ("/v1/footprints", "footprint_type=water&"),
     "water_stress": ("/v1/impacts", "impact_type=water&"),
-    "environmental_score": ("/v1/environmental-score", ""),
 }
 METRIC_NAMES: dict[str, str] = {
     "carbon": "Carbon intensity",
     "water": "Water footprint",
     "water_stress": "Water stress",
-    "environmental_score": "Environmental score",
 }
 
 
@@ -56,7 +56,7 @@ class WattnetEuProvider(BaseProvider):
     using a short code that typically refers to a single country. Data has
     15 minute resolution and extends 72 hours into the future.
 
-    Supports four metrics from three separate wattnet.eu endpoints
+    Supports three metrics from two separate wattnet.eu endpoints
     (selected with --metric; confirmed live against the real API):
 
     - carbon (default): carbon intensity, life-cycle scope, in gCO2/kWh
@@ -65,26 +65,24 @@ class WattnetEuProvider(BaseProvider):
     - water_stress: water-stress-weighted water footprint, operational
       scope, in stress-L/kWh - accounts for local water scarcity, unlike
       water's plain volume figure.
-    - environmental_score: wattnet's own composite environmental score,
-      operational scope. The API gives no unit; higher is better (the
-      usual convention for "scores"), so this provider negates it so that
-      lower is still "better" for CATS' minimum-average-window scheduler,
-      consistent with every other metric in CATS.
 
     Only carbon keeps the Timeseries.metric name "Carbon intensity", so
     that --footprint (which checks forecast.metric == "Carbon intensity" in
-    cli.py) keeps working; the other three metrics are not compatible with
+    cli.py) keeps working; the other two metrics are not compatible with
     --footprint.
 
     Note that this provider is an experimental service and requires authentication.
-    You will need to arrange a user name and password to be set outside of CATS
-    and specify these in two environment variables: CATS_WATTNET_EMAIL and
-    CATS_WATTNET_PASSWORD. CATS arranges to use these to obtain a short term
-    access token. See https://docs.wattnet.eu for details on registering for an
-    account and obtaining these credentials.
+    You will need API client credentials from https://developers.wattnet.eu,
+    specified in two environment variables: WATTNET_CLIENT_ID and
+    WATTNET_CLIENT_SECRET. CATS uses these to obtain a short term access
+    token. See https://docs.wattnet.eu for details on obtaining these
+    credentials.
     """
 
     BASE_URL: ClassVar[str] = "https://api.wattnet.eu"
+    TOKEN_URL: ClassVar[str] = (
+        "https://auth.wattnet.eu/realms/wattnet/protocol/openid-connect/token"
+    )
     SUPPORTED_METRICS: ClassVar[frozenset[str]] = frozenset(METRIC_ENDPOINTS)
     DEFAULT_METRIC: ClassVar[str] = "carbon"
 
@@ -92,37 +90,37 @@ class WattnetEuProvider(BaseProvider):
         """
         Update the short-lived access token for the wattnet API
 
-        To access the watnet API an access token is needed. This can
-        be obtained using an API call with a pre-authorized email address
-        and password. The access token is stored in the api_key attribute.
-        This method gets a new token (with a the email address and password
-        extracted from environment variables) and updates the api_key attribute.
+        To access the Wattnet API an access token is needed. This method
+        gets one with the OAuth client credentials grant (client ID and
+        secret extracted from environment variables) and stores it, with
+        its expiry time, in the api_data attribute.
 
         NB: the HTTP calls in this method are not cached.
         """
         if self.api_data is None:
             self.api_data = {}
-        email = os.environ.get("CATS_WATTNET_EMAIL")
-        password = os.environ.get("CATS_WATTNET_PASSWORD")
-        if (email is None) or (password is None):
+        client_id = os.environ.get("WATTNET_CLIENT_ID")
+        client_secret = os.environ.get("WATTNET_CLIENT_SECRET")
+        if not client_id or not client_secret:
             raise ProviderAuthenticationError(
-                "CATS_WATTNET_EMAIL and CATS_WATTNET_PASSWORD "
+                "WATTNET_CLIENT_ID and WATTNET_CLIENT_SECRET "
                 "environment variables must be set for the wattnet provider"
             )
-        data = {"email": email, "password": password}
-        headers = {"Content-Type": "application/json"}
-        headers.update(user_agent)
-        url = f"{self.base_url}/token-request/get_token"
-        response = requests.post(url, json=data, headers=headers)
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
+        response = requests.post(self.TOKEN_URL, data=data, headers=dict(user_agent))
         if response.status_code != 200:
             raise ProviderAuthenticationError(
                 f"Wattnet token request failed with status {response.status_code}"
             )
         result = response.json()
         self.api_data["access_token"] = result["access_token"]
-        self.api_data["expires_at"] = datetime.datetime.fromisoformat(
-            result["expires_at"]
-        )
+        self.api_data["expires_at"] = datetime.datetime.now(
+            datetime.timezone.utc
+        ) + datetime.timedelta(seconds=result["expires_in"])
 
     def get_max_duration_minutes(self, metric: str | None = None) -> int:
         resolve_metric(metric, self.SUPPORTED_METRICS, self.DEFAULT_METRIC)
@@ -148,7 +146,7 @@ class WattnetEuProvider(BaseProvider):
 
         :param timestamp: Timestamp from which to start forecast data retrieval
         :param location: Location for which to start forecast data retrieval
-        :param metric: One of carbon, water, water_stress, environmental_score
+        :param metric: One of carbon, water, water_stress
         :param headers: Optional, if specified, passes additional headers
         :return: Timeseries as a list of PointEstimate classes
         """
@@ -201,26 +199,22 @@ class WattnetEuProvider(BaseProvider):
 
         # The "Z" at the end of the format string indicates UTC,
         # however, strptime does not know how to parse this, so we
-        # need to add tzinfo data. All three endpoints share the same
-        # series/values structure regardless of metric.
+        # need to add tzinfo data. Both endpoints share the same
+        # series/points structure regardless of metric. Points are read by
+        # field name, since the API may add new fields without notice.
         datefmt = "%Y-%m-%dT%H:%M:%SZ"
         utc = ZoneInfo("UTC")
-        raw_values = response[0]["series"][0]["values"]
+        points = response[0]["series"][0]["points"]
 
         unit = response[0].get("unit", "")
-        match metric:
-            case "environmental_score":
-                # Higher score is better, so minimise the negated score
-                sign = -1
-                unit = "-score"
-            case _:
-                sign = 1
         values = [
             PointEstimate(
-                datetime=datetime.datetime.strptime(t, datefmt).replace(tzinfo=utc),
-                value=sign * v,
+                datetime=datetime.datetime.strptime(p["timestamp"], datefmt).replace(
+                    tzinfo=utc
+                ),
+                value=p["value"],
             )
-            for t, v in raw_values
+            for p in points
         ]
         return Timeseries(METRIC_NAMES[metric], values=values, unit=unit)
 

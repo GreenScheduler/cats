@@ -69,7 +69,7 @@ Use ``--metric renewables``. CATS reports the non-renewable share, so lower is s
 Minimise water use or environmental impact
 ------------------------------------------
 
-The ``wattnet.eu`` API (which needs a free registration, see :ref:`quickstart`) offers several environmental metrics for European zones: ``carbon``, ``water``, ``water_stress`` (water use weighted by local scarcity) and ``environmental_score``.
+The ``wattnet.eu`` API (which needs a free registration, see :ref:`quickstart`) offers several environmental metrics for European zones: ``carbon``, ``water`` and ``water_stress`` (water use weighted by local scarcity).
 
 .. code-block:: console
 
@@ -82,8 +82,6 @@ The ``wattnet.eu`` API (which needs a free registration, see :ref:`quickstart`) 
    Price at chosen start time         = 156.99 EUR/MWh (+ 130.11)
 
 Note that a price comparison is only shown when price data covers both the start time you would get now and the chosen one. Price forecasts usually cover a shorter period than the environmental forecasts, so it is sometimes left out.
-
-``environmental_score`` is wattnet.eu's own combination of the carbon, water and water stress measures. Use it instead of combining those three yourself.
 
 .. _cookbook-price-constraint:
 
