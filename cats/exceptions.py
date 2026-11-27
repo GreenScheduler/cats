@@ -13,6 +13,10 @@ class UnsupportedProviderError(Exception):
     "Provider is unsupported"
 
 
+class ProviderResponseError(Exception):
+    "The provider is unable to generate a valid response to the query"
+
+
 class ProviderAuthenticationError(Exception):
     "Provider authentication failed"
 
