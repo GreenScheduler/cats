@@ -13,6 +13,7 @@ raw_output=$(docker exec -i slurmctld \
           if(i){ print substr($0,i); found=1 }
       } else { print }
   }')
+echo "Raw output: $raw_output"
 job_id=$(echo "$raw_output" | grep ^Submitted | awk '{print $4}')
 echo "Detected job submission ID: $job_id"
 raw_json=$(echo "$raw_output" | grep -v ^Submitted)
