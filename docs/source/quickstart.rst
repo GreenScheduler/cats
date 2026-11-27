@@ -64,15 +64,15 @@ compared to 14 areas provided by the NESO) but at finer time resolution (15
 compared to 30 minutes) and for a longer duration (72 hours rather than 48 hours).
 To use https://wattnet.eu/ the `--location` argument **must** be provided and must be the
 name of a zone. In addition the `--api` argument needs to have the value "wattnet.eu"
-and your personal wattnet password and email address combination must be provided via
-environment variables. See https://docs.wattnet.eu for details on registering for an
-account and obtaining these credentials. The example above is thus changed to:
+and your Wattnet API client ID and client secret (from https://developers.wattnet.eu)
+must be provided via environment variables. See https://docs.wattnet.eu for details on
+obtaining these credentials. The example above is thus changed to:
 
 .. code-block:: console
    :caption: *A basic command to run CATS using wattnet data.*
 
-   $ export CATS_WATTNET_EMAIL=example@example.com
-   $ export CATS_WATTNET_PASSWORD=a-password-for-wattnet
+   $ export WATTNET_CLIENT_ID=your-client-id
+   $ export WATTNET_CLIENT_SECRET=your-client-secret
    $ cats --duration 480 --location GB --api wattnet.eu
    ...
 
@@ -179,14 +179,12 @@ since it is specific to the ``Carbon intensity`` metric.
 Sustainability metrics from wattnet.eu
 -----------------------------------------
 
-``wattnet.eu`` (see :ref:`locations-outside-gb` above) serves four metrics
-from three separate endpoints of its own API, confirmed live against the
+``wattnet.eu`` (see :ref:`locations-outside-gb` above) serves three metrics
+from two separate endpoints of its own API, confirmed live against the
 real service: ``carbon`` (the default; the carbon intensity metric
-described above), ``water`` (life-cycle water footprint, in L/kWh),
-``water_stress`` (water-stress-weighted footprint, in stress-L/kWh -
-accounts for local water scarcity rather than plain volume), and
-``environmental_score`` (wattnet's own composite score, where higher is
-better; CATS negates it so that lower is better, like every other metric CATS reports).
+described above), ``water`` (life-cycle water footprint, in L/kWh)
+and ``water_stress`` (water-stress-weighted footprint, in stress-L/kWh -
+accounts for local water scarcity rather than plain volume).
 
 .. code-block:: console
    :caption: *wattnet.eu's water metric, for Germany.*
@@ -205,7 +203,7 @@ Constraining, rather than optimising for, price
 Optimising for price directly can drift away from CATS' climate-aware
 purpose. As a safer default, CATS can instead treat price as a hard
 **constraint** on top of whichever metric is actually being optimised
-(``carbon``, ``renewables``, ``environmental_score``, ...): keep optimising
+(``carbon``, ``renewables``, ``water``, ...): keep optimising
 for that metric, but only consider job start times whose price does not
 exceed a cap.
 
@@ -278,7 +276,7 @@ to also supply ``--duration``:
    wattnet.eu
        Experimental provider for the wattnet.eu project API
        max duration: 4305 min, resolution: 15 min
-       metrics: carbon (default), environmental_score, water, water_stress
+       metrics: carbon (default), water, water_stress
 
 The maximum duration of ``energy-charts.info`` and ``octopus.energy`` depends
 on the time of day, since their data runs to the end of tomorrow (or, for the
